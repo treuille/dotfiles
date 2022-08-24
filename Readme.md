@@ -7,6 +7,11 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 mkdir -v ~/.local/share/nvim/vim-plug
 ```
 
+2. Installed the tmux plugin manager
+```
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
+
 # Todo 
 
 1. Setup XDG properly
