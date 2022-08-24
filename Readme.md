@@ -9,6 +9,7 @@ mkdir -v ~/.local/share/nvim/vim-plug
 
 # Todo 
 
-2. Setup XDG properly
+1. Setup XDG properly
+2. Get nvim and other `.config/`s into this repo 
 
 
