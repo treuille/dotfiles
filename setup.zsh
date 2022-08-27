@@ -22,3 +22,19 @@ if [[ -e "${ZSHRC}" ]]; then
 fi
 echo "Linking ${ZSHRC} to ${DOTFILE_ZSHRC}."
 ln -s "${DOTFILE_ZSHRC}" "${ZSHRC}"
+
+# Link .config
+CONFIG=${HOME}/.config
+DOTFILE_CONFIG=$(pwd)/.config
+ORIGINAL_CONFIG=${ORIGINAL_DOTFILES}/.config
+if [[ -e "${CONFIG}" ]]; then
+    if [[ -e "${ORIGINAL_CONFIG}" ]]; then 
+        echo "Removing ${CONFIG} without overwriting ${ORIGINAL_CONFIG}."
+        rm -v "${CONFIG}"
+    else
+        echo "Moving ${CONFIG} to ${ORIGINAL_CONFIG}."
+        mv "${CONFIG}" "${ORIGINAL_CONFIG}"
+    fi
+fi
+echo "Linking ${CONFIG} to ${DOTFILE_CONFIG}."
+ln -s "${DOTFILE_CONFIG}" "${CONFIG}"

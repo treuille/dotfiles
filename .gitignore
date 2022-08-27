@@ -1,2 +1,6 @@
 # This is where we store the original dotfiles
 original_dotfiles
+
+# Some random crap zsh puts into .config
+.config/zsh/.zsh_sessions
+.config/zsh/.zsh_history
