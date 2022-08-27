@@ -7,6 +7,11 @@
 brew install python@3.10
 ```
 
+2. Install `rg` for fast nvim telescope searches
+```sh
+brew install rg
+```
+
 3. Installed vim plug
 ```sh
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
@@ -23,6 +28,11 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 ```sh
 zsh ./setup.zsh
+```
+
+6. Install lazygit
+```sh
+brew install lazygit
 ```
 
 
