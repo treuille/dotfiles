@@ -64,7 +64,7 @@ local handlers = {
             virtual_text = false
      }
   )
-},
+}
 
 -- Setup for various language servers
 require('lspconfig')['pyright'].setup{
