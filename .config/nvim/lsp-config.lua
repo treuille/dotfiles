@@ -54,7 +54,7 @@ end
 
 -- Make lsp-config compatible with nvim-cmp.
 local client_capabilities = vim.lsp.protocol.make_client_capabilities()
-local capabilities = require('cmp_nvim_lsp').update_capabilities(client_capabilities)
+local capabilities = require('cmp_nvim_lsp').default_capabilities(client_capabilities)
 
 -- Don't show inline virtual text, which I find distracting.
 local handlers = {
