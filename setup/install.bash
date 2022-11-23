@@ -63,7 +63,8 @@ fi
 
 # Clone the repo
 start_block "Cloning the repo"
-GIT_REPO="git@github.com:treuille/dev-env.git"
+# GIT_REPO="git@github.com:treuille/dev-env.git"
+GIT_REPO="git@github.com:treuille/dotfiles.git"
 # GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 cd ~
 if [[ ! -d dev-env ]];
