@@ -1,23 +1,19 @@
 """
-Sets up the local environment for a Digital Ocean box.
-
-To run it go to ~/dev-env and enter:
-    
-    pipenv run python ./setup_env.py
+TODO: Add documentation
 """
 
+# import time
+# import getpass
+# import crypt
+# import subprocess
+# import tempfile
+# from termcolor import cprint
 import sys
-import time
 import os
-import getpass
-import crypt
-import subprocess
-import tempfile
-from termcolor import cprint
 import cached_run
 
 
-def root_only_install():
+def setup_root():
     """These are the installation steps which should happen as root."""
 
     # Setup zsh
@@ -29,6 +25,7 @@ def root_only_install():
         ],
     )
 
+    return 
     cached_run.run_commands(
         "Installing unzip",
         [
@@ -286,16 +283,18 @@ def user_is_root():
 def main():
     """Execution starts here."""
     # These installations require the user to be root.
-    if user_is_root():
-        root_only_install()
+    if not user_is_root():
+        raise RuntimeError("Must run this script as root.")
 
-    # Both root and non-root accounts are setup this way.
-    # both_install()
+    setup_root()
 
-    # Tell the root user to reboot.
-    if user_is_root():
-        cprint(f"Please reboot the computer:", "red", attrs=["bold"])
-        print("  shutdown -r now")
+    # # Both root and non-root accounts are setup this way.
+    # # both_install()
+
+    # # Tell the root user to reboot.
+    # if user_is_root():
+    #     cprint(f"Please reboot the computer:", "red", attrs=["bold"])
+    #     print("  shutdown -r now")
 
 
 if __name__ == "__main__":

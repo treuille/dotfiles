@@ -7,3 +7,4 @@ original_dotfiles
 
 # The virtual environment used for installation script
 setup/venv
+setup/__pycache__
