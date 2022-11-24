@@ -4,3 +4,6 @@ original_dotfiles
 # Some random crap zsh puts into .config
 .config/zsh/.zsh_sessions
 .config/zsh/.zsh_history
+
+# The virtual environment used for installation script
+setup/venv
