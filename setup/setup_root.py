@@ -11,8 +11,17 @@ import crypt
 import time
 import tempfile
 
+
 def setup_root():
     """These are the installation steps which should happen as root."""
+
+    # Installing cc linker and compiler which cargo will need.
+    setup_utils.cached_run(
+        "Installing cc linker and compiler",
+        [
+            "sudo apt install build-essential",
+        ],
+    )
 
     # Setup zsh
     setup_utils.cached_run(
@@ -22,13 +31,6 @@ def setup_root():
             "chsh -s $(which zsh)",
         ],
     )
-
-    # setup_utils.cached_run(
-    #     "Installing unzip",
-    #     [
-    #         "apt install -y unzip",
-    #     ],
-    # )
 
     setup_utils.cached_run(
         "Installing netstat",
@@ -103,7 +105,7 @@ def setup_root():
     setup_utils.cached_run(
         "Installing nvim",
         [
-            'apt install -y neovim',
+            "apt install -y neovim",
             # "sudo snap install --beta nvim --classic",
             # "apt install -y make",
             # "apt install -y cmake",
@@ -115,7 +117,7 @@ def setup_root():
             # "cd ~ && git clone https://github.com/neovim/neovim.git",
             # "cd ~/neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo install",
             # "rm -rfv ~/neovim",
-        ]
+        ],
     )
 
     setup_utils.cached_run(
@@ -125,7 +127,7 @@ def setup_root():
             # "apt-add-repository --yes ppa:lazygit-team/release",
             # "apt update",
             # "apt install lazygit",
-       ]
+        ],
     )
 
     # Create a user to SSH into this box.
@@ -140,8 +142,9 @@ def setup_root():
         [
             "ufw allow ssh",
             "ufw enable",
-        ]
+        ],
     )
+
 
 def create_user(user):
     """Create a new user"""
@@ -266,7 +269,6 @@ def both_install():
     )
 
     install_nvim_plugins()
-
 
 
 def main():

@@ -2,15 +2,11 @@
 TODO: Add documentation
 """
 
-# import sys
-import os
 import setup_utils
-# from termcolor import cprint
-# import subprocess
-# import getpass
-# import crypt
-# import time
-# import tempfile
+import sys
+import os
+from termcolor import cprint
+
 
 def install_dotfiles():
     """Install all the dotfiles from the dotfiles dirctory into the home
@@ -29,19 +25,11 @@ def install_dotfiles():
 
     # Setup a backup dirctory to move old dotfiles.
     for dotfile in os.listdir(dotfiles_path):
-        if dotfile in [".git", ".gitignore"]:
-            continue
-        if not dotfile.startswith("."):
+        if dotfile in [".git", ".gitignore"] or not dotfile.startswith("."):
             continue
         orignal_dotfile_path = os.path.join(dotfiles_path, dotfile)
         install_dotfile_path = os.path.join(home_path, dotfile)
         backup_dotfile_path = os.path.join(backup_path, dotfile)
-        
-        # # debug - begin
-        # print(f"orignal_dotfile_path: {orignal_dotfile_path}")
-        # print(f"install_dotfile_path: {install_dotfile_path}")
-        # print(f"backup_dotfile_path: {backup_dotfile_path}")
-        # # debug - end
 
         if os.path.exists(install_dotfile_path):
             setup_utils.cached_run(
@@ -58,21 +46,6 @@ def install_dotfiles():
             ],
         )
 
-def install_nvim_plugins():
-    """Install the nvim and coc plugins."""
-    # Would be great to figure out a way to do this automatically
-    sys.stdout.write("Install nvim plugins interactively? [y/n] ")
-    try:
-        if input().lower()[:1] == "y":
-            os.system("nvim +PlugInstall")
-            os.system('nvim +"CocInstall coc-tsserver coc-pyright"')
-    except EOFError:
-        cprint("\nSkipping nvim plugins (couldn't read stdin).\n", "cyan")
-
-
-def setup_user():
-    """These are the packages which shoild happen for any user."""
-
     # Removing bash config files.
     setup_utils.cached_run(
         "Removing extraneous home folder files",
@@ -83,27 +56,50 @@ def setup_user():
         ],
     )
 
-    # See: https://github.com/junegunn/vim-plug
+
+def install_rust():
+    """Installs in the home directory."""
+    home_path = os.path.expanduser("~")
+    cargo_home = os.path.join(home_path, ".local/rust/cargo")
+    rustup_home = os.path.join(home_path, ".local/rust/rustup")
+    rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
     setup_utils.cached_run(
-        "Installing vim-plug",
+        "Installing rust",
         [
-            """sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'""",
+            "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | "
+            f"{rust_env} sh -s -- -y",
+        ],
+        skip_if=(os.path.exists(cargo_home) or os.path.exists(rustup_home)),
+    )
+    setup_utils.cached_run(
+        "Configuring rust",
+        [
+            f"{rust_env} rustup default stable",
+            f"{rust_env} rustup component add rls rust-analysis rust-src",
+            f"{rust_env} cargo install cargo-watch",
         ],
     )
 
-    # Install a nice theme for tmux
-    # See: https://github.com/odedlaz/tmux-onedark-theme
-    tmux_onedark_theme_repo = "https://github.com/odedlaz/tmux-onedark-theme"
-    tmux_onedark_theme_path = "~/.local/share/tmux/tmux-onedark-theme"
-    setup_utils.cached_run(
-        "Installing tmux-onedark-theme",
-        [
-            f"git clone {tmux_onedark_theme_repo} {tmux_onedark_theme_path}",
-        ],
-        skip_if=os.path.exists(os.path.expanduser(tmux_onedark_theme_path)),
-    )
+    # Install lsd, a prettier form of ls.
+    setup_utils.cached_run("Installing lsd", [f"{rust_env} cargo install lsd"])
 
-    # Install another nice theme for tmux using the tmux plugin manager
+
+def install_tmux_plugins():
+    """These are the packages which shoild happen for any user."""
+
+    # # Install a nice theme for tmux
+    # # See: https://github.com/odedlaz/tmux-onedark-theme
+    # tmux_onedark_theme_repo = "https://github.com/odedlaz/tmux-onedark-theme"
+    # tmux_onedark_theme_path = "~/.local/share/tmux/tmux-onedark-theme"
+    # setup_utils.cached_run(
+    #     "Installing tmux-onedark-theme",
+    #     [
+    #         f"git clone {tmux_onedark_theme_repo} {tmux_onedark_theme_path}",
+    #     ],
+    #     skip_if=os.path.exists(os.path.expanduser(tmux_onedark_theme_path)),
+    # )
+
+    # Install the tmux plugin manager
     tmux_plugin_path = "~/.config/tmux/plugins/tpm"
     tmux_plugin_repo = "https://github.com/tmux-plugins/tpm"
     setup_utils.cached_run(
@@ -114,13 +110,34 @@ def setup_user():
         skip_if=os.path.exists(os.path.expanduser(tmux_plugin_path)),
     )
 
-    install_nvim_plugins()
+
+def install_nvim_plugins():
+    """Install the nvim and coc plugins."""
+    # Install the plugin manager github.com/junegunn/vim-plug
+    setup_utils.cached_run(
+        "Installing vim-plug",
+        [
+            """sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'""",
+        ],
+    )
+
+    # Would be great to figure out a way to do this automatically
+    sys.stdout.write("Install nvim plugins interactively? [y/n] ")
+    try:
+        if input().lower()[:1] == "y":
+            os.system("nvim +PlugInstall")
+            # os.system('nvim +"CocInstall coc-tsserver coc-pyright"')
+    except EOFError:
+        cprint("\nSkipping nvim plugins (couldn't read stdin).\n", "cyan")
+
 
 def main():
     """Execution starts here."""
     install_dotfiles()
-    # print("Setting up a user...")
-    # setup_user()
+    install_rust()
+    install_nvim_plugins()
+    install_tmux_plugins()
+
 
 if __name__ == "__main__":
     main()
