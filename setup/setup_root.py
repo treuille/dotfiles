@@ -19,7 +19,7 @@ def setup_root():
     setup_utils.cached_run(
         "Installing cc linker and compiler",
         [
-            "sudo apt install build-essential",
+            "sudo apt install build-essential -y",
         ],
     )
 
