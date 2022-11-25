@@ -19,3 +19,9 @@ bindkey -v
 
 # Nvim configuration
 export EDITOR=nvim
+
+# Rust
+CARGO_HOME=${HOME}/.local/rust/cargo
+RUSTUP_HOME=${HOME}/.local/rust/rustup
+export PATH=/home/adrien/.local/rust/cargo/bin:${PATH}
+# export PATH=/home/adrien/.local/cargo/bin:${PATH}
