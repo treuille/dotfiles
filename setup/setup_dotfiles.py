@@ -59,6 +59,7 @@ def install_dotfiles():
 
 def install_rust():
     """Installs in the home directory."""
+    # Install rust itself.
     home_path = os.path.expanduser("~")
     cargo_home = os.path.join(home_path, ".local/rust/cargo")
     rustup_home = os.path.join(home_path, ".local/rust/rustup")
@@ -71,17 +72,21 @@ def install_rust():
         ],
         skip_if=(os.path.exists(cargo_home) or os.path.exists(rustup_home)),
     )
+
+    # Additional rust configuration.
+    rustup_bin = os.path.join(cargo_home, "bin/rustup")
+    cargo_bin = os.path.join(cargo_home, "bin/cargo")
     setup_utils.cached_run(
         "Configuring rust",
         [
-            f"{rust_env} rustup default stable",
-            f"{rust_env} rustup component add rls rust-analysis rust-src",
-            f"{rust_env} cargo install cargo-watch",
+            f"{rust_env} {rustup_bin} default stable",
+            f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
+            f"{rust_env} {cargo_bin} install cargo-watch",
         ],
     )
 
     # Install lsd, a prettier form of ls.
-    setup_utils.cached_run("Installing lsd", [f"{rust_env} cargo install lsd"])
+    setup_utils.cached_run("Installing lsd", [f"{rust_env} {cargo_bin} install lsd"])
 
 
 def install_tmux_plugins():
