@@ -4,7 +4,7 @@ TODO: Add documentation
 
 import sys
 import os
-import cached_run
+import setup_utils
 from termcolor import cprint
 import getpass
 import crypt
@@ -275,15 +275,12 @@ def main():
     if not setup_utils.user_is_root():
         raise RuntimeError("Must run this script as root.")
 
+    # Run the setup script.
     setup_root()
 
-    # # Both root and non-root accounts are setup this way.
-    # # both_install()
-
-    # # Tell the root user to reboot.
-    # if setup_utils.user_is_root():
-    #     cprint(f"Please reboot the computer:", "red", attrs=["bold"])
-    #     print("  shutdown -r now")
+    # Tell the root user to reboot.
+    cprint(f"Please reboot the computer:", "red", attrs=["bold"])
+    print("  shutdown -r now")
 
 
 if __name__ == "__main__":
