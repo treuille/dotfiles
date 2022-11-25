@@ -142,9 +142,9 @@ def install_nvim_plugins():
 def main():
     """Execution starts here."""
     install_dotfiles()
-    install_nvim_plugins()
-    install_tmux_plugins()
-    install_rust()
+    # install_nvim_plugins()
+    # install_tmux_plugins()
+    # install_rust()
 
 
 if __name__ == "__main__":
