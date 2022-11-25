@@ -78,11 +78,9 @@ install_python_venv()
   then
     echo_red "The package ${PYTHON_VENV_PACKAGE} already exists."
   else
-    start_block "Installing ${PYTHON_VENV_PACKAGE}"
     apt update -y
     apt upgrade -y
     apt install python3.10-venv -y
-    end_block
   fi
   end_block
 }
@@ -101,47 +99,21 @@ setup_venv()
   end_block
 }
 
+# Run a python script in the virtual environment
+run_python_script()
+{
+  if [[ $EUID -eq 0 ]];
+  then
+    PYTHON_SCRIPT="setup_root"
+  else
+    PYTHON_SCRIPT="setup_user"
+  fi
+  echo_red "Executing setup script ${PYTHON_SCRIPT}.py."
+  PYTHONPATH=${SETUP_PATH} ${VENV_PATH}/bin/python -m ${PYTHON_SCRIPT}
+}
+
 # Actually run the script
 install_dotfiles
 install_python_venv
 setup_venv
-exit 255
-
-
-
-exit 255
-
-# 
-# 
-# # The initial (root) install updates the apt repoe ans installs pipenv.
-# bash ~/dotfiles/setup/run_python.bash setup_digital_ocean
-# 
-# # echo "Setup the python environment." # <- REMOVE
-# # 
-# # # Run the python setup script.
-# # start_block "Setting up python environment"
-# # cd ~/dev-env/
-# # python3 -m venv .venv
-# # .venv/bin/pip install -r requirements.txt
-# # end_block
-# # 
-# # 
-# # # Actualy run the sub command
-# # echo -e "\e[1m\e[31mRunning Python setup script in $(pwd)\e[0m"
-# # echo
-# # .venv/bin/python ./setup_env.py
-# # # pipenv run python ./setup_env.py
-
-############################
-# RUNNING THE SCRIPT STUFF #
-############################
-
-# PYTHON_SCRIPT=${1}
-# SCRIPT_PATH="${SETUP_PATH}/${PYTHON_SCRIPT}.py"
-
-# # Check for the setup path.
-# if [[ ! -f ${SCRIPT_PATH} ]];
-# then
-#   echo "Missing script ${SCRIPT_PATH}."
-#   exit 255
-# fi
+run_python_script

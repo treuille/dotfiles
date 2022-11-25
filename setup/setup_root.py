@@ -2,16 +2,15 @@
 TODO: Add documentation
 """
 
-# import time
-# import getpass
-# import crypt
-# import subprocess
-# import tempfile
-# from termcolor import cprint
 import sys
 import os
 import cached_run
-
+from termcolor import cprint
+import subprocess
+import getpass
+import crypt
+import time
+import tempfile
 
 def setup_root():
     """These are the installation steps which should happen as root."""
@@ -25,13 +24,12 @@ def setup_root():
         ],
     )
 
-    return 
-    cached_run.run_commands(
-        "Installing unzip",
-        [
-            "apt install -y unzip",
-        ],
-    )
+    # cached_run.run_commands(
+    #     "Installing unzip",
+    #     [
+    #         "apt install -y unzip",
+    #     ],
+    # )
 
     cached_run.run_commands(
         "Installing netstat",
