@@ -131,7 +131,6 @@ def install_nvim_plugins():
     try:
         if input().lower()[:1] == "y":
             os.system("nvim +PlugInstall")
-            # os.system('nvim +"CocInstall coc-tsserver coc-pyright"')
     except EOFError:
         cprint("\nSkipping nvim plugins (couldn't read stdin).\n", "cyan")
 
