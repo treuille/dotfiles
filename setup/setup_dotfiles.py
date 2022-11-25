@@ -75,7 +75,7 @@ def install_rust():
 
     # Additional rust configuration.
     rustup_bin = os.path.join(cargo_home, "bin/rustup")
-    cargo_bin = os.path.join(cargo_home, "bin/cargo")
+    cargo_bin = os.path.join(cargo_home, "bin/cargo -j 4")
     setup_utils.cached_run(
         "Configuring rust",
         [
