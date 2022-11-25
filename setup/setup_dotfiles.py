@@ -110,7 +110,7 @@ def install_tmux_plugins():
     setup_utils.cached_run(
         "Installing the tmux plugin manager",
         [
-            f"git clone {tmux_plugin_repo} {tmux_plugin_path}",
+            f"echo git clone {tmux_plugin_repo} {tmux_plugin_path}",
         ],
         skip_if=os.path.exists(os.path.expanduser(tmux_plugin_path)),
     )
