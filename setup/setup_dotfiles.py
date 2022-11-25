@@ -75,18 +75,18 @@ def install_rust():
 
     # Additional rust configuration.
     rustup_bin = os.path.join(cargo_home, "bin/rustup")
-    cargo_bin = os.path.join(cargo_home, "bin/cargo -j 4")
+    cargo_bin = os.path.join(cargo_home, "bin/cargo")
     setup_utils.cached_run(
         "Configuring rust",
         [
             f"{rust_env} {rustup_bin} default stable",
             f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
-            f"{rust_env} {cargo_bin} install cargo-watch",
+            f"{rust_env} {cargo_bin} install -j4 cargo-watch",
         ],
     )
 
     # Install lsd, a prettier form of ls.
-    setup_utils.cached_run("Installing lsd", [f"{rust_env} {cargo_bin} install lsd"])
+    setup_utils.cached_run("Installing lsd", [f"{rust_env} {cargo_bin} install -j4 lsd"])
 
 
 def install_tmux_plugins():
@@ -138,9 +138,9 @@ def install_nvim_plugins():
 def main():
     """Execution starts here."""
     install_dotfiles()
-    install_rust()
     install_nvim_plugins()
     install_tmux_plugins()
+    install_rust()
 
 
 if __name__ == "__main__":
