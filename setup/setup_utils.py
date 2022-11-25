@@ -8,8 +8,9 @@ import sys
 import hashlib
 import pickle
 import xdg
+import subprocess
 
-def run_commands(title, commands, skip_if=False):
+def cached_run(title, commands, skip_if=False):
     """Runs the given set of commands, prepending the title."""
     # Inidcate the command we're running
     cprint(f'{title}...', 'blue', attrs=['bold'])
@@ -48,3 +49,12 @@ def run_commands(title, commands, skip_if=False):
     print('Wrote:', cache_filename)
     cprint('Done', 'green')
     print()
+
+def user_exists(user):
+    """Returns true if the named user exists"""
+    return bool(subprocess.run(["getent", "passwd", user], capture_output=True).stdout)
+
+def user_is_root():
+    """Returns true if this user is root."""
+    return os.geteuid() == 0
+
