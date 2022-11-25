@@ -6,7 +6,6 @@ import sys
 import os
 import cached_run
 from termcolor import cprint
-import subprocess
 import getpass
 import crypt
 import time
@@ -16,7 +15,7 @@ def setup_root():
     """These are the installation steps which should happen as root."""
 
     # Setup zsh
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Setting up zsh",
         [
             "apt install -y zsh",
@@ -24,14 +23,14 @@ def setup_root():
         ],
     )
 
-    # cached_run.run_commands(
+    # setup_utils.cached_run(
     #     "Installing unzip",
     #     [
     #         "apt install -y unzip",
     #     ],
     # )
 
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Installing netstat",
         [
             "apt install -y net-tools",
@@ -39,7 +38,7 @@ def setup_root():
     )
 
     # # See: https://github.com/nodesource/distributions
-    # cached_run.run_commands(
+    # setup_utils.cached_run(
     #     "Installing node",
     #     [
     #         "curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -",
@@ -49,7 +48,7 @@ def setup_root():
     #     ],
     # )
 
-    # cached_run.run_commands(
+    # setup_utils.cached_run(
     #     "Installing yarn",
     #     [
     #         "curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -",
@@ -59,7 +58,7 @@ def setup_root():
     #     ],
     # )
 
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Installing fancy search tools",
         [
             # Needed for fast fuzzy grep using telescope
@@ -69,7 +68,7 @@ def setup_root():
 
     # install rust, then lsd with cargo
 
-    # cached_run.run_commands(
+    # setup_utils.cached_run(
     #     "Installing lsd",
     #     [
     #         "curl -LJO https://github.com/Peltoche/lsd/releases/download/0.19.0/lsd_0.19.0_amd64.deb",
@@ -79,21 +78,21 @@ def setup_root():
     # )
 
     # Set the timezone properly
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Setting timezone",
         [
             "timedatectl set-timezone America/Los_Angeles",
         ],
     )
 
-    # cached_run.run_commands(
+    # setup_utils.cached_run(
     #     "Installing useful commands",
     #     [
     #         "sudo apt install -y poppler-utils",  # gives you pdfimages
     #     ],
     # )
 
-    # cached_run.run_commands(
+    # setup_utils.cached_run(
     #     "Installing LSP servers",
     #     [
     #         "npm install -g vim-language-server", # vimls
@@ -101,7 +100,7 @@ def setup_root():
     #     ]
     # )
 
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Installing nvim",
         [
             'apt install -y neovim',
@@ -119,7 +118,7 @@ def setup_root():
         ]
     )
 
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Installing lazygit",
         [
             'curl -L "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.36.0_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin lazygit'
@@ -136,7 +135,7 @@ def setup_root():
     lock_down_ssh()
 
     # Turn on the firewall
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Turn on the firewall",
         [
             "ufw allow ssh",
@@ -149,7 +148,7 @@ def create_user(user):
 
     user_home = f"/home/{user}"
     cprint(f"Creating user {user}...", "blue", attrs=["bold"])
-    if user_exists(user):
+    if setup_utils.user_exists(user):
         cprint(f"User {user} already exists\n", "cyan")
     else:
         password = getpass.getpass(f"Password for user {user}: ")
@@ -167,7 +166,7 @@ def create_user(user):
         cprint(f"Added user {user}.\n", "green")
 
         # Setting up the new user
-        cached_run.run_commands(
+        setup_utils.cached_run(
             f"Setting up {user}",
             [
                 f"mkdir {user_home}/.ssh",
@@ -226,7 +225,7 @@ def both_install():
     """These are the packages which shoild happen for any user."""
 
     # Removing bash config files.
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Removing extraneous home folder files",
         [
             "rm -fv ~/.bashrc ~/.bash_history ~/.bash_logout",
@@ -236,7 +235,7 @@ def both_install():
     )
 
     # See: https://github.com/junegunn/vim-plug
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Installing vim-plug",
         [
             """sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'""",
@@ -247,7 +246,7 @@ def both_install():
     # See: https://github.com/odedlaz/tmux-onedark-theme
     tmux_onedark_theme_repo = "https://github.com/odedlaz/tmux-onedark-theme"
     tmux_onedark_theme_path = "~/.local/share/tmux/tmux-onedark-theme"
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Installing tmux-onedark-theme",
         [
             f"git clone {tmux_onedark_theme_repo} {tmux_onedark_theme_path}",
@@ -258,7 +257,7 @@ def both_install():
     # Install another nice theme for tmux using the tmux plugin manager
     tmux_plugin_path = "~/.config/tmux/plugins/tpm"
     tmux_plugin_repo = "https://github.com/tmux-plugins/tpm"
-    cached_run.run_commands(
+    setup_utils.cached_run(
         "Installing the tmux plugin manager",
         [
             f"git clone {tmux_plugin_repo} {tmux_plugin_path}",
@@ -269,19 +268,11 @@ def both_install():
     install_nvim_plugins()
 
 
-def user_exists(user):
-    return bool(subprocess.run(["getent", "passwd", user], capture_output=True).stdout)
-
-
-def user_is_root():
-    """Returns true if this user is root."""
-    return os.geteuid() == 0
-
 
 def main():
     """Execution starts here."""
     # These installations require the user to be root.
-    if not user_is_root():
+    if not setup_utils.user_is_root():
         raise RuntimeError("Must run this script as root.")
 
     setup_root()
@@ -290,7 +281,7 @@ def main():
     # # both_install()
 
     # # Tell the root user to reboot.
-    # if user_is_root():
+    # if setup_utils.user_is_root():
     #     cprint(f"Please reboot the computer:", "red", attrs=["bold"])
     #     print("  shutdown -r now")
 
