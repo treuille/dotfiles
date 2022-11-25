@@ -5,6 +5,10 @@ original_dotfiles
 .config/zsh/.zsh_sessions
 .config/zsh/.zsh_history
 
+# Lazygit autocreates its own install folder 
+.config/lazygit
+
 # The virtual environment used for installation script
 setup/venv
+setup/backup
 setup/__pycache__

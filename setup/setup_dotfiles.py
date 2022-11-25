@@ -3,7 +3,7 @@ TODO: Add documentation
 """
 
 # import sys
-# import os
+import os
 import setup_utils
 # from termcolor import cprint
 # import subprocess
@@ -11,6 +11,52 @@ import setup_utils
 # import crypt
 # import time
 # import tempfile
+
+def install_dotfiles():
+    """Install all the dotfiles from the dotfiles dirctory into the home
+    directory, moving all backups to ~/dofiles/setup/backup."""
+    # Setup a backup dirctory to move old dotfiles.
+    home_path = os.path.expanduser("~")
+    dotfiles_path = os.path.join(home_path, "dotfiles")
+    backup_path = os.path.join(dotfiles_path, "setup/backup")
+    setup_utils.cached_run(
+        "Setting up backup dirctory",
+        [
+            f"mkdir -pv {backup_path}",
+        ],
+        skip_if=os.path.exists(backup_path),
+    )
+
+    # Setup a backup dirctory to move old dotfiles.
+    for dotfile in os.listdir(dotfiles_path):
+        if dotfile in [".git", ".gitignore"]:
+            continue
+        if not dotfile.startswith("."):
+            continue
+        orignal_dotfile_path = os.path.join(dotfiles_path, dotfile)
+        install_dotfile_path = os.path.join(home_path, dotfile)
+        backup_dotfile_path = os.path.join(backup_path, dotfile)
+        
+        # # debug - begin
+        # print(f"orignal_dotfile_path: {orignal_dotfile_path}")
+        # print(f"install_dotfile_path: {install_dotfile_path}")
+        # print(f"backup_dotfile_path: {backup_dotfile_path}")
+        # # debug - end
+
+        if os.path.exists(install_dotfile_path):
+            setup_utils.cached_run(
+                f"Backing up {dotfile}",
+                [
+                    f"mv -v {install_dotfile_path} {backup_dotfile_path}",
+                ],
+                skip_if=os.path.exists(backup_dotfile_path),
+            )
+        setup_utils.cached_run(
+            f"Installing {dotfile}",
+            [
+                f"ln -sv {orignal_dotfile_path} {install_dotfile_path}",
+            ],
+        )
 
 def install_nvim_plugins():
     """Install the nvim and coc plugins."""
@@ -72,11 +118,9 @@ def setup_user():
 
 def main():
     """Execution starts here."""
-    # These installations require the user to be root.
-    if setup_utils.user_is_root():
-        raise RuntimeError("Should not run this script as root.")
-
-    setup_user()
+    install_dotfiles()
+    # print("Setting up a user...")
+    # setup_user()
 
 if __name__ == "__main__":
     main()

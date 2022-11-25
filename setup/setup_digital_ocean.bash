@@ -106,7 +106,7 @@ run_python_script()
   then
     PYTHON_SCRIPT="setup_root"
   else
-    PYTHON_SCRIPT="setup_user"
+    PYTHON_SCRIPT="setup_dotfiles"
   fi
   echo_red "Executing setup script ${PYTHON_SCRIPT}.py."
   PYTHONPATH=${SETUP_PATH} ${VENV_PATH}/bin/python -m ${PYTHON_SCRIPT}
