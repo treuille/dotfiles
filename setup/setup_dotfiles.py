@@ -31,6 +31,10 @@ def install_dotfiles():
         install_dotfile_path = os.path.join(home_path, dotfile)
         backup_dotfile_path = os.path.join(backup_path, dotfile)
 
+        print(f"orignal_dotfile_path: {orignal_dotfile_path}")
+        print(f"install_dotfile_path: {install_dotfile_path}")
+        print(f"backup_dotfile_path: {backup_dotfile_path}")
+
         if os.path.exists(install_dotfile_path):
             setup_utils.cached_run(
                 f"Backing up {dotfile}",
