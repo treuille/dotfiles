@@ -182,6 +182,7 @@ def create_user(user):
                 f"mkdir {user_home}/.ssh",
                 f"cp -v ~/.ssh/authorized_keys {user_home}/.ssh",
                 f"chmod 0700 {user_home}/.ssh",
+                f"touch {user_home}/.zshrc",
                 f"chown -vR {user}:{user} {user_home}",
             ],
         )
