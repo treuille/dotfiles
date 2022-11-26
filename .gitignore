@@ -4,3 +4,14 @@ original_dotfiles
 # Some random crap zsh puts into .config
 .config/zsh/.zsh_sessions
 .config/zsh/.zsh_history
+
+# Some random crap zsh puts into .config
+.config/tmux/plugins
+
+# Lazygit autocreates its own install folder 
+.config/lazygit
+
+# The virtual environment used for installation script
+setup/venv
+setup/backup
+setup/__pycache__
