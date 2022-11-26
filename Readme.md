@@ -1,4 +1,8 @@
-# How I did this
+# Digital Ocean Installation Instructions
+
+
+
+# MacOS Installation Instructions
 
 1. Need to include instructions on installing homebrew itself 
 
