@@ -75,16 +75,21 @@ def setup_root():
         ],
     )
 
-    # install rust, then lsd with cargo
-
-    # setup_utils.cached_run(
-    #     "Installing lsd",
-    #     [
-    #         "curl -LJO https://github.com/Peltoche/lsd/releases/download/0.19.0/lsd_0.19.0_amd64.deb",
-    #         "sudo apt install ./lsd_0.19.0_amd64.deb",
-    #         "rm -rv lsd_0.19.0_amd64.deb",
-    #     ],
-    # )
+    # Install lsd, a prettier ls
+    lsd_version = "0.23.1"
+    lsd_package = f"lsd_{lsd_version}_amd64.deb"
+    lsd_release = (
+        "https://github.com/Peltoche/lsd/releases/download"
+        f"/{lsd_version}/{lsd_package}"
+    )
+    setup_utils.cached_run(
+        "Installing lsd",
+        [
+            f"curl -L {lsd_release} > {lsd_package}",
+            f"dpkg -i {lsd_package}",
+            f"rm -rv {lsd_package}",
+        ],
+    )
 
     # Set the timezone properly
     setup_utils.cached_run(
