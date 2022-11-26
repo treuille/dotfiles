@@ -88,6 +88,18 @@ def install_rust():
     )
 
 
+def install_pure():
+    """Installs a prettier prompt for zsh."""
+    pure_repo = "https://github.com/sindresorhus/pure.git"
+    zsh_plugin_path = os.path.expanduser("~/.local/share/zsh")
+    pure_path = os.path.join(zsh_plugin_path, "pure")
+    setup_utils.cached_run(
+        "Installing pure, a prettier prompt for zsh",
+        [f"mkdir -pv {zsh_plugin_path}", f"git clone {pure_repo} {pure_path}"],
+        skip_if=os.path.exists(pure_path),
+    )
+
+
 def install_tmux_plugins():
     """Make tmux work with its plugins."""
     tmux_plugin_path = os.path.expanduser("~/.config/tmux/plugins")
@@ -125,6 +137,7 @@ def install_nvim_plugins():
 
 def main():
     """Execution starts here."""
+    install_pure()
     install_dotfiles()
     install_nvim_plugins()
     install_tmux_plugins()
