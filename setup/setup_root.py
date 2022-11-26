@@ -14,13 +14,13 @@ import tempfile
 
 def setup_root():
     """These are the installation steps which should happen as root."""
-    # Prevent interactive retart prompts
-    setup_utils.cached_run(
-        "Preventing interactive retart prompts",
-        [
-            """sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l'/g" /etc/needrestart/needrestart.conf"""
-        ]
-    )
+    # # Prevent interactive retart prompts
+    # setup_utils.cached_run(
+    #     "Preventing interactive retart prompts",
+    #     [
+    #         """sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l'/g" /etc/needrestart/needrestart.conf"""
+    #     ]
+    # )
 
     # Installing cc linker and compiler which cargo will need.
     setup_utils.cached_run(

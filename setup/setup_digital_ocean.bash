@@ -35,6 +35,15 @@ echo_red()
     echo -e "\e[1m\e[31m$@\e[0m"
 }
 
+# Prevent interactive restart dialogs
+prevent_restart_dialog()
+{
+  if [[ $? -eq 0 ]];
+  then
+    sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l';/g" /etc/needrestart/needrestart.conf
+  fi
+}
+
 # Install the dotfiles repo
 install_dotfiles()
 {
@@ -113,6 +122,7 @@ run_python_script()
 }
 
 # Actually run the script
+prevent_restart_dialog
 install_dotfiles
 install_python_venv
 setup_venv
