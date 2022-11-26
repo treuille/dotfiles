@@ -38,8 +38,9 @@ echo_red()
 # Prevent interactive restart dialogs
 prevent_restart_dialog()
 {
-  if [[ $? -eq 0 ]];
+  if [[ $EUID -eq 0 ]];
   then
+    echo_red "Turning off interactive restart during install process...\n"
     sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l';/g" /etc/needrestart/needrestart.conf
   fi
 }
