@@ -41,7 +41,7 @@ def install_dotfiles():
             assert os.path.exists(backup_dotfile_path)
         assert not os.path.exists(install_dotfile_path)
         os.system(f"ln -sv {orignal_dotfile_path} {install_dotfile_path}")
-    cprint(f"Done", "green")
+    cprint(f"Done\n", "green")
 
     # Removing bash config files.
     setup_utils.cached_run(
