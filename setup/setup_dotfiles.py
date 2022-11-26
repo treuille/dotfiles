@@ -61,31 +61,32 @@ def install_rust():
     cargo_home = os.path.join(home_path, ".local/rust/cargo")
     rustup_home = os.path.join(home_path, ".local/rust/rustup")
     rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
+    rust_install_args = (
+        "--default-toolchain stable "
+        "--profile complete "
+        '--component "rls rust-analysis rust-src" '
+        "-y "
+    )
     setup_utils.cached_run(
         "Installing rust",
         [
             "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | "
-            f"{rust_env} sh -s -- -y",
+            f"{rust_env} sh -s -- {rust_install_args}",
         ],
         skip_if=(os.path.exists(cargo_home) or os.path.exists(rustup_home)),
     )
 
-    # Additional rust configuration.
-    rustup_bin = os.path.join(cargo_home, "bin/rustup")
-    cargo_bin = os.path.join(cargo_home, "bin/cargo")
-    setup_utils.cached_run(
-        "Configuring rust",
-        [
-            f"{rust_env} {rustup_bin} default stable",
-            f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
-            f"{rust_env} {cargo_bin} install -j4 cargo-watch",
-        ],
-    )
-
-    # Install lsd, a prettier form of ls.
-    setup_utils.cached_run(
-        "Installing lsd", [f"{rust_env} {cargo_bin} install -j4 lsd"]
-    )
+    # # Additional rust configuration.
+    # rustup_bin = os.path.join(cargo_home, "bin/rustup")
+    # cargo_bin = os.path.join(cargo_home, "bin/cargo")
+    # setup_utils.cached_run(
+    #     "Configuring rust",
+    #     [
+    #         f"{rust_env} {rustup_bin} default stable",
+    #         f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
+    #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
+    #     ],
+    # )
 
 
 def install_pure():
@@ -141,7 +142,7 @@ def main():
     install_dotfiles()
     install_nvim_plugins()
     install_tmux_plugins()
-    # install_rust()
+    install_rust()
 
     print("Everythign installed. Log back in for the new shell.")
 
