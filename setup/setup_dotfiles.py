@@ -111,7 +111,7 @@ def install_tmux_plugins():
         [
             f"mkdir -pv {tmux_plugin_path}",
             f"git clone {tpm_plugin_repo} {tpm_plugin_path}",
-            f"{tpm_plugin_path}/bindings/install_plugins",
+            f"{tpm_plugin_path}/bindings/install_plugins || true",
         ],
         skip_if=os.path.exists(os.path.expanduser(tpm_plugin_path)),
     )
