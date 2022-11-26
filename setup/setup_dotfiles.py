@@ -24,7 +24,7 @@ def install_dotfiles():
     )
 
     # Setup a backup dirctory to move old dotfiles.
-    cprint(f'Installing dotfiles...', 'blue', attrs=['bold'])
+    cprint(f"Installing dotfiles...", "blue", attrs=["bold"])
     for dotfile in os.listdir(dotfiles_path):
         if dotfile in [".git", ".gitignore"] or not dotfile.startswith("."):
             continue
@@ -32,7 +32,7 @@ def install_dotfiles():
         install_dotfile_path = os.path.join(home_path, dotfile)
         backup_dotfile_path = os.path.join(backup_path, dotfile)
 
-        cprint(f'Installing {dotfile}', 'green')
+        cprint(f"Installing {dotfile}", "green")
         if os.path.exists(install_dotfile_path):
             if os.path.exists(backup_dotfile_path):
                 os.system(f"rm -rfv {install_dotfile_path}")
@@ -41,7 +41,7 @@ def install_dotfiles():
             assert os.path.exists(backup_dotfile_path)
         assert not os.path.exists(install_dotfile_path)
         os.system(f"ln -sv {orignal_dotfile_path} {install_dotfile_path}")
-    cprint(f'Done', 'green')
+    cprint(f"Done", "green")
 
     # Removing bash config files.
     setup_utils.cached_run(
@@ -83,33 +83,24 @@ def install_rust():
     )
 
     # Install lsd, a prettier form of ls.
-    setup_utils.cached_run("Installing lsd", [f"{rust_env} {cargo_bin} install -j4 lsd"])
+    setup_utils.cached_run(
+        "Installing lsd", [f"{rust_env} {cargo_bin} install -j4 lsd"]
+    )
 
 
 def install_tmux_plugins():
-    """These are the packages which shoild happen for any user."""
-
-    # # Install a nice theme for tmux
-    # # See: https://github.com/odedlaz/tmux-onedark-theme
-    # tmux_onedark_theme_repo = "https://github.com/odedlaz/tmux-onedark-theme"
-    # tmux_onedark_theme_path = "~/.local/share/tmux/tmux-onedark-theme"
-    # setup_utils.cached_run(
-    #     "Installing tmux-onedark-theme",
-    #     [
-    #         f"git clone {tmux_onedark_theme_repo} {tmux_onedark_theme_path}",
-    #     ],
-    #     skip_if=os.path.exists(os.path.expanduser(tmux_onedark_theme_path)),
-    # )
-
-    # Install the tmux plugin manager
-    tmux_plugin_path = "~/.config/tmux/plugins/tpm"
-    tmux_plugin_repo = "https://github.com/tmux-plugins/tpm"
+    """Make tmux work with its plugins."""
+    tmux_plugin_path = os.path.expanduser("~/.config/tmux/plugins")
+    tpm_plugin_path = os.path.join(tmux_plugin_path, "tpm")
+    tpm_plugin_repo = "https://github.com/tmux-plugins/tpm"
     setup_utils.cached_run(
         "Installing the tmux plugin manager",
         [
-            f"echo git clone {tmux_plugin_repo} {tmux_plugin_path}",
+            f"mkdir -pv {tmux_plugin_path}",
+            f"git clone {tpm_plugin_repo} {tpm_plugin_path}",
+            f"{tpm_plugin_path}/bindings/install_plugins",
         ],
-        skip_if=os.path.exists(os.path.expanduser(tmux_plugin_path)),
+        skip_if=os.path.exists(os.path.expanduser(tpm_plugin_path)),
     )
 
 
@@ -136,7 +127,7 @@ def main():
     """Execution starts here."""
     install_dotfiles()
     install_nvim_plugins()
-    # install_tmux_plugins()
+    install_tmux_plugins()
     # install_rust()
 
 
