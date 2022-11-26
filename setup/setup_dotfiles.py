@@ -143,6 +143,8 @@ def main():
     install_tmux_plugins()
     # install_rust()
 
+    print("Everythign installed. Log back in for the new shell.")
+
 
 if __name__ == "__main__":
     main()
