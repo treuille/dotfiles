@@ -24,6 +24,7 @@ def install_dotfiles():
     )
 
     # Setup a backup dirctory to move old dotfiles.
+    cprint(f'Installing dotfiles...', 'blue', attrs=['bold'])
     for dotfile in os.listdir(dotfiles_path):
         if dotfile in [".git", ".gitignore"] or not dotfile.startswith("."):
             continue
@@ -31,24 +32,16 @@ def install_dotfiles():
         install_dotfile_path = os.path.join(home_path, dotfile)
         backup_dotfile_path = os.path.join(backup_path, dotfile)
 
-        print(f"orignal_dotfile_path: {orignal_dotfile_path}")
-        print(f"install_dotfile_path: {install_dotfile_path}")
-        print(f"backup_dotfile_path: {backup_dotfile_path}")
-
+        cprint(f'Installing {dotfile}', 'green')
         if os.path.exists(install_dotfile_path):
-            setup_utils.cached_run(
-                f"Backing up {dotfile}",
-                [
-                    f"mv -v {install_dotfile_path} {backup_dotfile_path}",
-                ],
-                skip_if=os.path.exists(backup_dotfile_path),
-            )
-        setup_utils.cached_run(
-            f"Installing {dotfile}",
-            [
-                f"ln -sv {orignal_dotfile_path} {install_dotfile_path}",
-            ],
-        )
+            if os.path.exists(backup_dotfile_path):
+                os.system(f"rm -rfv {install_dotfile_path}")
+            else:
+                os.system(f"mv -v {install_dotfile_path} {backup_dotfile_path}")
+            assert os.path.exists(backup_dotfile_path)
+        assert not os.path.exists(install_dotfile_path)
+        os.system(f"ln -sv {orignal_dotfile_path} {install_dotfile_path}")
+    cprint(f'Done', 'green')
 
     # Removing bash config files.
     setup_utils.cached_run(
@@ -142,7 +135,7 @@ def install_nvim_plugins():
 def main():
     """Execution starts here."""
     install_dotfiles()
-    # install_nvim_plugins()
+    install_nvim_plugins()
     # install_tmux_plugins()
     # install_rust()
 
