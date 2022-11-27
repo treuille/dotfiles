@@ -8,12 +8,12 @@ bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup
 
 2. ssh in, this time as `adrien`, and run the same command.
 
-## Then we need to do a few more installs in rust which we shoud automate
+## Optional installs
 
-1. Install rust-analyzer
+1. Install `cargo-watch`
 
 ```sh
-rustup component add rust-analyzer
+cargo install -j4 cargo-watch
 ```
 
 # MacOS Installation Instructions
