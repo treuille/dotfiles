@@ -144,7 +144,8 @@ def main():
     install_tmux_plugins()
     install_rust()
 
-    print("Everythign installed. Log back in for the new shell.")
+    cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
+    print(". ~/.zshrc")
 
 
 if __name__ == "__main__":
