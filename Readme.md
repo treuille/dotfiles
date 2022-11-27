@@ -8,6 +8,14 @@ bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup
 
 2. ssh in, this time as `adrien`, and run the same command.
 
+## Then we need to do a few more installs in rust which we shoud automate
+
+1. Install rust-analyzer
+
+```sh
+rustup component add rust-analyzer
+```
+
 # MacOS Installation Instructions
 
 1. Need to include instructions on installing homebrew itself 
