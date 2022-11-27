@@ -79,14 +79,15 @@ require('lspconfig')['pyright'].setup{
 --     on_attach = on_attach,
 --     flags = {},
 -- }
--- require('lspconfig')['rust_analyzer'].setup{
---     on_attach = on_attach,
---     flags = {},
---     -- Server-specific settings...
---     settings = {
---       ["rust-analyzer"] = {}
---     }
--- }
+
+require('lspconfig')['rust_analyzer'].setup{
+    on_attach = on_attach,
+    flags = {},
+    -- Server-specific settings...
+    settings = {
+      ["rust-analyzer"] = {}
+    }
+}
 
 
 -- ADRIEN'S OLD STUFF -- 
