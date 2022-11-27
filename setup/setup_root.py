@@ -14,14 +14,6 @@ import tempfile
 
 def setup_root():
     """These are the installation steps which should happen as root."""
-    # # Prevent interactive retart prompts
-    # setup_utils.cached_run(
-    #     "Preventing interactive retart prompts",
-    #     [
-    #         """sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l'/g" /etc/needrestart/needrestart.conf"""
-    #     ]
-    # )
-
     # Installing cc linker and compiler which cargo will need.
     setup_utils.cached_run(
         "Installing cc linker and compiler",
@@ -45,27 +37,6 @@ def setup_root():
             "apt install -y net-tools",
         ],
     )
-
-    # # See: https://github.com/nodesource/distributions
-    # setup_utils.cached_run(
-    #     "Installing node",
-    #     [
-    #         "curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -",
-    #         "sudo apt-get install -y nodejs",
-    #         #        'curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -',
-    #         #        'sudo apt-get install -y nodejs',
-    #     ],
-    # )
-
-    # setup_utils.cached_run(
-    #     "Installing yarn",
-    #     [
-    #         "curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -",
-    #         'echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list',
-    #         "sudo apt update",
-    #         "sudo apt install yarn",
-    #     ],
-    # )
 
     setup_utils.cached_run(
         "Installing fancy search tools",
@@ -99,36 +70,10 @@ def setup_root():
         ],
     )
 
-    # setup_utils.cached_run(
-    #     "Installing useful commands",
-    #     [
-    #         "sudo apt install -y poppler-utils",  # gives you pdfimages
-    #     ],
-    # )
-
-    # setup_utils.cached_run(
-    #     "Installing LSP servers",
-    #     [
-    #         "npm install -g vim-language-server", # vimls
-    #         "npm install -g pyright", # python
-    #     ]
-    # )
-
     setup_utils.cached_run(
         "Installing nvim",
         [
             "apt install -y neovim",
-            # "sudo snap install --beta nvim --classic",
-            # "apt install -y make",
-            # "apt install -y cmake",
-            # "apt install -y g++",
-            # "apt install -y pkg-config",
-            # "apt install -y libtool-bin",
-            # "apt install -y gettext",
-            # "apt install -y libgettextpo-dev",
-            # "cd ~ && git clone https://github.com/neovim/neovim.git",
-            # "cd ~/neovim && make CMAKE_BUILD_TYPE=RelWithDebInfo install",
-            # "rm -rfv ~/neovim",
         ],
     )
 
@@ -136,9 +81,6 @@ def setup_root():
         "Installing lazygit",
         [
             'curl -L "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.36.0_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin lazygit'
-            # "apt-add-repository --yes ppa:lazygit-team/release",
-            # "apt update",
-            # "apt install lazygit",
         ],
     )
 
