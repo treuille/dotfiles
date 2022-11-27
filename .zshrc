@@ -21,11 +21,10 @@ bindkey -v
 export EDITOR=nvim
 
 # Rust
-CARGO_HOME=${HOME}/.local/rust/cargo
-RUSTUP_HOME=${HOME}/.local/rust/rustup
+export CARGO_HOME=${HOME}/.local/rust/cargo
+export RUSTUP_HOME=${HOME}/.local/rust/rustup
 export PATH=/home/adrien/.local/rust/cargo/bin:${PATH}
-# export PATH=/home/adrien/.local/cargo/bin:${PATH}
-#
+
 # # Make rust analyzer availalbe as an executable
 export PATH=${PATH}:/home/adrien/.local/rust/rust-analyzer/bin
 
