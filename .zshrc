@@ -23,10 +23,10 @@ export EDITOR=nvim
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup
-export PATH=/home/adrien/.local/rust/cargo/bin:${PATH}
+export PATH=${CARGO_HOME}/bin:${PATH}
 
-# # Make rust analyzer availalbe as an executable
-export PATH=${PATH}:/home/adrien/.local/rust/rust-analyzer/bin
+# Make rust analyzer availalbe as an executable
+export PATH=${PATH}:${RUSTUP_HOME}/toolchains/stable-x86_64-unknown-linux-gnu/bin
 
 # Pure, a prettier prompt
 fpath+=(/home/adrien/.local/share/zsh/pure)
