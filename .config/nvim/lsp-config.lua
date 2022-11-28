@@ -14,12 +14,30 @@ local on_attach = function(client, bufnr)
     -- triggered by <c-x><c-o>.)
     -- vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-    -- Show line diagnostics automatically in hover window.
     -- To activate in insert mode, use {"CursorHold", "CursorHoldI"}, instead.
+
+    -- Show line diagnostics automatically in hover window, while preventing
+    -- the cursor from getting stuck in the dialog (focusable = false).
+    -- See: https://github.com/vh205/dotfiles/blob/master/nvim/lua/lsp-config/init.lua
     vim.o.updatetime = 250
     vim.api.nvim_create_autocmd("CursorHold", {
-      pattern = "*",
-      callback = vim.diagnostic.open_float,
+        buffer = bufnr,
+        callback = function()
+            local opts = {
+              focusable = false,
+              close_events = {
+                  "BufLeave",
+                  "CursorMoved",
+                  "InsertEnter",
+                  "FocusLost"
+              },
+              border = 'rounded',
+              -- source = 'always',
+              -- prefix = ' ',
+              -- scope = 'cursor',
+            }
+            vim.diagnostic.open_float(nil, opts)
+          end
     })
 
     -- Always show the sign column so its appearance isn't distracting.
