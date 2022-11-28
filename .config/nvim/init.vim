@@ -48,10 +48,6 @@ Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
-" Install synax completion with coc
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" Plug 'fannheyward/telescope-coc.nvim'
-
 " Language Server Protocol support
 " See: https://www.youtube.com/watch?v=tOjVHXaUrzo
 Plug 'neovim/nvim-lspconfig'
@@ -99,8 +95,6 @@ call plug#end()
 
 " " lua require "pears".setup()
 source  ~/.config/nvim/colorscheme-config.vim
-" source  ~/.config/nvim/coc-config.vim
-
 luafile ~/.config/nvim/lsp-config.lua
 luafile ~/.config/nvim/nvim-cmp-config.lua
 source  ~/.config/nvim/commentary-config.vim
