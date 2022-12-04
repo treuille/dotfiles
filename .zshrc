@@ -29,6 +29,6 @@ export PATH=${CARGO_HOME}/bin:${PATH}
 export PATH=${PATH}:${RUSTUP_HOME}/toolchains/stable-x86_64-unknown-linux-gnu/bin
 
 # Pure, a prettier prompt
-fpath+=(/home/adrien/.local/share/zsh/pure)
+fpath+=(${HOME}/.local/share/zsh/pure)
 autoload -U promptinit; promptinit
 prompt pure

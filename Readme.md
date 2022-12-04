@@ -53,6 +53,12 @@ zsh ./setup.zsh
 brew install lazygit
 ```
 
+7. Install pure
+
+```sh
+mkdir -p ${HOME}/.local/share/zsh/pure
+git clone https://github.com/sindresorhus/pure.git ${HOME}/.local/share/zsh/pure
+```
 
 # Todo 
 
@@ -60,3 +66,4 @@ brew install lazygit
 2. Get nvim and other `.config/`s into this repo 
 
 
+mkdir -p /Users/atreuille/.local/share/zsh/pure
