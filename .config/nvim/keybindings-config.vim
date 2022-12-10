@@ -13,3 +13,7 @@ nnoremap <leader>s :update<cr>
 " Allows me to replace the selected text, without contorting my fingers either.
 " See: https://stackoverflow.com/questions/676600/vim-search-and-replace-selected-text
 vnoremap <leader>r "hy:%s/<C-r>h//gc<left><left><left>
+
+" Move among buffers with CTRL
+map <C-J> :bnext<CR>
+map <C-K> :bprev<CR>
