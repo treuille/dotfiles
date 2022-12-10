@@ -42,23 +42,34 @@ mkdir -v ~/.local/share/nvim/vim-plug
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ```
 
-5. EXPERIMENTAL -- Run the setup script.
-
-```sh
-zsh ./setup.zsh
-```
-
-6. Install lazygit
+5. Install lazygit
 ```sh
 brew install lazygit
 ```
 
-7. Install pure
+6. Install pure
 
 ```sh
 mkdir -p ${HOME}/.local/share/zsh/pure
 git clone https://github.com/sindresorhus/pure.git ${HOME}/.local/share/zsh/pure
 ```
+
+6. Install GitHub Copilot
+
+Start by installing node
+
+```sh
+brew install node
+```
+
+Then, follow [these instructions](https://github.com/github/copilot.vim).
+
+7. EXPERIMENTAL -- Run the setup script.
+
+```sh
+zsh ./setup.zsh
+```
+
 
 # Todo 
 

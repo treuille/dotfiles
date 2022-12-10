@@ -87,8 +87,7 @@ Plug 'phaazon/hop.nvim'
 Plug 'psf/black', { 'branch': 'stable' }
 
 " Enable Github Copilot
-" Not installed yet becuase I'm waiting to get off the waitlist!
-" Plug 'github/copilot.vim'
+Plug 'github/copilot.vim'
 
 " Initialize plugin system
 call plug#end()

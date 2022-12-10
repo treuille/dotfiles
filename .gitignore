@@ -11,6 +11,9 @@ original_dotfiles
 # Lazygit autocreates its own install folder 
 .config/lazygit
 
+# GitHub Copilot stuff
+.config/github-copilot
+
 # The virtual environment used for installation script
 setup/venv
 setup/backup
