@@ -10,6 +10,7 @@ original_dotfiles
 
 # Lazygit autocreates its own install folder 
 .config/lazygit
+.config/lazygit/**
 
 # GitHub Copilot stuff
 .config/github-copilot
