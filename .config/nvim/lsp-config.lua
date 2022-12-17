@@ -70,9 +70,11 @@ local on_attach = function(client, bufnr)
     -- end, bufopts)
 end
 
+
 -- Make lsp-config compatible with nvim-cmp.
 local client_capabilities = vim.lsp.protocol.make_client_capabilities()
 local capabilities = require('cmp_nvim_lsp').default_capabilities(client_capabilities)
+
 
 -- Don't show inline virtual text, which I find distracting.
 local handlers = {
@@ -98,14 +100,38 @@ require('lspconfig')['pyright'].setup{
 --     flags = {},
 -- }
 
-require('lspconfig')['rust_analyzer'].setup{
-    on_attach = on_attach,
-    flags = {},
-    -- Server-specific settings...
-    settings = {
-      ["rust-analyzer"] = {}
-    }
-}
+-- Use rst-tools instead of require('lspconfig')['rust_analyzer']
+require("rust-tools").setup({
+    tools = { -- rust-tools options
+        autoSetHints = true,
+        -- hover_with_actions = true,
+        inlay_hints = {
+            show_parameter_hints = false,
+            parameter_hints_prefix = "",
+            other_hints_prefix = " \u{00B7}\u{00B7} ",
+            highlight = "Comment",
+            -- highlight = "red",
+        },
+    },
+
+    -- Args to require('lspconfig')['rust_analyzer'].setup
+    server = {
+        capabilities = capabilities,
+        on_attach = on_attach,
+        flags = {},
+        handlers = handlers,
+        settings = {
+            ["rust-analyzer"] = {
+                checkOnSave = {
+                    command = "clippy"
+                },
+            }
+        }
+    },
+})
+
+-- Run rust fmt on save
+vim.g.rustfmt_autosave = 1
 
 
 -- ADRIEN'S OLD STUFF -- 

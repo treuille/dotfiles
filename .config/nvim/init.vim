@@ -89,10 +89,16 @@ Plug 'psf/black', { 'branch': 'stable' }
 " Enable Github Copilot
 Plug 'github/copilot.vim'
 
+" Following https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/
+Plug 'williamboman/mason.nvim'    
+Plug 'williamboman/mason-lspconfig.nvim'
+Plug 'simrat39/rust-tools.nvim'
+Plug 'rust-lang/rust.vim'
+
 " Initialize plugin system
 call plug#end()
 
-" " lua require "pears".setup()
+
 source  ~/.config/nvim/colorscheme-config.vim
 luafile ~/.config/nvim/lsp-config.lua
 luafile ~/.config/nvim/nvim-cmp-config.lua
@@ -104,3 +110,4 @@ source  ~/.config/nvim/black-config.vim
 luafile ~/.config/nvim/lualine-config.lua
 source  ~/.config/nvim/keybindings-config.vim
 luafile ~/.config/nvim/treesitter-config.lua
+luafile ~/.config/nvim/mason-config.lua
