@@ -8,9 +8,8 @@ original_dotfiles
 # Some random crap zsh puts into .config
 .config/tmux/plugins
 
-# Lazygit autocreates its own install folder 
+# Lazygit auto-creates its own install folder 
 .config/lazygit
-.config/lazygit/**
 
 # GitHub Copilot stuff
 .config/github-copilot
