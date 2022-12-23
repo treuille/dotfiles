@@ -59,6 +59,9 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/nvim-cmp'
 
+" Using LuaSnip for completions
+Plug 'L3MON4D3/LuaSnip', {'tag': 'v1.*'}
+
 " Not using this because it's no longer supported..
 " Plug 'nvim-lua/completion-nvim'
 
