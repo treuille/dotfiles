@@ -8,6 +8,13 @@ bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup
 
 2. ssh in, this time as `adrien`, and run the same command.
 
+## Installs which haven't been automated yet
+
+1. Install node (for GitHub Copilot)
+```sh
+sudo apt install -y nodejs
+```
+
 ## Optional installs
 
 1. Install `cargo-watch`
