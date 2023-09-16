@@ -4,8 +4,8 @@
 
 # Python 3.10 and venv
 export PATH=/opt/homebrew/opt/python@3.10/libexec/bin:${PATH}
+alias venv-create="python3 -m venv .venv ; venv-activate"
 alias venv-activate="source .venv/bin/activate"
-alias venv-create="python3 -m venv .venv"
 alias venv-delete="rm -rfv .venv"
 
 # Snowsql
@@ -32,3 +32,11 @@ export PATH=${PATH}:${RUSTUP_HOME}/toolchains/stable-x86_64-unknown-linux-gnu/bi
 fpath+=(${HOME}/.local/share/zsh/pure)
 autoload -U promptinit; promptinit
 prompt pure
+
+# Vincne't cool tsh thingy
+function tshaccess() {
+    tsh login --proxy teleport.m1.us-west-2.aws-dev.app.snowflake.com:3080 
+    tsh clusters 
+    tsh login sfc-or-dev-misc-k8s-sandbox1
+    tsh login --kube-cluster=sfc-or-dev-misc-k8s-sandbox1 sfc-or-dev-misc-k8s-sandbox1
+}
