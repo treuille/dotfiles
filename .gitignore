@@ -14,6 +14,9 @@ original_dotfiles
 # GitHub Copilot stuff
 .config/github-copilot
 
+# Not sure what this is, but it snuck into my .config folder
+.config/pudb/
+
 # The virtual environment used for installation script
 setup/venv
 setup/backup
