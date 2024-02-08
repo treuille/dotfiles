@@ -68,7 +68,7 @@ Plug 'tpope/vim-commentary'
 " Give us some surround amazingness
 Plug 'tpope/vim-surround'
 
-"Nice syntax highlighting 
+" Nice syntax highlighting 
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 " Status line
