@@ -12,7 +12,7 @@ The old way, on the `main` branch was:
 bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup_digital_ocean.bash)
 ```
 
-2. ssh in, this time as `adrien`, and run the same command.
+        2. ssh in, this time as `adrien`, and run the same command.
 
 ## Installs which haven't been automated yet
 
@@ -89,10 +89,14 @@ zsh ./setup.zsh
 * Get everything basically working again from Tahiti
 * Automate the installation of Github Copilot as part of the install 
 
-### Old Todo Items
+### Finally 
+
+* Merge back into main
+* Update the repo back to `main` in
+    * This README
+    * The setup digital ocean script
+
+## Old Todo Items
 
 1. Setup XDG properly
 2. Get nvim and other `.config/`s into this repo 
-
-
-mkdir -p /Users/atreuille/.local/share/zsh/pure

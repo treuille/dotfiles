@@ -9,7 +9,7 @@
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
-GIT_BRANCH="main"
+GIT_BRANCH="tahiti"
 DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
 VENV_PATH="${DOTFILES_PATH}/setup/venv"
@@ -127,4 +127,5 @@ prevent_restart_dialog
 install_dotfiles
 install_python_venv
 setup_venv
-run_python_script
+echo "Not running the Python script for now..."
+# run_python_script
