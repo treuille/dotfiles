@@ -65,7 +65,7 @@ install_dotfiles()
 	 fi
 
 	 # Actually clone the repo
-	 if [[ ! git clone -b ${GIT_BRANCH} ${GIT_REPO} ]];
+	 if ! git clone -b ${GIT_BRANCH} ${GIT_REPO};
    then
     echo "Failed to clone branch "${GIT_BRANCH}" from "${GIT_REPO}".
     exit 1
