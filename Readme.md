@@ -86,6 +86,11 @@ zsh ./setup.zsh
 
 # Todo 
 
+* Get everything basically working again from Tahiti
+* Automate the installation of Github Copilot as part of the install 
+
+### Old Todo Items
+
 1. Setup XDG properly
 2. Get nvim and other `.config/`s into this repo 
 
