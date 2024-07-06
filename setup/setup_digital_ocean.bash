@@ -65,7 +65,11 @@ install_dotfiles()
 	 fi
 
 	 # Actually clone the repo
-	 git clone -b ${GIT_BRANCH} ${GIT_REPO}
+	 if [[ ! git clone -b ${GIT_BRANCH} ${GIT_REPO} ]];
+   then
+    echo "Failed to clone branch "${GIT_BRANCH}" from "${GIT_REPO}".
+    exit 1
+   fi
 
   fi
 
@@ -129,3 +133,4 @@ install_python_venv
 setup_venv
 echo "Not running the Python script for now..."
 # run_python_script
+
