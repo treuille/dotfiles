@@ -129,8 +129,9 @@ run_python_script()
 # Actually run the script
 prevent_restart_dialog
 install_dotfiles
-install_python_venv
-setup_venv
+echo "Not installing the Python stuff for now."
+# install_python_venv
+# setup_venv
 echo "Not running the Python script for now..."
 # run_python_script
 
