@@ -68,7 +68,7 @@ install_dotfiles()
     git clone -b ${GIT_BRANCH} ${GIT_REPO}
     if [[ $? -ne 0 ]];
     then
-      echo "Failed to clone branch \"${GIT_BRANCH}\" from \"${GIT_REPO}\"."
+      echo_red "Failed to clone branch \"${GIT_BRANCH}\" from \"${GIT_REPO}\"."
       exit 1
     fi
 
