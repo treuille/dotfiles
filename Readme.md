@@ -29,6 +29,28 @@ sudo apt install -y nodejs
 cargo install -j4 cargo-watch
 ```
 
+# Blink Shell Installation Instructions
+
+Make sure the following settings are set for your host:
+
+### SSH
+
+* **HostName**: *(Ip address of the host)*
+* **Port**: `22`
+* **User**: `root`*(update to username later in process)*
+* **Key**: `Blink3@Elbowpads`
+* **SSH Config**: 
+```
+Compression yes
+LocalForward 8501 localhost:8501
+ForwardAgent yes
+```
+
+### SSH AGENT
+
+* **Agent Forwarding**: `Always`
+* **Forward Keys**: `Blink3@Elbowpads`
+
 # MacOS Installation Instructions
 
 1. Need to include instructions on installing homebrew itself 
