@@ -140,7 +140,7 @@ def main():
     """Execution starts here."""
     install_pure()
     install_dotfiles()
-    install_nvim_plugins()
+#    install_nvim_plugins()
     install_tmux_plugins()
     install_rust()
 
