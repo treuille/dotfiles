@@ -142,7 +142,7 @@ def main():
     install_dotfiles()
 #    install_nvim_plugins()
     install_tmux_plugins()
-    install_rust()
+#    install_rust()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
     print(". ~/.zshrc")
