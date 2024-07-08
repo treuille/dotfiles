@@ -61,16 +61,16 @@ def setup_root():
         ]
     )
 
-    print("Early stop: setup_root.")
-    sys.exit(-1)
+#    setup_utils.cached_run(
+#         "Installing lazygit",
+#         [
+#             'curl -L "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.36.0_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin lazygit'
+#         ],
+#     )
 
-    setup_utils.cached_run(
-        "Installing lazygit",
-        [
-            'curl -L "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.36.0_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin lazygit'
-        ],
-    )
-
+#    print("Early stop: setup_root.")
+#     sys.exit(-1)
+ 
     # Create a user to SSH into this box.
     create_user("adrien")
 
