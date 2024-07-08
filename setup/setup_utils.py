@@ -9,7 +9,7 @@ import hashlib
 import pickle
 import xdg
 import subprocess
-
+from typing import Optional
 
 def cached_run(title, commands, skip_if=False):
     """Runs the given set of commands, prepending the title."""
@@ -51,6 +51,14 @@ def cached_run(title, commands, skip_if=False):
     cprint("Done", "green")
     print()
 
+def cached_apt_install(package: str, title:Optional[str]=None):
+    """Istall a package using apt and the cached_run mechanism."""
+    # Give a standard title if none given
+    if title == None:
+        title = "Installing " + package
+
+    # Run apt install on the package
+    cached_run(title, ["apt install -y " + package])
 
 def user_exists(user):
     """Returns true if the named user exists"""
