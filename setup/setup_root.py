@@ -82,8 +82,8 @@ def setup_root():
         "Turn on the firewall",
         [
             "ufw allow ssh",
-            "yes | ufw enable",
-        ],
+            "echo y | ufw enable",
+        ]
     )
 
 
