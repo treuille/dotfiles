@@ -1,7 +1,7 @@
 # Bootstrap the setup of a digital ocean installation by:
 # 
 # 1. Installing the dotfiles repo
-# 2. Installing python3.10-venv if necessary
+# 2. Installing python3.12-venv if necessary
 # 3. Creating a venv
 # 4. Running a script in the venv
 #     - if root: setup_root.py
@@ -77,16 +77,17 @@ install_dotfiles()
   end_block
 }
 
-# Install the python3.10-venv required to use Python venv in Ubuntu.
+# Install the python3.12-venv required to use Python venv in Ubuntu.
 install_python_venv()
 {
   # Only run in the user is root.
   if [[ $EUID -ne 0 ]];
   then
-	 return 255
+    return 255
   fi
   
-  PYTHON_VENV_PACKAGE="python3.10-venv"
+  # apt install python3.12-venv
+  PYTHON_VENV_PACKAGE="python3.12-venv"
   start_block "Installing ${PYTHON_VENV_PACKAGE}."
   dpkg -s ${PYTHON_VENV_PACKAGE} &> /dev/null
   if [[ $? -eq 0 ]];
@@ -95,9 +96,9 @@ install_python_venv()
   else
     apt update -y
     apt upgrade -y
-    apt install python3.10-venv -y
+    apt install ${PYTHON_VENV_PACKAGE} -y
   fi
-  end_block
+ end_block
 }
 
 # Create the virtual environment and install the requirements file.
@@ -130,9 +131,7 @@ run_python_script()
 # Actually run the script
 prevent_restart_dialog
 install_dotfiles
-echo "Not installing the Python stuff for now."
-# install_python_venv
-# setup_venv
-echo "Not running the Python script for now..."
-# run_python_script
+install_python_venv 
+setup_venv
+run_python_script
 
