@@ -15,12 +15,7 @@ import tempfile
 def setup_root():
     """These are the installation steps which should happen as root."""
     # Installing cc linker and compiler which cargo will need.
-    setup_utils.cached_run(
-        "Installing cc linker and compiler",
-        [
-            "sudo apt install build-essential -y",
-        ],
-    )
+    setup_utils.cached_apt_install("build-essential") 
 
     # Setup zsh
     setup_utils.cached_run(
@@ -31,36 +26,15 @@ def setup_root():
         ],
     )
 
-    setup_utils.cached_run(
-        "Installing netstat",
-        [
-            "apt install -y net-tools",
-        ],
-    )
+    # Install netstat
+    setup_utils.cached_apt_install("net-tools")
 
-    setup_utils.cached_run(
-        "Installing fancy search tools",
-        [
-            # Needed for fast fuzzy grep using telescope
-            "sudo apt install -y ripgrep",
-        ],
-    )
+    # Install fancy search tools
+    setup_utils.cached_apt_install("ripgrep")
+    setup_utils.cached_apt_install("fzf")
 
     # Install lsd, a prettier ls
-    lsd_version = "0.23.1"
-    lsd_package = f"lsd_{lsd_version}_amd64.deb"
-    lsd_release = (
-        "https://github.com/Peltoche/lsd/releases/download"
-        f"/{lsd_version}/{lsd_package}"
-    )
-    setup_utils.cached_run(
-        "Installing lsd",
-        [
-            f"curl -L {lsd_release} > {lsd_package}",
-            f"dpkg -i {lsd_package}",
-            f"rm -rv {lsd_package}",
-        ],
-    )
+    setup_utils.cached_apt_install("lsd")
 
     # Set the timezone properly
     setup_utils.cached_run(
@@ -70,12 +44,25 @@ def setup_root():
         ],
     )
 
+    # Install neovim, the only way to edit code
+    setup_utils.cached_apt_install("neovim")
+    
+    # Install the latest GitHub Command line tools
     setup_utils.cached_run(
-        "Installing nvim",
+        "Installing GitHub Command line tools",
         [
-            "apt install -y neovim",
-        ],
+            "apt-get install wget -y",
+            "mkdir -p -m 755 /etc/apt/keyrings",
+            "wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null",
+            "sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg",
+            'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null',
+            "sudo apt update",
+            "sudo apt install gh -y"
+        ]
     )
+
+    print("Early stop: setup_root.")
+    sys.exit(-1)
 
     setup_utils.cached_run(
         "Installing lazygit",
