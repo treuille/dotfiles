@@ -46,7 +46,13 @@ def setup_root():
     )
 
     # Install neovim, the only way to edit code
-    setup_utils.cached_apt_install("neovim")
+    setup_utils.cached_run(
+        "Installing the latest stable neovim",
+        [
+            "curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | sudo tar -vC /opt -xz",
+        ],
+    )
+
     
     # Install the latest GitHub Command line tools
     setup_utils.cached_run(
