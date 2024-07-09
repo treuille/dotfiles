@@ -32,6 +32,7 @@ def setup_root():
     # Install fancy search tools
     setup_utils.cached_apt_install("ripgrep")
     setup_utils.cached_apt_install("fzf")
+    setup_utils.cached_apt_install("fd-find")
 
     # Install lsd, a prettier ls
     setup_utils.cached_apt_install("lsd")
