@@ -13,6 +13,7 @@ GIT_BRANCH="tahiti-modular-kickstart-nvim"
 DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
 VENV_PATH="${DOTFILES_PATH}/setup/venv"
+NVIM_CONFIG_PATH="${DOTFILES_PATH}/.config/nvim"
 
 # Tell the user what we're doing at the start of each block.
 start_block()
@@ -64,7 +65,7 @@ install_dotfiles()
       exit 255
     fi
 
-    # Actually clone the repo
+    # Clone the repo
     git clone -b ${GIT_BRANCH} ${GIT_REPO}
     if [[ $? -ne 0 ]];
     then
@@ -72,6 +73,13 @@ install_dotfiles()
       exit 1
     fi
 
+    # Update the submodule
+    git -C ${NVIM_CONFIG_PATH} submodule update --init --recursive
+    if [[ $? -ne 0 ]];
+    then
+      echo_red "Failed to update submodule in \"${NVIM_CONFIG_PATH}\"."
+      exit 1
+    fi
   fi
 
   end_block
