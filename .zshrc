@@ -13,7 +13,7 @@ alias ls=lsd
 bindkey -v
 
 # Nvim configuration
-export PATH=${PATH}:/opt/nvim-linux64/bin/nvim
+export PATH=${PATH}:/opt/nvim-linux64/bin
 export EDITOR=nvim
 
 # A better find
