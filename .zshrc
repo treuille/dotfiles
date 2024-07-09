@@ -13,7 +13,11 @@ alias ls=lsd
 bindkey -v
 
 # Nvim configuration
+export PATH=${PATH}:/opt/nvim-linux64/bin/nvim
 export EDITOR=nvim
+
+# A better find
+alias fd=fdfind
 
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
