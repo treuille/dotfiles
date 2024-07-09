@@ -9,7 +9,7 @@
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
-GIT_BRANCH="tahiti"
+GIT_BRANCH="tahiti-kickstart-nvim"
 DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
 VENV_PATH="${DOTFILES_PATH}/setup/venv"
