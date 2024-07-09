@@ -1,9 +1,4 @@
-# export PATH=${PATH}:/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/bin
-# export PATH=${PATH}:/Users/atreuille/Library/Python/3.8/bin
-# export CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/Headers
-
-# Python 3.10 and venv
-export PATH=/opt/homebrew/opt/python@3.10/libexec/bin:${PATH}
+# Python venv
 alias venv-activate="source .venv/bin/activate"
 alias venv-create="python3 -m venv .venv"
 alias venv-delete="rm -rfv .venv"
