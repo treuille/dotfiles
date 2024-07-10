@@ -68,12 +68,16 @@ def setup_root():
         ]
     )
 
-#    setup_utils.cached_run(
-#         "Installing lazygit",
-#         [
-#             'curl -L "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.36.0_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin lazygit'
-#         ],
-#     )
+    # I nice TUI for GIT - need to test this
+    setup_utils.cached_run(
+        "Installing lazygit",
+        [
+            """curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*'}_Linux_x86_64.tar.gz" """,
+            'tar xf lazygit.tar.gz lazygit',
+            'sudo install lazygit /usr/local/bin',
+            # 'curl -L "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.36.0_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin lazygit'
+        ],
+    )
 
 #    print("Early stop: setup_root.")
 #     sys.exit(-1)
