@@ -14,7 +14,8 @@ require('lazy').setup({
   'tpope/vim-sleuth', 
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  -- Don't need this in 0.10, right?
+  -- { 'numToStr/Comment.nvim', opts = {} },
 
   -- modular approach: using `require 'path/name'` will
   -- include a plugin definition from file lua/path/name.lua

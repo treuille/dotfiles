@@ -6,14 +6,16 @@ return {
       {
         '<leader>f',
         function()
-          require('conform').format { async = true, lsp_fallback = true }
+          -- Disable lsp_fallback because I want precise control over formatting
+          require('conform').format { async = true, lsp_fallback = false }
+          -- require('conform').format { async = true, lsp_fallback = true }
         end,
         mode = '',
         desc = '[F]ormat buffer',
       },
     },
     opts = {
-      notify_on_error = false,
+      notify_on_error = true,
       format_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
@@ -21,11 +23,13 @@ return {
         local disable_filetypes = { c = true, cpp = true }
         return {
           timeout_ms = 500,
-          lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+          -- Disable lsp_fallback because I want precise control over formatting
+          lsp_fallback = false,
+          -- lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
         }
       end,
       formatters_by_ft = {
-        lua = { 'stylua' },
+        -- lua = { 'stylua' },
 
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
