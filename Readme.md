@@ -12,7 +12,7 @@ The old way, on the `main` branch was:
 bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup_digital_ocean.bash)
 ```
 
-        2. ssh in, this time as `adrien`, and run the same command.
+2. ssh in, this time as `adrien`, and run the same command.
 
 ## Installs which haven't been automated yet
 
