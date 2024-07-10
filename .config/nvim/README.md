@@ -2,12 +2,12 @@
 
 This is based on [dam9000/kickstart](https://github.com/dam9000/kickstart-modular.nvim) with the following changes
 
-* Removed mason because I prefer tointall LSPs in the local virtual environment.
+* Removed mason because I prefer to intall LSPs in the local virtual environment.
 * Adding in some of my own favorite plugins like hop.
 
 ## Todo 
 
-* Simplify the [plugin directory structure](lazy.folke.io/installation)
+* **Simplify the [plugin directory structure](lazy.folke.io/installation)**
 * Continue manually going through all plugins to see if I want them
 * Add in my own commenting plugin -- or just use the neovim v0.10 commenting
 * Add lspconfig support
