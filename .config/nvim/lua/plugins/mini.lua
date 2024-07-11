@@ -28,6 +28,9 @@ return {
 
       -- Work with trailing whitespace
       require('mini.trailspace').setup()
+
+      -- Make nice auto-paired parentheses
+      require('mini.pairs').setup()
     end
   }
 }
