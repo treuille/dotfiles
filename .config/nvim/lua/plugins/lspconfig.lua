@@ -109,8 +109,14 @@ return {
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
-      -- These are the mason packages we want to install
-      local ensure_installed = {}
+      -- Setup Mason
+      require('mason').setup()
+      require('mason-tool-installer').setup({
+        ensure_installed = {
+          'lua-language-server',
+        }
+      })
+      require('mason-lspconfig').setup()
 
       -- Setup basedpyright for Python projects
       require('lspconfig').basedpyright.setup({
@@ -138,12 +144,7 @@ return {
             },
           }
       })
-      table.insert(ensure_installed, 'lua-language-server')
 
-      -- Setup Mason
-      require('mason').setup()
-      require('mason-tool-installer').setup({ ensure_installed = ensure_installed })
-      require('mason-lspconfig').setup()
       -- {
       --   handlers = {
       --     function(server_name)
