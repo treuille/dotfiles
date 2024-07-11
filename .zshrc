@@ -1,6 +1,6 @@
 # Python venv
 alias venv-activate="source .venv/bin/activate"
-alias venv-create="python3 -m venv .venv"
+alias venv-create="python3 -m venv .venv ; venv-activate"
 alias venv-delete="rm -rfv .venv"
 
 # Snowsql
