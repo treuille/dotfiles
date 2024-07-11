@@ -122,6 +122,9 @@ return {
         },
       })
 
+      -- WARN: This might be on startup. Delete if so.
+      vim.cmd('MasonToolsUpdateSync')
+
       -- Setup basedpyright for Python projects
       require('lspconfig').basedpyright.setup({
         capabilities = capabilities,
