@@ -111,12 +111,16 @@ return {
 
       -- Setup Mason
       require('mason').setup()
+      require('mason-lspconfig').setup()
       require('mason-tool-installer').setup({
         ensure_installed = {
-          'lua-language-server',
-        }
+          'lua_ls',
+          -- 'lua-language-server',
+        }, 
+        integrations = {
+          ['mason-lspconfig'] = true,
+        },
       })
-      require('mason-lspconfig').setup()
 
       -- Setup basedpyright for Python projects
       require('lspconfig').basedpyright.setup({
