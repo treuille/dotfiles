@@ -8,6 +8,7 @@ This is based on [dam9000/kickstart](https://github.com/dam9000/kickstart-modula
 ## Todo 
 
 * Continue manually going through all plugins to see if I want them
+
 * Add in my own commenting plugin -- or just use the neovim v0.10 commenting
 
 * Add lspconfig support
