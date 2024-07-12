@@ -14,6 +14,13 @@ return {
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
+
+      -- " Style the highlight column nicely.
+      vim.cmd.hi 'ColorColumn guibg=#343A55'
+
+      -- Nice, subtle Coc type hints
+      vim.cmd.hi 'CocRustTypeHint guifg=#272744'
+      vim.cmd.hi 'CocRustChainingHint guifg=#272744'
     end,
   },
 }

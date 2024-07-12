@@ -38,7 +38,24 @@ vim.opt.updatetime = 250
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
-vim.opt.timeoutlen = 300
+-- vim.opt.timeoutlen = 300
+
+-- Decrease delay when going from INSERT -> NORMAL mode
+-- See :h 'ttimeoutlen'
+vim.opt.timeoutlen = 1000
+vim.opt.ttimeoutlen = 1
+
+-- Use spaces not tabs
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+
+-- Encourage an 88 character width column for `gq`.
+-- vim.opt.colorcolumn = "88"
+vim.opt.textwidth = 88
+
+-- Prevent line wrapping
+vim.opt.wrap = false
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
