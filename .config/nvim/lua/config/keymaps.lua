@@ -5,6 +5,13 @@
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+-- Makes saving files easier
+vim.keymap.set('n', '<leader>s', ':update<cr>', {
+  noremap = true,
+  silent = true,
+  desc = '[S]ave file'
+})
+
 -- -- Diagnostic keymaps - I don't believe this is necessary in neovim 0.10
 -- vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 -- vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
