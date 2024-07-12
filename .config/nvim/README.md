@@ -5,17 +5,13 @@ This is based on [dam9000/kickstart](https://github.com/dam9000/kickstart-modula
 ## Todo
 
 * Go through my old plugins
-    * `phaazon/hop.nvim`
     * `github/copilot.vim`
     * `williamboman/mason.nvim`
     * `williamboman/mason-lspconfig.nvim`
-    * maybe later
-        * `tpope/vim-surround`
-        * `psf/black`
-
-* Split out Mason into it's own installer
 
 * Copy over my old telescope config
+
+* Split out Mason into it's own installer
 
 * Go through my old neovim config and add things that I liked
     * Keybindings
