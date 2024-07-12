@@ -4,27 +4,19 @@ This is based on [dam9000/kickstart](https://github.com/dam9000/kickstart-modula
 
 ## Todo
 
-* Go through my old plugins
-    * `github/copilot.vim`
-    * `williamboman/mason.nvim`
-    * `williamboman/mason-lspconfig.nvim`
-
-* Copy over my old telescope config
-
-* Split out Mason into it's own installer
-
 * Go through my old neovim config and add things that I liked
     * Keybindings
-        * `<leader>p` - nice paste thing
         * `<leader>w` - nice write things
-* Do I really want this which-key thing?
 
 * Test that Python coding is working nicely
 
+## Later
+
+* Split out Mason into it's own installer
 * install LuaRocks? `sudo apt install liblua5.1-0-dev`
     * Then install `luaformatter`?
 
-## Later
+### Other Languages
 
 * Install Rust plugins
     * `simrat39/rust-tools.nvim`
