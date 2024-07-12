@@ -37,6 +37,9 @@ def setup_root():
     # Install lsd, a prettier ls
     setup_utils.cached_apt_install("lsd")
 
+    # Installing nodejs (for the GitHub plugin)
+    setup_utils.cached_apt_install("nodejs")
+
     # Set the timezone properly
     setup_utils.cached_run(
         "Setting timezone",
@@ -53,7 +56,6 @@ def setup_root():
         ],
     )
 
-    
     # Install the latest GitHub Command line tools
     setup_utils.cached_run(
         "Installing GitHub Command line tools",
@@ -75,13 +77,9 @@ def setup_root():
             "LAZYGIT_VERSION=0.42.0 curl -Lo lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.42.0_Linux_x86_64.tar.gz",
             'tar xf lazygit.tar.gz lazygit',
             'sudo install lazygit /usr/local/bin',
-            # 'curl -L "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.36.0_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin lazygit'
         ],
     )
 
-#    print("Early stop: setup_root.")
-#     sys.exit(-1)
- 
     # Create a user to SSH into this box.
     create_user("adrien")
 
