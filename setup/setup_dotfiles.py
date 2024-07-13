@@ -3,7 +3,6 @@ TODO: Add documentation
 """
 
 import setup_utils
-import sys
 import os
 from termcolor import cprint
 
@@ -54,39 +53,40 @@ def install_dotfiles():
     )
 
 
-def install_rust():
-    """Installs in the home directory."""
-    # Install rust itself.
-    home_path = os.path.expanduser("~")
-    cargo_home = os.path.join(home_path, ".local/rust/cargo")
-    rustup_home = os.path.join(home_path, ".local/rust/rustup")
-    rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
-    rust_install_args = (
-        "--default-toolchain stable "
-        "--profile complete "
-        '--component "rls rust-analysis rust-src" '
-        "-y "
-    )
-    setup_utils.cached_run(
-        "Installing rust",
-        [
-            "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | "
-            f"{rust_env} sh -s -- {rust_install_args}",
-        ],
-        skip_if=(os.path.exists(cargo_home) or os.path.exists(rustup_home)),
-    )
-
-    # # Additional rust configuration.
-    # rustup_bin = os.path.join(cargo_home, "bin/rustup")
-    # cargo_bin = os.path.join(cargo_home, "bin/cargo")
-    # setup_utils.cached_run(
-    #     "Configuring rust",
-    #     [
-    #         f"{rust_env} {rustup_bin} default stable",
-    #         f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
-    #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
-    #     ],
-    # )
+# def install_rust():
+#     """Installs in the home directory."""
+#     # Install rust itself.
+#     home_path = os.path.expanduser("~")
+#     cargo_home = os.path.join(home_path, ".local/rust/cargo")
+#     rustup_home = os.path.join(home_path, ".local/rust/rustup")
+#     rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
+#     rust_install_args = (
+#         "--default-toolchain stable "
+#         "--profile complete "
+#         '--component "rls rust-analysis rust-src" '
+#         "-y "
+#     )
+#     setup_utils.cached_run(
+#         "Installing rust",
+#         [
+#             "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | "
+#             f"{rust_env} sh -s -- {rust_install_args}",
+#         ],
+#         skip_if=(os.path.exists(cargo_home) or os.path.exists(rustup_home)),
+#     )
+#
+#     # # Additional rust configuration.
+#     # rustup_bin = os.path.join(cargo_home, "bin/rustup")
+#     # cargo_bin = os.path.join(cargo_home, "bin/cargo")
+#     # setup_utils.cached_run(
+#     #     "Configuring rust",
+#     #     [
+#     #         f"{rust_env} {rustup_bin} default stable",
+#     #         f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
+#     #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
+#     #     ],
+#     # )
+#
 
 
 def install_pure():
@@ -117,32 +117,12 @@ def install_tmux_plugins():
     )
 
 
-def install_nvim_plugins():
-    """Install the nvim and coc plugins."""
-    # Install the plugin manager github.com/junegunn/vim-plug
-    setup_utils.cached_run(
-        "Installing vim-plug",
-        [
-            """sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'""",
-        ],
-    )
-
-    # Would be great to figure out a way to do this automatically
-    sys.stdout.write("Install nvim plugins interactively? [y/n] ")
-    try:
-        if input().lower()[:1] == "y":
-            os.system("nvim +PlugInstall")
-    except EOFError:
-        cprint("\nSkipping nvim plugins (couldn't read stdin).\n", "cyan")
-
-
 def main():
     """Execution starts here."""
     install_pure()
     install_dotfiles()
-#    install_nvim_plugins()
     install_tmux_plugins()
-#    install_rust()
+    #    install_rust()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
     print(". ~/.zshrc")
