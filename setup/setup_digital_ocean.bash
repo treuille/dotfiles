@@ -1,5 +1,5 @@
 # Bootstrap the setup of a digital ocean installation by:
-# 
+#
 # 1. Installing the dotfiles repo
 # 2. Installing python3.12-venv if necessary
 # 3. Creating a venv
@@ -9,7 +9,7 @@
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
-GIT_BRANCH="tahiti-lazy-nvim-simple"
+GIT_BRANCH="main"
 DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
 VENV_PATH="${DOTFILES_PATH}/setup/venv"
