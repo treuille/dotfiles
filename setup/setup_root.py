@@ -74,7 +74,7 @@ def setup_root():
     setup_utils.cached_run(
         "Installing lazygit",
         [
-            "LAZYGIT_VERSION=0.42.0 curl -Lo lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.42.0_Linux_x86_64.tar.gz",
+            "curl -Lo lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.43.1_Linux_x86_64.tar.gz",
             'tar xf lazygit.tar.gz lazygit',
             'sudo install lazygit /usr/local/bin',
         ],
