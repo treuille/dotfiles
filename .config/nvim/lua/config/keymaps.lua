@@ -6,10 +6,10 @@ vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Makes saving files easier
-vim.keymap.set('n', '<leader>s', ':update<cr>', {
+vim.keymap.set('n', '<leader>u', ':update<cr>', {
   noremap = true,
   silent = true,
-  desc = '[S]ave file'
+  desc = '[U]pdate file'
 })
 
 -- -- Diagnostic keymaps - I don't believe this is necessary in neovim 0.10
