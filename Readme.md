@@ -3,12 +3,6 @@
 1. ssh in as `root`, and run this command:
 
 ```sh
-bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/tahiti-lazy-nvim-simple/setup/setup_digital_ocean.bash)
-```
-
-The old way, on the `main` branch was:
-
-```sh
 bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup_digital_ocean.bash)
 ```
 
