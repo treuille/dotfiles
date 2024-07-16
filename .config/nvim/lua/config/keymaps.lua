@@ -3,14 +3,10 @@
 
 -- Set highlight on search, but clear on pressing <leader>n in normal mode
 vim.opt.hlsearch = true
-vim.keymap.set('n', '<leader>n', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<leader>n', '<cmd>nohlsearch<CR>', { desc = '[N]o search highlight' })
 
 -- Makes saving files easier
-vim.keymap.set('n', '<leader>u', ':update<cr>', {
-  noremap = true,
-  silent = true,
-  desc = '[U]pdate file'
-})
+vim.keymap.set('n', '<leader>u', ':update<cr>', { desc = '[U]pdate file' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
