@@ -4,7 +4,7 @@ return {
     lazy = false,
     keys = {
       {
-        '<leader>f',
+        '<leader>ff',
         function()
           -- Disable lsp_fallback because I want precise control over formatting
           require('conform').format { async = true, lsp_fallback = false }

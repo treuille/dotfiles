@@ -2,7 +2,7 @@
 return {
   {
     'folke/which-key.nvim',
-    enabled = false,
+    enabled = true,
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     event = 'VeryLazy', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
@@ -15,11 +15,12 @@ return {
           { '<leader>a', group = '[A]I' },
           { '<leader>c', group = '[C]ode' },
           { '<leader>d', group = '[D]ocument' },
+          { '<leader>f', group = '[F]ormat' },
+          { '<leader>h', group = 'Git [H]unk' },
           { '<leader>r', group = '[R]ename' },
           { '<leader>s', group = '[S]earch' },
-          { '<leader>w', group = '[W]orkspace' },
           { '<leader>t', group = '[T]oggle' },
-          { '<leader>h', group = 'Git [H]unk' },
+          { '<leader>w', group = '[W]orkspace' },
         },
         {
           mode = 'v',

@@ -29,8 +29,13 @@ return {
       -- Work with trailing whitespace
       require('mini.trailspace').setup()
 
-      -- Make nice auto-paired parentheses
-      require('mini.pairs').setup()
+      --- <leader>ft trims trailing whitespace
+      ---@diagnostic disable-next-line: undefined-global
+      vim.keymap.set('n', '<leader>ft', MiniTrailspace.trim,
+        { desc = '[T]rim trailing whitespace' })
+
+      -- NOTE: Got rid of auto-paired parentheses because slowed my coding.
+      -- require('mini.pairs').setup()
     end
   }
 }
