@@ -57,7 +57,7 @@ return {
       dropdown_keymap('<leader>sh', 'help_tags', '[S]earch [H]elp')
       dropdown_keymap('<leader>sk', 'keymaps', '[S]earch [K]eymaps')
       dropdown_keymap('<leader>sf', 'find_files', '[S]earch [F]iles')
-      dropdown_keymap('<leader>ss', 'builtin', '[S]earch [S]elect Telescope')
+      dropdown_keymap('<leader>st', 'builtin', '[S]earch Select [T]elescope')
       dropdown_keymap('<leader>sw', 'grep_string', '[S]earch current [W]ord')
       dropdown_keymap('<leader>sg', 'live_grep', '[S]earch by [G]rep')
       dropdown_keymap('<leader>sd', 'diagnostics', '[S]earch [D]iagnostics')

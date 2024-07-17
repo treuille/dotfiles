@@ -41,12 +41,12 @@ return {
           -- Jump to the type of the word under your cursor.
           map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
-          -- Fuzzy find all the symbols in your current document.
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+          -- Fuzzy find all the symbols in your current document. 
+          map('<leader>ssd', require('telescope.builtin').lsp_document_symbols, '[S]earch [S]ymbols [D]ocument')
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>sm', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[S]earch Workspace Sy[M]mbols')
+          map('<leader>ssw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[S]earch [S]ymbols [W]orkspace')
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
