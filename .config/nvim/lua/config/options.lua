@@ -15,10 +15,13 @@ vim.opt.mouse = 'a'
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
--- Sync clipboard between OS and Neovim.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
-vim.opt.clipboard = 'unnamedplus'
+-- To disable the clipboard integration and ensure the most performant setting, can use:
+-- Disable clipboard integration
+vim.opt.clipboard = ""
+
+-- Prevent loading the clipboard provider plugin
+-- See `:help 'clipboard'`
+vim.g.loaded_clipboard = 1
 
 -- Enable break indent
 vim.opt.breakindent = true
