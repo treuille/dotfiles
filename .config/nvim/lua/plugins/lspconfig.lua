@@ -4,8 +4,9 @@ return {
     dependencies = {
       'hrsh7th/cmp-nvim-lsp',
 
-      -- -- Automatically install LSPs and related tools to stdpath for Neovim
-      { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+      -- Automatically install LSPs and related tools to stdpath for Neovim
+      --  NOTE: Must be loaded before dependants
+      { 'williamboman/mason.nvim', config = true },
       'williamboman/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
@@ -17,7 +18,7 @@ return {
       'folke/neodev.nvim',
     },
 
-    config = function ()
+    config = function()
       -- This function gets run when an LSP attaches to a particular buffer.
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
@@ -41,7 +42,7 @@ return {
           -- Jump to the type of the word under your cursor.
           map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
-          -- Fuzzy find all the symbols in your current document. 
+          -- Fuzzy find all the symbols in your current document.
           map('<leader>ssd', require('telescope.builtin').lsp_document_symbols, '[S]earch [S]ymbols [D]ocument')
 
           -- Fuzzy find all the symbols in your current workspace.
@@ -56,7 +57,6 @@ return {
           -- or a suggestion from your LSP for this to activate.
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
-
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap.
           map('K', vim.lsp.buf.hover, 'Hover Documentation')
@@ -68,27 +68,27 @@ return {
           local hover_opts = {
             focusable = false,
             close_events = {
-                "BufLeave",
-                "CursorMoved",
-                "InsertEnter",
-                "FocusLost"
+              'BufLeave',
+              'CursorMoved',
+              'InsertEnter',
+              'FocusLost',
             },
             border = 'rounded',
             -- source = 'always',
             -- prefix = ' ',
             -- scope = 'cursor',
           }
-          vim.lsp.handlers["textDocument/hover"] = vim.lsp.with( vim.lsp.handlers.hover, hover_opts )
+          vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, hover_opts)
 
           -- Show line diagnostics automatically in hover window, while preventing
           -- the cursor from getting stuck in the dialog (focusable = false).
           -- See: https://github.com/vh205/dotfiles/blob/master/nvim/lua/lsp-config/init.lua
           vim.o.updatetime = 250
-          vim.api.nvim_create_autocmd("CursorHold", {
-              buffer = event.buf,
-              callback = function()
-                  vim.diagnostic.open_float(nil, hover_opts)
-                end
+          vim.api.nvim_create_autocmd('CursorHold', {
+            buffer = event.buf,
+            callback = function()
+              vim.diagnostic.open_float(nil, hover_opts)
+            end,
           })
 
           -- The following autocommand is used to enable inlay hints in your
@@ -112,45 +112,45 @@ return {
       -- Setup Mason
       require('mason').setup()
       require('mason-lspconfig').setup()
-      require('mason-tool-installer').setup({
+      require('mason-tool-installer').setup {
         ensure_installed = {
           'lua_ls',
           -- 'lua-language-server',
-        }, 
+        },
         integrations = {
           ['mason-lspconfig'] = true,
         },
-      })
+      }
 
       -- WARN: This might be on startup. Delete if so.
-      vim.cmd('MasonToolsUpdateSync')
+      vim.cmd 'MasonToolsUpdateSync'
 
       -- Setup basedpyright for Python projects
-      require('lspconfig').basedpyright.setup({
+      require('lspconfig').basedpyright.setup {
         capabilities = capabilities,
         settings = {
           basedpyright = {
-            typeCheckingMode = "standard",
-          }
-        }
-      })
+            typeCheckingMode = 'standard',
+          },
+        },
+      }
 
       -- Setup lua_ls for lua projects
-      require('lspconfig').lua_ls.setup({
-          capabilities = capabilities,
-          settings = {
-            Lua = {
-              completion = {
-                callSnippet = 'Replace',
-              },
-              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              diagnostics = {
-                disable = { 'missing-fields' },
-                globals = { 'vim' },
-              },
+      require('lspconfig').lua_ls.setup {
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            completion = {
+              callSnippet = 'Replace',
             },
-          }
-      })
+            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+            diagnostics = {
+              disable = { 'missing-fields' },
+              globals = { 'vim' },
+            },
+          },
+        },
+      }
 
       -- {
       --   handlers = {
