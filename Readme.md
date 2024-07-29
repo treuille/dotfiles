@@ -27,7 +27,7 @@ cargo install -j4 cargo-watch
 
 Make sure the following settings are set for your host:
 
-### SSH
+### Blink SSH
 
 * **HostName**: *(Ip address of the host)*
 * **Port**: `22`
@@ -39,11 +39,25 @@ Compression yes
 LocalForward 8501 localhost:8501
 ForwardAgent yes
 ```
+* SSH Agent
+    * **Agent Forwarding**: `Always`
+    * **Forward Keys**: `Blink3@Elbowpads`
 
-### SSH AGENT
+### MacBook SSH
 
-* **Agent Forwarding**: `Always`
-* **Forward Keys**: `Blink3@Elbowpads`
+Make sure your SSH config has the following structure:
+
+```
+Host <HOST>
+     HostName <IP ADDRESS>
+     Port 22
+     User adrien
+     ForwardAgent yes
+     AddKeysToAgent yes
+     IdentitiesOnly yes
+     IdentityFile ~/.ssh/id_ed25519
+     LocalForward 8501 <IP ADDRESS>:8501
+```
 
 # MacOS Installation Instructions
 
