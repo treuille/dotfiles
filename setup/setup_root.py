@@ -15,7 +15,7 @@ import tempfile
 def setup_root():
     """These are the installation steps which should happen as root."""
     # Installing cc linker and compiler which cargo will need.
-    setup_utils.cached_apt_install("build-essential") 
+    setup_utils.cached_apt_install("build-essential")
 
     # Setup zsh
     setup_utils.cached_run(
@@ -33,6 +33,10 @@ def setup_root():
     setup_utils.cached_apt_install("ripgrep")
     setup_utils.cached_apt_install("fzf")
     setup_utils.cached_apt_install("fd-find")
+
+    # Install zip and unzip
+    setup_utils.cached_apt_install("zip")
+    setup_utils.cached_apt_install("unzip")
 
     # Install lsd, a prettier ls
     setup_utils.cached_apt_install("lsd")
@@ -66,8 +70,8 @@ def setup_root():
             "sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg",
             'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null',
             "sudo apt update",
-            "sudo apt install gh -y"
-        ]
+            "sudo apt install gh -y",
+        ],
     )
 
     # I nice TUI for GIT - need to test this
@@ -75,8 +79,8 @@ def setup_root():
         "Installing lazygit",
         [
             "curl -Lo lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.43.1_Linux_x86_64.tar.gz",
-            'tar xf lazygit.tar.gz lazygit',
-            'sudo install lazygit /usr/local/bin',
+            "tar xf lazygit.tar.gz lazygit",
+            "sudo install lazygit /usr/local/bin",
         ],
     )
 
@@ -92,7 +96,7 @@ def setup_root():
         [
             "ufw allow ssh",
             "echo y | ufw enable",
-        ]
+        ],
     )
 
 
