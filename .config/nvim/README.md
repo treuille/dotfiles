@@ -4,6 +4,11 @@ This is based on [dam9000/kickstart](https://github.com/dam9000/kickstart-modula
 
 ## Todo
 
+* Update the copilot config so that <tab> is not remapped for .md files
+    * ...and possibly not for any files which copilot skips?
+
+### Maybe later
+
 * Split out Mason into it's own installer
 * install LuaRocks? `sudo apt install liblua5.1-0-dev`
     * Then install `luaformatter`?
