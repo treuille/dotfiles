@@ -16,6 +16,9 @@ return {
       -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
       -- used for completion, annotations and signatures of Neovim apis
       'folke/neodev.nvim',
+
+      -- Required so that we can do some LSP + telescope searches
+      'nvim-telescope/telescope.nvim',
     },
 
     config = function()
@@ -42,12 +45,14 @@ return {
           -- Jump to the type of the word under your cursor.
           map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
-          -- Fuzzy find all the symbols in your current document.
-          map('<leader>ssd', require('telescope.builtin').lsp_document_symbols, '[S]earch [S]ymbols [D]ocument')
+          -- NOTE: I moved this to `telescope.lua` to take advantage of the dropdown themeyy
+          -- -- Fuzzy find all the symbols in your current document.
+          -- map('<leader>ssd', require('telescope.builtin').lsp_document_symbols, '[S]earch [S]ymbols [D]ocument')
 
-          -- Fuzzy find all the symbols in your current workspace.
-          --  Similar to document symbols, except searches over your entire project.
-          map('<leader>ssw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[S]earch [S]ymbols [W]orkspace')
+          -- NOTE: I moved this to `telescope.lua` to take advantage of the dropdown themeyy
+          -- -- Fuzzy find all the symbols in your current workspace.
+          -- --  Similar to document symbols, except searches over your entire project.
+          -- map('<leader>ssw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[S]earch [S]ymbols [W]orkspace')
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
