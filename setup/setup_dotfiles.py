@@ -101,7 +101,8 @@ def install_rust():
     setup_utils.cached_run(
         "Installing rust",
         [
-            "curl https://sh.rustup.rs -sSf | sh -s -- -y --install-dir ~/.local/rust"
+            f"curl https://sh.rustup.rs -sSf | {rust_env} sh -s -- -y"
+            # "curl https://sh.rustup.rs -sSf | sh -s -- -y --install-dir ~/.local/rust"
             #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
             # "source ~/.local/rust/cargo/env & rustup component add rust-analyzer"
             # "source ~/.local/rust/cargo/env & cargo install cargo-watch -j4"
@@ -117,8 +118,8 @@ def install_rust():
         [
             f"{rust_env} {rustup_bin} default stable",
             f"{rust_env} {rustup_bin} component add rust-analyzer",
-            # f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
             f"{rust_env} {cargo_bin} install -j4 cargo-watch",
+            # f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
             # "source ~/.local/rust/cargo/env & rustup component add rust-analyzer"
             # "source ~/.local/rust/cargo/env & cargo install cargo-watch -j4"
         ],
