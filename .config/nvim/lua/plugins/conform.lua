@@ -22,7 +22,8 @@ return {
         -- languages here or re-enable it for the disabled ones.
         local disable_filetypes = { c = true, cpp = true }
         return {
-          timeout_ms = 500,
+          timeout_ms = 2000,
+          -- timeout_ms = 500,
           -- Disable lsp_fallback because I want precise control over formatting
           lsp_fallback = false,
           -- lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
