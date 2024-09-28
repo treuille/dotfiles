@@ -85,6 +85,8 @@ def install_rust():
     """Installs in the home directory."""
     # Install rust itself.
     home_path = os.path.expanduser("~")
+    # cargo_home = os.path.join(home_path, ".cargo")
+    # rustup_home = os.path.join(home_path, ".rustup")
     cargo_home = os.path.join(home_path, ".local/rust/cargo")
     rustup_home = os.path.join(home_path, ".local/rust/rustup")
     rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
@@ -99,7 +101,7 @@ def install_rust():
     setup_utils.cached_run(
         "Installing rust",
         [
-            "curl https://sh.rustup.rs -sSf | sh -s -- -y"
+            "curl https://sh.rustup.rs -sSf | sh -s -- -y --install-dir ~/.local/rust"
             #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
             # "source ~/.local/rust/cargo/env & rustup component add rust-analyzer"
             # "source ~/.local/rust/cargo/env & cargo install cargo-watch -j4"
