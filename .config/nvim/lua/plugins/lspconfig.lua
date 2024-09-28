@@ -157,6 +157,24 @@ return {
         },
       }
 
+      -- Setup rust_analyzer for Rust projects
+      require('lspconfig').rust_analyzer.setup {
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+        settings = {
+          ['rust-analyzer'] = {
+            cargo = {
+              allFeatures = true,
+            },
+            checkOnSave = {
+              command = 'clippy',
+            },
+          },
+        },
+        on_attach = function(client, bufnr)
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        end,
+      }
+
       -- {
       --   handlers = {
       --     function(server_name)

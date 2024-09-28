@@ -87,7 +87,7 @@ install_python_venv()
   then
     return 255
   fi
-  
+
   # apt install python3.12-venv
   PYTHON_VENV_PACKAGE="python3.12-venv"
   start_block "Installing ${PYTHON_VENV_PACKAGE}."
@@ -133,7 +133,7 @@ run_python_script()
 # Actually run the script
 prevent_restart_dialog
 install_dotfiles
-install_python_venv 
+install_python_venv
 setup_venv
 run_python_script
 

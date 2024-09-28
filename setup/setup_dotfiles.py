@@ -53,42 +53,6 @@ def install_dotfiles():
     )
 
 
-# def install_rust():
-#     """Installs in the home directory."""
-#     # Install rust itself.
-#     home_path = os.path.expanduser("~")
-#     cargo_home = os.path.join(home_path, ".local/rust/cargo")
-#     rustup_home = os.path.join(home_path, ".local/rust/rustup")
-#     rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
-#     rust_install_args = (
-#         "--default-toolchain stable "
-#         "--profile complete "
-#         '--component "rls rust-analysis rust-src" '
-#         "-y "
-#     )
-#     setup_utils.cached_run(
-#         "Installing rust",
-#         [
-#             "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | "
-#             f"{rust_env} sh -s -- {rust_install_args}",
-#         ],
-#         skip_if=(os.path.exists(cargo_home) or os.path.exists(rustup_home)),
-#     )
-#
-#     # # Additional rust configuration.
-#     # rustup_bin = os.path.join(cargo_home, "bin/rustup")
-#     # cargo_bin = os.path.join(cargo_home, "bin/cargo")
-#     # setup_utils.cached_run(
-#     #     "Configuring rust",
-#     #     [
-#     #         f"{rust_env} {rustup_bin} default stable",
-#     #         f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
-#     #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
-#     #     ],
-#     # )
-#
-
-
 def install_pure():
     """Installs a prettier prompt for zsh."""
     pure_repo = "https://github.com/sindresorhus/pure.git"
@@ -117,12 +81,54 @@ def install_tmux_plugins():
     )
 
 
+def install_rust():
+    """Installs in the home directory."""
+    # Install rust itself.
+    home_path = os.path.expanduser("~")
+    cargo_home = os.path.join(home_path, ".local/rust/cargo")
+    rustup_home = os.path.join(home_path, ".local/rust/rustup")
+    rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
+    rustup_bin = os.path.join(cargo_home, "bin/rustup")
+    cargo_bin = os.path.join(cargo_home, "bin/cargo")
+    # rust_install_args = (
+    #     "--default-toolchain stable "
+    #     "--profile complete "
+    #     '--component "rls rust-analysis rust-src" '
+    #     "-y "
+    # )
+    setup_utils.cached_run(
+        "Installing rust",
+        [
+            "curl https://sh.rustup.rs -sSf | sh -s -- -y"
+            #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
+            # "source ~/.local/rust/cargo/env & rustup component add rust-analyzer"
+            # "source ~/.local/rust/cargo/env & cargo install cargo-watch -j4"
+            # "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | "
+            # f"{rust_env} sh -s -- {rust_install_args}",
+        ],
+        # skip_if=(os.path.exists(cargo_home) and os.path.exists(rustup_home)),
+    )
+
+    # Additional rust configuration.
+    setup_utils.cached_run(
+        "Configuring rust",
+        [
+            f"{rust_env} {rustup_bin} default stable",
+            f"{rust_env} {rustup_bin} component add rust-analyzer",
+            # f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
+            f"{rust_env} {cargo_bin} install -j4 cargo-watch",
+            # "source ~/.local/rust/cargo/env & rustup component add rust-analyzer"
+            # "source ~/.local/rust/cargo/env & cargo install cargo-watch -j4"
+        ],
+    )
+
+
 def main():
     """Execution starts here."""
     install_pure()
     install_dotfiles()
     install_tmux_plugins()
-    #    install_rust()
+    install_rust()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
     print(". ~/.zshrc")

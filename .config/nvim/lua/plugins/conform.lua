@@ -38,6 +38,9 @@ return {
         -- For Python, just using black, not isort
         python = { "black" },
 
+        -- For rust, just using rustfmt, not cargo fmt
+        rust = { "rustfmt" },
+
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
