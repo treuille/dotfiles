@@ -96,9 +96,9 @@ install_python_venv()
   then
     echo_red "The package ${PYTHON_VENV_PACKAGE} already exists."
   else
-    apt update -y
-    apt upgrade -y
-    apt install ${PYTHON_VENV_PACKAGE} -y
+    DEBIAN_FRONTEND=noninteractive apt update -y
+    DEBIAN_FRONTEND=noninteractive apt upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt install ${PYTHON_VENV_PACKAGE} -y
   fi
  end_block
 }
