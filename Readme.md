@@ -8,13 +8,21 @@ bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup
 
 2. ssh in, this time as `adrien`, and run the same command.
 
-## (Optional) install cargo watch
-
-1. Install `cargo-watch`
+3. copy over the OpenAI key as follows:
 
 ```sh
-cargo install -j4 cargo-watch
+scp <oldhost>:.config/nvim/chatgpt_nvim.txt <newhost>:.config/nvim/chatgpt_nvim.txt
 ```
+
+## (Optional) install bacon
+
+1. Install `bacon` (the new `cargo-watch`)
+
+```sh
+cargo install --locked bacon
+```
+
+See [the website](https://dystroy.org/bacon/).
 
 # Blink Shell Installation Instructions
 
