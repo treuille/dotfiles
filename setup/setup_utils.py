@@ -8,9 +8,12 @@ import os
 import sys
 import hashlib
 import pickle
-import xdg
 import subprocess
 from typing import Optional
+
+# import xdg
+
+APT_INSTALL = "DEBIAN_FRONTEND=noninteractive apt install -y"
 
 
 def cached_run(title, commands, skip_if=False):
