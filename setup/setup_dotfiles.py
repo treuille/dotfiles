@@ -85,45 +85,28 @@ def install_rust():
     """Installs in the home directory."""
     # Install rust itself.
     home_path = os.path.expanduser("~")
-    # cargo_home = os.path.join(home_path, ".cargo")
-    # rustup_home = os.path.join(home_path, ".rustup")
     cargo_home = os.path.join(home_path, ".local/rust/cargo")
     rustup_home = os.path.join(home_path, ".local/rust/rustup")
     rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
-    rustup_bin = os.path.join(cargo_home, "bin/rustup")
-    cargo_bin = os.path.join(cargo_home, "bin/cargo")
-    # rust_install_args = (
-    #     "--default-toolchain stable "
-    #     "--profile complete "
-    #     '--component "rls rust-analysis rust-src" '
-    #     "-y "
-    # )
     setup_utils.cached_run(
         "Installing rust",
-        [
-            f"curl https://sh.rustup.rs -sSf | {rust_env} sh -s -- -y"
-            # "curl https://sh.rustup.rs -sSf | sh -s -- -y --install-dir ~/.local/rust"
-            #         f"{rust_env} {cargo_bin} install -j4 cargo-watch",
-            # "source ~/.local/rust/cargo/env & rustup component add rust-analyzer"
-            # "source ~/.local/rust/cargo/env & cargo install cargo-watch -j4"
-            # "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | "
-            # f"{rust_env} sh -s -- {rust_install_args}",
-        ],
-        # skip_if=(os.path.exists(cargo_home) and os.path.exists(rustup_home)),
+        [f"curl https://sh.rustup.rs -sSf | {rust_env} sh -s -- -y"],
+        skip_if=(os.path.exists(cargo_home) and os.path.exists(rustup_home)),
     )
 
     # Additional rust configuration.
+    rustup_bin = os.path.join(cargo_home, "bin/rustup")
+    cargo_bin = os.path.join(cargo_home, "bin/cargo")
     setup_utils.cached_run(
         "Configuring rust",
         [
             f"{rust_env} {rustup_bin} default stable",
             f"{rust_env} {rustup_bin} component add rust-analyzer",
-            f"{rust_env} {cargo_bin} install -j4 cargo-watch",
-            # f"{rust_env} {rustup_bin} component add rls rust-analysis rust-src",
-            # "source ~/.local/rust/cargo/env & rustup component add rust-analyzer"
-            # "source ~/.local/rust/cargo/env & cargo install cargo-watch -j4"
+            # f"{rust_env} {cargo_bin} install -j4 cargo-watch",
         ],
     )
+    print("To install cargo watch, run:")
+    print("cargo install -j4 cargo-watch")
 
 
 def main():
