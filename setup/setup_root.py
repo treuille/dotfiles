@@ -21,7 +21,7 @@ def setup_root():
     setup_utils.cached_run(
         "Setting up zsh",
         [
-            "apt install -y zsh",
+            f"{setup_utils.APT_INSTALL} -y zsh",
             "chsh -s $(which zsh)",
         ],
     )
@@ -64,7 +64,7 @@ def setup_root():
     # setup_utils.cached_run(
     #     "Installing GitHub Command line tools",
     #     [
-    #         "apt-get install wget -y",
+    #         f"{setup_utils.APT_INSTALL} -y wget",
     #         "mkdir -p -m 755 /etc/apt/keyrings",
     #         "wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null",
     #         "sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg",

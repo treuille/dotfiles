@@ -20,12 +20,11 @@ export EDITOR=nvim
 alias fd=fdfind
 
 # Rust
+export CARGO_HOME=${HOME}/.local/rust/cargo
+export RUSTUP_HOME=${HOME}/.local/rust/rustup
+export PATH=${CARGO_HOME}/bin:${PATH}
 source ~/.local/rust/cargo/env
 
-# export CARGO_HOME=${HOME}/.local/rust/cargo
-# export RUSTUP_HOME=${HOME}/.local/rust/rustup
-# export PATH=${CARGO_HOME}/bin:${PATH}
-#
 # # Make rust analyzer availalbe as an executable
 # export PATH=${PATH}:${RUSTUP_HOME}/toolchains/stable-x86_64-unknown-linux-gnu/bin
 

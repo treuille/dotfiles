@@ -96,17 +96,17 @@ def install_rust():
 
     # Additional rust configuration.
     rustup_bin = os.path.join(cargo_home, "bin/rustup")
-    cargo_bin = os.path.join(cargo_home, "bin/cargo")
+    # cargo_bin = os.path.join(cargo_home, "bin/cargo")
     setup_utils.cached_run(
         "Configuring rust",
         [
             f"{rust_env} {rustup_bin} default stable",
             f"{rust_env} {rustup_bin} component add rust-analyzer",
-            # f"{rust_env} {cargo_bin} install -j4 cargo-watch",
+            "echo 'To install cargo watch, run:'",
+            "echo 'cargo install -j4 cargo-watch'",
+            "echo",
         ],
     )
-    print("To install cargo watch, run:")
-    print("cargo install -j4 cargo-watch")
 
 
 def main():
