@@ -102,9 +102,6 @@ def install_rust():
         [
             f"{rust_env} {rustup_bin} default stable",
             f"{rust_env} {rustup_bin} component add rust-analyzer",
-            "echo 'To install cargo watch, run:'",
-            "echo 'cargo install -j4 cargo-watch'",
-            "echo",
         ],
     )
 
