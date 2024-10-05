@@ -21,6 +21,9 @@ return {
       -- Nice, subtle Coc type hints
       vim.cmd.hi 'CocRustTypeHint guifg=#272744'
       vim.cmd.hi 'CocRustChainingHint guifg=#272744'
+
+      -- Make unused variables a bit brigher
+      vim.cmd.hi 'DiagnosticUnnecessary guifg=#737aa2'
     end,
   },
 }
