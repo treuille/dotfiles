@@ -8,8 +8,11 @@ original_dotfiles
 # Some random crap zsh puts into .config
 .config/tmux/plugins
 
-# Lazygit auto-creates its own install folder 
+# Lazygit auto-creates its own install folder
 .config/lazygit
+
+# We don't care about htop's auto-generated config
+.config/htop/htoprc
 
 # GitHub Copilot stuff
 .config/github-copilot
