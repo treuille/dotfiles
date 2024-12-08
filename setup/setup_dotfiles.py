@@ -106,12 +106,26 @@ def install_rust():
     )
 
 
+def install_volta():
+    """Installs volta (pyenv for node) in the home directory."""
+    # Install rust itself.
+    home_path = os.path.expanduser("~")
+    volta_home = os.path.join(home_path, ".local/volta")
+    volta_env = f"VOLTA_HOME={volta_home}"
+    setup_utils.cached_run(
+        "Installing volta",
+        [f"curl https://get.volta.sh | {volta_env} bash"],
+        skip_if=(os.path.exists(volta_home)),
+    )
+
+
 def main():
     """Execution starts here."""
     install_pure()
     install_dotfiles()
     install_tmux_plugins()
     install_rust()
+    install_volta()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
     print(". ~/.zshrc")
