@@ -36,10 +36,26 @@ return {
         -- python = { "isort", "black" },
 
         -- For Python, just using black, not isort
-        python = { "black" },
+        python = { 'black' },
 
         -- For rust, just using rustfmt, not cargo fmt
-        rust = { "rustfmt" },
+        rust = { 'rustfmt' },
+
+        -- For JavaScript and SolidJS, use prettierd
+        javascript = { 'prettierd' },
+        typescript = { 'prettierd' },
+        html = { 'prettierd' },
+        css = { 'prettierd' },
+        scss = { 'prettierd' },
+        json = { 'prettierd' },
+        jsonc = { 'prettierd' },
+        tsx = { 'prettierd' },
+        jsx = { 'prettierd' },
+        javascriptreact = { 'prettierd' },
+        typescriptreact = { 'prettierd' },
+        sass = { 'prettierd' },
+        yaml = { 'prettierd' },
+        markdown = { 'prettierd' },
 
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
