@@ -126,8 +126,23 @@ return {
       -- WARN: This might be on startup. Delete if so.
       vim.cmd 'MasonToolsUpdateSync'
 
+      -- This is the main LSP setup
+      local lspconfig = require 'lspconfig'
+
+      -- This is tsserver for TypeScript projects (notably SolidJS)
+      lspconfig.ts_ls.setup {
+        cmd = { 'node', './node_modules/.bin/typescript-language-server', '--stdio' },
+        filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact', 'tsx', 'jsx' },
+        root_dir = lspconfig.util.root_pattern('package.json', 'tsconfig.json', '.git'),
+        settings = {
+          completions = {
+            completeFunctionCalls = true,
+          },
+        },
+      }
+
       -- Setup basedpyright for Python projects
-      require('lspconfig').basedpyright.setup {
+      lspconfig.basedpyright.setup {
         capabilities = capabilities,
         settings = {
           basedpyright = {
@@ -137,7 +152,7 @@ return {
       }
 
       -- Setup lua_ls for lua projects
-      require('lspconfig').lua_ls.setup {
+      lspconfig.lua_ls.setup {
         capabilities = capabilities,
         settings = {
           Lua = {
@@ -154,7 +169,7 @@ return {
       }
 
       -- Setup rust_analyzer for Rust projects
-      require('lspconfig').rust_analyzer.setup {
+      lspconfig.rust_analyzer.setup {
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
         settings = {
           ['rust-analyzer'] = {
