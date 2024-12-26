@@ -11,10 +11,8 @@ import pickle
 import subprocess
 from typing import Optional
 
-# import xdg
-
-APT_INSTALL = "DEBIAN_FRONTEND=noninteractive apt install -y"
-
+# This is the command to install apt packages
+APT_INSTALL = "sudo DEBIAN_FRONTEND=noninteractive apt install -y"
 
 def cached_run(title, commands, skip_if=False):
     """Runs the given set of commands, prepending the title."""
@@ -64,7 +62,7 @@ def cached_apt_install(package: str, title: Optional[str] = None):
         title = "Installing " + package
 
     # Run apt install on the package
-    cached_run(title, ["DEBIAN_FRONTEND=noninteractive apt install -y " + package])
+    cached_run(title, [f"{APT_INSTALL} {package}"])
 
 
 def user_exists(user):

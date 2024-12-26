@@ -22,7 +22,7 @@ def setup_root():
         "Setting up zsh",
         [
             f"{setup_utils.APT_INSTALL} -y zsh",
-            "chsh -s $(which zsh)",
+            "sudo chsh -s $(which zsh)",
         ],
     )
 
@@ -48,7 +48,7 @@ def setup_root():
     setup_utils.cached_run(
         "Setting timezone",
         [
-            "timedatectl set-timezone America/Los_Angeles",
+            "sudo timedatectl set-timezone America/Los_Angeles",
         ],
     )
 
@@ -60,31 +60,13 @@ def setup_root():
         ],
     )
 
-    # # Install the latest GitHub Command line tools
-    # setup_utils.cached_run(
-    #     "Installing GitHub Command line tools",
-    #     [
-    #         f"{setup_utils.APT_INSTALL} -y wget",
-    #         "mkdir -p -m 755 /etc/apt/keyrings",
-    #         "wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null",
-    #         "sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg",
-    #         'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null',
-    #         "sudo apt update",
-    #         "sudo apt install gh -y",
-    #     ],
-    # )
-
     # I nice TUI for GIT - need to test this
     setup_utils.cached_run(
         "Installing lazygit",
         [
-            # """LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" """,
             r"""curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')_Linux_x86_64.tar.gz" """,
             "tar xf lazygit.tar.gz lazygit",
             "sudo install lazygit /usr/local/bin",
-            # "curl -Lo lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_0.43.1_Linux_x86_64.tar.gz",
-            # "tar xf lazygit.tar.gz lazygit",
-            # "sudo install lazygit /usr/local/bin",
         ],
     )
 
@@ -98,8 +80,8 @@ def setup_root():
     setup_utils.cached_run(
         "Turn on the firewall",
         [
-            "ufw allow ssh",
-            "echo y | ufw enable",
+            "sudo ufw allow ssh",
+            "echo y | sudo ufw enable",
         ],
     )
 
@@ -118,7 +100,7 @@ def create_user(user):
             print("Passwords don't match.")
             sys.exit(-1)
         encrypted_password = crypt.crypt(password, crypt.mksalt(crypt.METHOD_SHA512))
-        add_user_cmd = f"useradd -b /home -G sudo -m -p '{encrypted_password}' -s $(which zsh) -U {user}"
+        add_user_cmd = f"sudo useradd -b /home -G sudo -m -p '{encrypted_password}' -s $(which zsh) -U {user}"
         os.system(add_user_cmd)
         temp_user_status = f'Adding {user} with {len(password)}-char password "{password[:2]}...{password[-2:]}"...'
         cprint(temp_user_status, "magenta", attrs=["bold"], end="\r")
@@ -130,13 +112,13 @@ def create_user(user):
         setup_utils.cached_run(
             f"Setting up {user}",
             [
-                f"mkdir {user_home}/.ssh",
-                f"cp -v ~/.ssh/authorized_keys {user_home}/.ssh",
-                f"cp -v ~/.ssh/known_hosts {user_home}/.ssh",
-                f"cp -v ~/dotfiles/setup/ssh_rc.bash {user_home}/.ssh/rc",
-                f"chmod 0700 {user_home}/.ssh",
-                f"touch {user_home}/.zshrc",
-                f"chown -vR {user}:{user} {user_home}",
+                f"sudo mkdir {user_home}/.ssh",
+                f"sudo cp -v ~/.ssh/authorized_keys {user_home}/.ssh",
+                f"sudo cp -v ~/.ssh/known_hosts {user_home}/.ssh",
+                f"sudo cp -v ~/dotfiles/setup/ssh_rc.bash {user_home}/.ssh/rc",
+                f"sudo chmod 0700 {user_home}/.ssh",
+                f"sudo touch {user_home}/.zshrc",
+                f"sudo chown -vR {user}:{user} {user_home}",
             ],
         )
 
@@ -164,8 +146,8 @@ def lock_down_ssh():
             temp_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
             temp_file.writelines(sshd_config)
             temp_file.close()
-            os.system(f"chmod -v --reference={sshd_config_filename} {temp_file.name}")
-            os.system(f"mv -v {temp_file.name} {sshd_config_filename}")
+            os.system(f"sudo chmod -v --reference={sshd_config_filename} {temp_file.name}")
+            os.system(f"sudo mv -v {temp_file.name} {sshd_config_filename}")
             print(f"Overwrote {sshd_config_filename}")
             print("Please restart the computer.")
         cprint("Done\n", "green")
@@ -177,14 +159,14 @@ def main():
     """Execution starts here."""
     # These installations require the user to be root.
     if not setup_utils.user_is_root():
-        raise RuntimeError("Must run this script as root.")
+        raise RuntimeError("Must run this script as root or with sudo privileges.")
 
     # Run the setup script.
     setup_root()
 
     # Tell the root user to reboot.
     cprint(f"Please reboot the computer:", "red", attrs=["bold"])
-    print("  shutdown -r now")
+    print("  sudo shutdown -r now")
 
 
 if __name__ == "__main__":
