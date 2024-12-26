@@ -73,5 +73,15 @@ def user_exists(user):
 
 
 def user_is_root():
-    """Returns true if this user is root."""
-    return os.geteuid() == 0
+    """Returns true if this user has passwordless sudo access."""
+    try:
+        # Try to run a harmless sudo command with -n flag (non-interactive)
+        # This will fail if user needs a password for sudo
+        result = subprocess.run(
+            ["sudo", "-n", "true"],
+            capture_output=True,
+            text=True
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
