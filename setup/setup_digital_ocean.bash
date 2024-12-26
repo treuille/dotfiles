@@ -147,4 +147,4 @@ prevent_restart_dialog
 install_dotfiles
 install_python_venv
 setup_venv
-# run_python_script
+run_python_script
