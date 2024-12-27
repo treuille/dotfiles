@@ -29,9 +29,10 @@ See [the website](https://dystroy.org/bacon/).
 Run these commands:
 
 ```sh
-multipass launch --cpus $(sysctl -n hw.physicalcpu) --disk 50G --memory $(echo "scale=1; $(sysctl -n hw.memsize) / 4 / 1073741824" | bc)G --name <instance-name>
-multipass exec <instance-name> -- sh -c "echo '$(cat ~/.ssh/id_ed25519.pub)' >> /home/ubuntu/.ssh/authorized_keys"
-multipass info <instance-name>
+INSTANCE_NAME=test-4 # or whatever
+multipass launch --cpus $(sysctl -n hw.physicalcpu) --disk 50G --memory $(echo "scale=1; $(sysctl -n hw.memsize) / 4 / 1073741824" | bc)G --name ${INSTANCE_NAME}
+multipass exec ${INSTANCE_NAME} -- sh -c "echo '$(cat ~/.ssh/id_ed25519.pub)' >> /home/ubuntu/.ssh/authorized_keys"
+multipass info ${INSTANCE_NAME}
 ```
 
 Then update `.ssh/config` and run:
