@@ -1,4 +1,4 @@
-# Digital Ocean Installation Instructions
+# Install in a Ubuntu Container
 
 1. ssh in as `root`, and run this command:
 
