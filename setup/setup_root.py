@@ -52,11 +52,18 @@ def setup_root():
        ],
    )
 
-   # Install neovim, the only way to edit code
+   # Install neovim build dependencies
+   setup_utils.cached_apt_install("cmake")
+   setup_utils.cached_apt_install("gettext")
+
+   # Now build neovim from source
    setup_utils.cached_run(
-       "Installing the latest stable neovim",
+       "Building neovim from source",
        [
-           "curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | sudo tar -vC /opt -xz",
+           "git clone https://github.com/neovim/neovim ./neovim",
+           "git -C ./neovim checkout stable",
+           f"make -C ./neovim -j$(nproc) CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=/opt/nvim",
+           "sudo make -C ./neovim install",
        ],
    )
 
