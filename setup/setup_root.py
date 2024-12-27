@@ -67,11 +67,12 @@ def setup_root():
        ],
    )
 
-   # I nice TUI for GIT - need to test this
+   # I nice TUI for GIT - need to test thi
+   arch_suffix = "Linux_arm64" if setup_utils.machine_is_arm64() else "Linux_x86_64"
    setup_utils.cached_run(
        "Installing lazygit",
        [
-           r"""curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')_Linux_x86_64.tar.gz" """,
+           r"""curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')_""" + arch_suffix + """.tar.gz" """,
            "tar xf lazygit.tar.gz lazygit",
            "sudo install lazygit /usr/local/bin",
        ],
@@ -92,46 +93,45 @@ def setup_root():
        ],
    )
 
-
 def create_user(user):
    """Create a new user"""
    user_home = f"/home/{user}"
    cprint(f"Creating user {user}...", "blue", attrs=["bold"])
    if setup_utils.user_exists(user):
        cprint(f"User {user} already exists\n", "cyan")
-   else:
-       password = getpass.getpass(f"Password for user {user}: ")
-       password_again = getpass.getpass("Reenter password: ")
-       if password != password_again:
-           print("Passwords don't match.")
-           sys.exit(-1)
-       
-       # Generate hash using passlib
-       encrypted_password = sha512_crypt.hash(password)
-       
-       # Create user with sudo privileges
-       add_user_cmd = f"sudo useradd -b /home -G sudo -m -p '{encrypted_password}' -s $(which zsh) -U {user}"
-       os.system(add_user_cmd)
-       
-       temp_user_status = f'Adding {user} with {len(password)}-char password "{password[:2]}...{password[-2:]}"...'
-       cprint(temp_user_status, "magenta", attrs=["bold"], end="\r")
-       time.sleep(4.0)
-       print(" " * len(temp_user_status), end="\r")  # clear the temp buffer
-       cprint(f"Added user {user}.\n", "green")
+       return
+   password = getpass.getpass(f"Password for user {user}: ")
+   password_again = getpass.getpass("Reenter password: ")
+   if password != password_again:
+       print("Passwords don't match.")
+       sys.exit(-1)
+   
+   # Generate hash using passlib
+   encrypted_password = sha512_crypt.hash(password)
+   
+   # Create user with sudo privileges
+   add_user_cmd = f"sudo useradd -b /home -G sudo -m -p '{encrypted_password}' -s $(which zsh) -U {user}"
+   os.system(add_user_cmd)
+   
+   temp_user_status = f'Adding {user} with {len(password)}-char password "{password[:2]}...{password[-2:]}"...'
+   cprint(temp_user_status, "magenta", attrs=["bold"], end="\r")
+   time.sleep(4.0)
+   print(" " * len(temp_user_status), end="\r")  # clear the temp buffer
+   cprint(f"Added user {user}.\n", "green")
 
-       # Setting up the new user
-       setup_utils.cached_run(
-           f"Setting up {user}",
-           [
-               f"sudo mkdir {user_home}/.ssh",
-               f"sudo cp -v ~/.ssh/authorized_keys {user_home}/.ssh",
-               f"sudo cp -v ~/.ssh/known_hosts {user_home}/.ssh",
-               f"sudo cp -v ~/dotfiles/setup/ssh_rc.bash {user_home}/.ssh/rc",
-               f"sudo chmod 0700 {user_home}/.ssh",
-               f"sudo touch {user_home}/.zshrc",
-               f"sudo chown -vR {user}:{user} {user_home}",
-           ],
-       )
+   # Setting up the new user
+   setup_utils.cached_run(
+       f"Setting up {user}",
+       [
+           f"sudo mkdir {user_home}/.ssh",
+           f"sudo cp -v ~/.ssh/authorized_keys {user_home}/.ssh",
+           f"sudo cp -v ~/.ssh/known_hosts {user_home}/.ssh",
+           f"sudo cp -v ~/dotfiles/setup/ssh_rc.bash {user_home}/.ssh/rc",
+           f"sudo chmod 0700 {user_home}/.ssh",
+           f"sudo touch {user_home}/.zshrc",
+           f"sudo chown -vR {user}:{user} {user_home}",
+       ],
+   )
 
 
 def lock_down_ssh():

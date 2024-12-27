@@ -10,9 +10,14 @@ import hashlib
 import pickle
 import subprocess
 from typing import Optional
+import platform
 
 # This is the command to install apt packages
 APT_INSTALL = "sudo DEBIAN_FRONTEND=noninteractive apt install -y"
+
+def machine_is_arm64():
+    """Determine if the machine architecture is ARM64."""
+    return platform.machine() == "aarch64"
 
 def cached_run(title, commands, skip_if=False):
     """Runs the given set of commands, prepending the title."""
