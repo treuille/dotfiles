@@ -34,21 +34,26 @@ return {
 
           -- Jump to the definition of the word under your cursor.
           --  To jump back, press <C-t>.
-          map('gD', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          -- TODO: Implement this in fzf-lua
+          -- map('gD', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 
           -- Find references for the word under your cursor.
-          map('gR', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          -- TODO: Implement this in fzf-lua
+          -- map('gR', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
-          map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          -- TODO: Implement this in fzf-lua
+          -- map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
 
           -- Jump to the type of the word under your cursor.
-          map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          -- TODO: Implement this in fzf-lua
+          -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
           -- Toggle inlay hints
-          map('<leader>th', function()
-            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-          end, '[T]oggle inlay [H]ints')
+          -- TODO: Implement this in fzf-lua
+          -- map('<leader>th', function()
+          --   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+          -- end, '[T]oggle inlay [H]ints')
 
           -- NOTE: I moved this to `telescope.lua` to take advantage of the dropdown themeyy
           -- -- Fuzzy find all the symbols in your current document.
