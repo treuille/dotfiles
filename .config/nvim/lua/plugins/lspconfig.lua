@@ -116,6 +116,7 @@ return {
       require('mason-tool-installer').setup {
         ensure_installed = {
           'lua_ls',
+          'stylua',
           -- 'lua-language-server',
         },
         integrations = {
