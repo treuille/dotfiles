@@ -56,7 +56,7 @@ return {
         border = 'noborder', -- 'border'
       },
       defaults = {
-        file_icons = false,
+        file_icons = true,
         actions = { ['ctrl-g'] = false },
         cwd_prompt = false,
         toggle_ignore_flag = '--no-ignore', -- flag toggled in `actions.toggle_ignore`
