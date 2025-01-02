@@ -32,25 +32,25 @@ return {
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
+          -- NOTE: Moved to fzf-lua
           -- Jump to the definition of the word under your cursor.
           --  To jump back, press <C-t>.
-          -- TODO: Implement this in fzf-lua
           -- map('gD', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 
+          -- NOTE: Moved to fzf-lua
           -- Find references for the word under your cursor.
-          -- TODO: Implement this in fzf-lua
           -- map('gR', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
+          -- NOTE: Moved to fzf-lua
           -- Jump to the implementation of the word under your cursor.
-          -- TODO: Implement this in fzf-lua
           -- map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
 
+          -- NOTE: Moved to fzf-lua
           -- Jump to the type of the word under your cursor.
-          -- TODO: Implement this in fzf-lua
           -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
+          -- NOTE: Moved to fzf-lua
           -- Toggle inlay hints
-          -- TODO: Implement this in fzf-lua
           -- map('<leader>th', function()
           --   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
           -- end, '[T]oggle inlay [H]ints')
