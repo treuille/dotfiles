@@ -1,5 +1,5 @@
 # lazy.nvim lock file
 lazy-lock.json
 
-# ChatGPT Credentials for Neovim
-chatgpt_nvim.txt
+# OpenAI and Anthropic credentials  for nvim
+api_keys.toml

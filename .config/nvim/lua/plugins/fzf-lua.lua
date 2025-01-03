@@ -22,24 +22,26 @@ return {
       { '<leader><leader>', '<cmd>FzfLua buffers<cr>', desc = '[ ] Find existing buffers' },
       { '<leader>ssd', '<cmd>FzfLua lsp_document_symbols<cr>', desc = '[S]earch [S]ymbols [D]ocument' },
       { '<leader>ssw', '<cmd>FzfLua lsp_workspace_symbols<cr>', desc = '[S]earch [S]ymbols [W]orkspace' },
-      {
-        '<leader>ssf',
-        function()
-          require('fzf-lua').lsp_document_symbols {
-            symbol_handler = function(opts)
-              -- Filter for function symbols only
-              opts.symbol_filter = function(sym)
-                return sym.kind == vim.lsp.protocol.SymbolKind.Function or sym.kind == vim.lsp.protocol.SymbolKind.Method
-              end
-              return opts
-              -- -- require('fzf-lua').lsp_document_symbols { symbols = { 'Function' } }
-              -- require('fzf-lua').lsp_document_symbols { symbol_kinds = { 'Function' } }
-              -- -- require('fzf-lua').lsp_document_symbols { symbol_kinds = { 'Function' } }
-            end,
-          }
-        end,
-        desc = '[S]earch [S]ymbols [F]unctions',
-      },
+
+      -- WARNING: Wasn't able to get this ssf binding to work to find only functions.
+      -- {
+      --   '<leader>ssf',
+      --   function()
+      --     require('fzf-lua').lsp_document_symbols {
+      --       symbol_handler = function(opts)
+      --         -- Filter for function symbols only
+      --         opts.symbol_filter = function(sym)
+      --           return sym.kind == vim.lsp.protocol.SymbolKind.Function or sym.kind == vim.lsp.protocol.SymbolKind.Method
+      --         end
+      --         return opts
+      --         -- -- require('fzf-lua').lsp_document_symbols { symbols = { 'Function' } }
+      --         -- require('fzf-lua').lsp_document_symbols { symbol_kinds = { 'Function' } }
+      --         -- -- require('fzf-lua').lsp_document_symbols { symbol_kinds = { 'Function' } }
+      --       end,
+      --     }
+      --   end,
+      --   desc = '[S]earch [S]ymbols [F]unctions',
+      -- },
     },
 
     opts = {

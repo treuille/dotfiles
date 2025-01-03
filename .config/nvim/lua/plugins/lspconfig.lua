@@ -33,8 +33,7 @@ return {
           end
 
           -- NOTE: Moved to fzf-lua
-          -- Jump to the definition of the word under your cursor.
-          --  To jump back, press <C-t>.
+          -- Jump to the definition of the word under your cursor. (To jump back, press <C-t>.)
           -- map('gD', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 
           -- NOTE: Moved to fzf-lua

@@ -1,6 +1,5 @@
 -- Unofficial GitHub Copilot plugin
-return {
-  {
+return  {
       "zbirenbaum/copilot.lua",
       opts = {
         panel = {
