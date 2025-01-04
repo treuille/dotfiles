@@ -26,9 +26,9 @@ export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup
 export PATH=${CARGO_HOME}/bin:${PATH}
 
-# TODO: Remove this
-# This doesnt' appear necessary, sice the above lines add cargo to the path
-# source ~/.local/rust/cargo/env
+# Zig
+# NOTE: Experimental. Delete if I'm no longer using zig
+export PATH=${HOME}/.local/zig-linux-aarch64-0.13.0:${PATH}
 
 # Pure, a prettier prompt
 fpath+=(${HOME}/.local/share/zsh/pure)
