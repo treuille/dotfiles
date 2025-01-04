@@ -46,3 +46,12 @@ elif [[ -z ${API_WARNING_SHOWN} ]]; then
     echo "${RED}Warning: ${API_KEY_FILE} not found${RESET}"
     export API_WARNING_SHOWN=1
 fi
+
+Fzf config
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
+# export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'batcat --color=always --style=grid --line-range :500 {}'"
+FZF_CONFIG=${HOME}/.config/fzf/0.44.1
+[ -f ${FZF_CONFIG}/completion.zsh ] && source ${FZF_CONFIG}/completion.zsh
+[ -f ${FZF_CONFIG}/key-bindings.zsh ] && source ${FZF_CONFIG}/key-bindings.zsh
+ls -lah ${FZF_CONFIG}
