@@ -3,10 +3,6 @@ alias venv-activate="source .venv/bin/activate"
 alias venv-create="python3 -m venv .venv ; venv-activate"
 alias venv-delete="rm -rfv .venv"
 
-# TODO: Remove this
-# # Snowsql
-# alias snowsql=/Applications/SnowSQL.app/Contents/MacOS/snowsql
-
 # A prettier ls
 alias ls=lsd
 
@@ -15,7 +11,6 @@ bindkey -v
 
 # Nvim configuration
 export PATH=${PATH}:/opt/nvim/bin
-# export PATH=${PATH}:/opt/nvim-linux64/bin
 export EDITOR=nvim
 
 # A better find
@@ -27,7 +22,6 @@ export RUSTUP_HOME=${HOME}/.local/rust/rustup
 export PATH=${CARGO_HOME}/bin:${PATH}
 
 # Zig
-# NOTE: Experimental. Delete if I'm no longer using zig
 export PATH=${HOME}/.local/zig-linux-aarch64-0.13.0:${PATH}
 
 # Pure, a prettier prompt
@@ -47,10 +41,9 @@ elif [[ -z ${API_WARNING_SHOWN} ]]; then
     export API_WARNING_SHOWN=1
 fi
 
-Fzf config
+# Fzf config
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
-# export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'batcat --color=always --style=grid --line-range :500 {}'"
 FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 [ -f ${FZF_CONFIG}/completion.zsh ] && source ${FZF_CONFIG}/completion.zsh
 [ -f ${FZF_CONFIG}/key-bindings.zsh ] && source ${FZF_CONFIG}/key-bindings.zsh
