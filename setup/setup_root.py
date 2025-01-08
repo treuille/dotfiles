@@ -44,6 +44,12 @@ def setup_root():
    # Installing nodejs (for the GitHub plugin)
    setup_utils.cached_apt_install("nodejs")
 
+   # Install bat, a prettier cat
+   setup_utils.cached_apt_install("bat")
+
+   # Need this for some more advanced Python ML packages that require C++ compilation
+   setup_utils.cached_apt_install("python3.12-dev")
+
    # Set the timezone properly
    setup_utils.cached_run(
        "Setting timezone",
