@@ -43,6 +43,7 @@ def setup_root():
 
    # Installing nodejs (for the GitHub plugin)
    setup_utils.cached_apt_install("nodejs")
+   setup_utils.cached_run("curl -L https://www.npmjs.com/install.sh | sudo sh")
 
    # Install bat, a prettier cat
    setup_utils.cached_apt_install("bat")
