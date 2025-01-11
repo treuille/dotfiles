@@ -3,7 +3,7 @@
 -- Place the plugin window depending on the aspect ration
 local width = vim.o.columns
 local height = vim.o.lines
-local window_position = (width / height) > 1.5 and 'right' or 'bottom'
+local window_position = (width / height) > 1.5 and 'right' or 'top' -- 'bottom'
 
 -- Configuration for the plugin
 return {
