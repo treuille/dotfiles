@@ -47,4 +47,8 @@ export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
 FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 [ -f ${FZF_CONFIG}/completion.zsh ] && source ${FZF_CONFIG}/completion.zsh
 [ -f ${FZF_CONFIG}/key-bindings.zsh ] && source ${FZF_CONFIG}/key-bindings.zsh
-ls -lah ${FZF_CONFIG}
+
+# Create or join tmux session based on current directory path
+# Example: ~/projects/my-app -> projects_my_app
+# If session exists, attaches to it. If not, creates new session.
+alias tmxa='tmux new-session -A -s $(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g")'
