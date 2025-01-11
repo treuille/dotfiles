@@ -43,7 +43,8 @@ def setup_root():
 
    # Installing nodejs (for the GitHub plugin)
    setup_utils.cached_apt_install("nodejs")
-   setup_utils.cached_run("curl -L https://www.npmjs.com/install.sh | sudo sh")
+   setup_utils.cached_run("Installing npm",
+      ["curl -L https://www.npmjs.com/install.sh | sudo sh"])
 
    # Install bat, a prettier cat
    setup_utils.cached_apt_install("bat")
@@ -112,14 +113,14 @@ def create_user(user):
    if password != password_again:
        print("Passwords don't match.")
        sys.exit(-1)
-   
+
    # Generate hash using passlib
    encrypted_password = sha512_crypt.hash(password)
-   
+
    # Create user with sudo privileges
    add_user_cmd = f"sudo useradd -b /home -G sudo -m -p '{encrypted_password}' -s $(which zsh) -U {user}"
    os.system(add_user_cmd)
-   
+
    temp_user_status = f'Adding {user} with {len(password)}-char password "{password[:2]}...{password[-2:]}"...'
    cprint(temp_user_status, "magenta", attrs=["bold"], end="\r")
    time.sleep(4.0)
