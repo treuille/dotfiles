@@ -42,9 +42,9 @@ return {
       require('nvim-treesitter.configs').setup(opts)
 
       local incremental_selection = require 'nvim-treesitter.incremental_selection'
-      vim.keymap.set('n', '<leader>v', incremental_selection.init_selection, { desc = '[V]isually select treesitter node' })
+      vim.keymap.set('n', '<C-Space>', incremental_selection.init_selection, { desc = '[V]isually select treesitter node' })
       vim.keymap.set('x', '<C-j>', incremental_selection.node_incremental, { desc = 'Increment treesitter selection' })
-      vim.keymap.set('x', '<C-k>', incremental_selection.node_decremental, { desc = 'Shrink treesitter selection' })
+      vim.keymap.set('x', '<C-k>', incremental_selection.node_decremental, { desc = 'Shrink selection to previous named node' })
 
       -- There are additional nvim-treesitter modules that you can use to interact
       -- with nvim-treesitter. You should go explore a few and see what interests you:
