@@ -13,8 +13,9 @@ bindkey -v
 export PATH=${PATH}:/opt/nvim/bin
 export EDITOR=nvim
 
-# A better find
-alias fd=fdfind
+# A better find.
+# -I means don't respect .gitignore
+alias fd="fdfind"
 
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
@@ -50,5 +51,6 @@ FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 
 # Create or join tmux session based on current directory path
 # Example: ~/projects/my-app -> projects_my_app
+# Example: ~/.config/nvim -> config_nvim
 # If session exists, attaches to it. If not, creates new session.
-alias tmxa='tmux new-session -A -s $(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g")'
+alias tmxa='tmux new-session -A -s $(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g" | sed "s/^_//")'
