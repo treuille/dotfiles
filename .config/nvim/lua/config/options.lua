@@ -17,7 +17,7 @@ vim.opt.showmode = false
 
 -- To disable the clipboard integration and ensure the most performant setting, can use:
 -- Disable clipboard integration
-vim.opt.clipboard = ""
+vim.opt.clipboard = ''
 
 -- Prevent loading the clipboard provider plugin
 -- See `:help 'clipboard'`
@@ -78,5 +78,12 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+
+-- Enable auto-reloading of changed files
+vim.o.autoread = true -- Enable auto-reloading of changed files
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'BufWinEnter', 'CursorHold' }, {
+  pattern = '*',
+  command = 'checktime', -- Checks if the file has changed and reloads it
+})
 
 -- vim: ts=2 sts=2 sw=2 et
