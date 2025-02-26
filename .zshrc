@@ -54,3 +54,9 @@ FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 # Example: ~/.config/nvim -> config_nvim
 # If session exists, attaches to it. If not, creates new session.
 alias tmxa='tmux new-session -A -s $(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g" | sed "s/^_//")'
+
+# Pyenv - for the Streamit docs
+# TODO: Remove when no longer working on Streamit docs
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
