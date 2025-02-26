@@ -80,6 +80,7 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 10
 
 -- Enable auto-reloading of changed files
+-- This is to make Neovim eaiser to work with the Claude command line tool
 vim.o.autoread = true -- Enable auto-reloading of changed files
 vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'BufWinEnter', 'CursorHold' }, {
   pattern = '*',
