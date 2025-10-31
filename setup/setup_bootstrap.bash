@@ -1,7 +1,7 @@
 # Bootstrap the setup of a digital ocean installation by:
 #
 # 1. Installing the dotfiles repo
-# 2. Installing python3.12-venv if necessary
+# 2. Installing python3 virtual environmnet (venv) if necessary
 # 3. Creating a venv
 # 4. Running a script in the venv
 #     - if root: setup_root.py
@@ -13,6 +13,7 @@ GIT_BRANCH="main"
 DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
 VENV_PATH="${DOTFILES_PATH}/setup/venv"
+PYTHON_VENV_PACKAGE="python3.13-venv"
 
 # Determine if we have passwordless sudo access
 sudo -n true &> /dev/null
@@ -81,7 +82,7 @@ install_dotfiles()
   end_block
 }
 
-# Install the python3.12-venv required to use Python venv in Ubuntu.
+# Install the python venv required to use Python venv in Ubuntu.
 install_python_venv()
 {
   # Only run if the user has sudo access
@@ -91,7 +92,6 @@ install_python_venv()
   fi
 
   # apt install python3.12-venv
-  PYTHON_VENV_PACKAGE="python3.12-venv"
   start_block "Installing ${PYTHON_VENV_PACKAGE}."
   sudo dpkg -s ${PYTHON_VENV_PACKAGE} &> /dev/null
   if [[ $? -eq 0 ]];
