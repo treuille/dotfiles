@@ -131,18 +131,22 @@ return {
       -- WARN: This might be on startup. Delete if so.
       vim.cmd 'MasonToolsUpdateSync'
 
+      -- =========================
+      -- LSP SERVER CONFIG (new API)
+      -- =========================
+
       -- Setup basedpyright for Python projects
-      require('lspconfig').basedpyright.setup {
+      vim.lsp.config('basedpyright', {
         capabilities = capabilities,
         settings = {
           basedpyright = {
             typeCheckingMode = 'standard',
           },
         },
-      }
+      })
 
       -- Setup lua_ls for lua projects
-      require('lspconfig').lua_ls.setup {
+      vim.lsp.config('lua_ls', {
         capabilities = capabilities,
         settings = {
           Lua = {
@@ -156,10 +160,10 @@ return {
             },
           },
         },
-      }
+      })
 
       -- Setup rust_analyzer for Rust projects
-      require('lspconfig').rust_analyzer.setup {
+      vim.lsp.config('rust_analyzer', {
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
         settings = {
           ['rust-analyzer'] = {
@@ -174,7 +178,10 @@ return {
         on_attach = function(client, bufnr)
           vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
         end,
-      }
+      })
+
+      -- Enable the servers (activates for their declared filetypes)
+      vim.lsp.enable { 'basedpyright', 'lua_ls', 'rust_analyzer' }
 
       -- {
       --   handlers = {
