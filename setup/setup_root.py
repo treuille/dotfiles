@@ -63,8 +63,12 @@ def setup_root():
     #     "Installing npm", ["curl -L https://www.npmjs.com/install.sh | sudo sh"]
     # )
 
-    # Install bat, a prettier cat
+    # Installe bat, a prettier cat (quality of life)
     setup_utils.cached_apt_install("bat")
+
+    # ZSH autosuggestions and highlighting (quality of life)
+    setup_utils.cached_apt_install("zsh-autosuggestions")
+    setup_utils.cached_apt_install("zsh-syntax-highlighting")
 
     # Install git lfs, which lets us download large files from git repos
     setup_utils.cached_apt_install("git-lfs")

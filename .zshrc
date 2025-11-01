@@ -55,3 +55,8 @@ FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 # If session exists, attaches to it. If not, creates new session.
 alias tmxa='tmux new-session -A -s $(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g" | sed "s/^_//")'
 
+# Enable autosuggestions
+source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# Enable syntax highlighting (must be last)
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
