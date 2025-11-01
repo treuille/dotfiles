@@ -209,7 +209,7 @@ def main():
 
     # Tell the root user to reboot.
     cprint(f"Please reboot the computer:", "red", attrs=["bold"])
-    print("  sudo shutdown -r now")
+    print("  sudo reboot")
 
 
 if __name__ == "__main__":
