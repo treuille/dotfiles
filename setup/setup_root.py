@@ -51,10 +51,11 @@ def setup_root():
         "Installing nodejs",
         [
             "apt-get purge -y nodejs",
-            "rm -f /etc/apt/sources.list.d/nodesource*.list",
-            "apt-get update",
-            "curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg",
-            'echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list >/dev/null',
+            "curl -fsSL https://deb.nodesource.com/setup_22.x | bash",
+            # "rm -f /etc/apt/sources.list.d/nodesource*.list",
+            # "apt-get update",
+            # "curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg",
+            # 'echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list >/dev/null',
         ],
     )
     setup_utils.cached_apt_install("nodejs")
