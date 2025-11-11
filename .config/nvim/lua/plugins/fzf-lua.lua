@@ -64,6 +64,14 @@ return {
         toggle_ignore_flag = '--no-ignore', -- flag toggled in `actions.toggle_ignore`
         toggle_hidden_flag = '--hidden', -- flag toggled in `actions.toggle_hidden`
       },
+      files = {
+        -- Search hidden files such a .zshsrc
+        cmd = "rg --files --hidden --follow --glob '!.git/*'",
+      },
+      -- Not sure why necessary, but suggested by ChatGPT
+      grep = {
+        rg_opts = "--column --line-number --no-heading --color=always --smart-case --hidden --glob '!.git/*'",
+      },
     },
   },
 }
