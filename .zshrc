@@ -17,6 +17,9 @@ export EDITOR=nvim
 # -I means don't respect .gitignore
 alias fd="fdfind"
 
+# A better cat
+alias bat="batcat"
+
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup
