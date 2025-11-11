@@ -1,7 +1,14 @@
 # Python venv
+# DEPRECATED: using uv now
 alias venv-activate="source .venv/bin/activate"
 alias venv-create="python3 -m venv .venv ; venv-activate"
 alias venv-delete="rm -rfv .venv"
+
+# --- uv venv helpers ---
+alias uv-venv-create="uv venv"                        # creates .venv (fast!)
+alias uv-venv-delete="rm -rfv .venv"                  # delete venv
+alias uv-venv-shell="source .venv/bin/activate"       # optional manual activation
+alias uv-venv-info="uv venv --show"                   # show path, interpreter, etc.
 
 # A prettier ls
 alias ls=lsd
@@ -25,13 +32,13 @@ export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup
 export PATH=${CARGO_HOME}/bin:${PATH}
 
-# Zig
-export PATH=${HOME}/.local/zig-linux-aarch64-0.13.0:${PATH}
-
 # Pure, a prettier prompt
 fpath+=(${HOME}/.local/share/zsh/pure)
 autoload -U promptinit; promptinit
 prompt pure
+
+# uv, a better pip
+export PATH=${HOME}/.local/uv:${PATH}
 
 # Add API keys for OpenAI and Anthropic
 API_KEY_FILE=${HOME}/.config/nvim/api_keys.toml

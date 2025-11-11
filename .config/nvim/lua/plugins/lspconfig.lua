@@ -135,12 +135,30 @@ return {
       -- LSP SERVER CONFIG (new API)
       -- =========================
 
-      -- Setup basedpyright for Python projects
+      -- -- Setup basedpyright for Python projects
+      -- vim.lsp.config('basedpyright', {
+      --   capabilities = capabilities,
+      --   settings = {
+      --     basedpyright = {
+      --       typeCheckingMode = 'standard',
+      --     },
+      --   },
+      -- })
+
+      -- Minimal BasedPyright LSP configuration using uvx
+      -- Assumptions:
+      --   1. You open Neovim from the project root (e.g. `cd myproject && nvim`).
+      --   2. The Python virtual environment is at "./.venv".
+      --   3. You have uv installed and available on your PATH.
+      --      uvx will download and cache basedpyright automatically if not already present.
       vim.lsp.config('basedpyright', {
+        cmd = { 'uvx', '--from', 'basedpyright', 'basedpyright-langserver', '--stdio' },
         capabilities = capabilities,
         settings = {
           basedpyright = {
             typeCheckingMode = 'standard',
+            venvPath = '.',
+            venv = '.venv',
           },
         },
       })

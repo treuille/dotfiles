@@ -35,15 +35,22 @@ return {
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
 
-        -- For Python, just using black, not isort
-        python = { "black" },
+        -- We will use black as provided by uv (uvx)
+        python = { 'uvx_black' },
 
         -- For rust, just using rustfmt, not cargo fmt
-        rust = { "rustfmt" },
+        rust = { 'rustfmt' },
 
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
+      },
+      formatters = {
+        uvx_black = {
+          command = 'uvx',
+          args = { 'black', '--quiet', '-' },
+          stdin = true,
+        },
       },
     },
   },
