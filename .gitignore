@@ -17,6 +17,15 @@ original_dotfiles
 # GitHub Copilot stuff
 .config/github-copilot
 
+# btop - a prettier way of getting system stats
+.config/btop
+
+# fish (shell, I guess?) - snuck in here when I installed uv
+.config/fish
+
+# uv.. a better way to handle python dependencies and venv
+.config/uv
+
 # The virtual environment used for installation script
 setup/venv
 setup/backup
