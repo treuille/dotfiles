@@ -27,6 +27,12 @@ alias fd="fdfind"
 # A better cat
 alias bat="batcat"
 
+# Used by Claude Code and potentially other tools
+export PATH=${HOME}/.local/bin:${PATH}
+
+# Claude Code XDG config directory
+export CLAUDE_CODE_CONFIG_DIR=${HOME}/.config/claude
+
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup

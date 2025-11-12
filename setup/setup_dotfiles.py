@@ -115,6 +115,15 @@ def install_python_tools():
         ],
     )
 
+def install_claude_code():
+    """Install the Claude Code CLI"""
+    setup_utils.cached_run(
+        "Installing Claude Code",
+        [
+            "curl -fsSL https://claude.ai/install.sh | bash",
+        ],
+    )
+
 def main():
     """Execution starts here."""
     install_pure()
@@ -122,6 +131,7 @@ def main():
     install_tmux_plugins()
     install_rust()
     install_python_tools()
+    install_claude_code()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
     print(". ~/.zshrc")
