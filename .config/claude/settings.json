@@ -2,5 +2,6 @@
   "env": {
     "EDITOR": "nano",
     "VISUAL": "nano"
-  }
+  },
+  "alwaysThinkingEnabled": true
 }
