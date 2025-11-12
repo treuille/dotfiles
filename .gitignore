@@ -26,6 +26,13 @@ original_dotfiles
 # uv.. a better way to handle python dependencies and venv
 .config/uv
 
+# Claude - ignore everything except settings.json
+.config/claude/*
+!.config/claude/settings.json
+
+# Claude - local settings overrides
+.claude
+
 # The virtual environment used for installation script
 setup/venv
 setup/backup
