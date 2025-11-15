@@ -9,11 +9,10 @@
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
-GIT_BRANCH="main"
+BRANCH="${DOTFILES_BRANCH:-main}"
 DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
-VENV_PATH="${DOTFILES_PATH}/setup/venv"
-PYTHON_VENV_PACKAGE="python3.13-venv"
+VENV_PATH="${DOTFILES_PATH}/setup/uv_venv"
 
 # Determine if we have passwordless sudo access
 sudo -n true &> /dev/null
@@ -71,10 +70,10 @@ install_dotfiles()
     fi
 
     # Clone the repo
-    git clone -b ${GIT_BRANCH} ${GIT_REPO}
+    git clone -b ${BRANCH} ${GIT_REPO}
     if [[ $? -ne 0 ]];
     then
-      echo_red "Failed to clone branch \"${GIT_BRANCH}\" from \"${GIT_REPO}\"."
+      echo_red "Failed to clone branch \"${BRANCH}\" from \"${GIT_REPO}\"."
       exit 1
     fi
   fi
@@ -82,8 +81,8 @@ install_dotfiles()
   end_block
 }
 
-# Install the python venv required to use Python venv in Ubuntu.
-install_python_venv()
+# Install uv globally to /usr/local/bin
+install_uv()
 {
   # Only run if the user has sudo access
   if [ $IS_ROOT -ne 0 ];
@@ -91,35 +90,68 @@ install_python_venv()
     return 255
   fi
 
-  # apt install python3.12-venv
-  start_block "Installing ${PYTHON_VENV_PACKAGE}."
-  sudo dpkg -s ${PYTHON_VENV_PACKAGE} &> /dev/null
-  if [[ $? -eq 0 ]];
+  start_block "Installing uv globally into /usr/local/bin"
+  # Check if uv is already installed
+  if command -v uv >/dev/null 2>&1;
   then
-    echo_red "The package ${PYTHON_VENV_PACKAGE} already exists."
+    echo_red "uv is already installed."
+    uv --version || true
   else
-    sudo DEBIAN_FRONTEND=noninteractive apt update -y
-    sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
-    sudo DEBIAN_FRONTEND=noninteractive apt install ${PYTHON_VENV_PACKAGE} -y
+    # Install uv system-wide
+    curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
+
+    # Verify installation
+    if ! command -v uv >/dev/null 2>&1;
+    then
+      echo_red "ERROR: uv not found in PATH after install."
+      exit 1
+    fi
+
+    uv --version || true
+  fi
+  end_block
+
+  start_block "Installing zsh completion for uv for all users"
+  # Ensure zsh site-functions directory exists
+  ZSH_COMPLETION_DIR="/usr/share/zsh/site-functions"
+  sudo mkdir -p "$ZSH_COMPLETION_DIR"
+
+  # Generate zsh completion file
+  uv generate-shell-completion zsh | sudo tee "${ZSH_COMPLETION_DIR}/_uv" > /dev/null
+
+  # Ensure zsh loads site-functions globally
+  ZSHRC_GLOBAL="/etc/zsh/zshrc"
+  LINE_TO_ADD='fpath=(/usr/share/zsh/site-functions $fpath)'
+
+  if ! grep -Fq "$LINE_TO_ADD" "$ZSHRC_GLOBAL" 2>/dev/null;
+  then
+    echo_red "Adding zsh completion path to $ZSHRC_GLOBAL"
+    {
+      echo ""
+      echo "# Added by uv installer script"
+      echo "$LINE_TO_ADD"
+    } | sudo tee -a "$ZSHRC_GLOBAL" > /dev/null
+  else
+    echo_red "zsh completion path already in $ZSHRC_GLOBAL"
   fi
   end_block
 }
 
-# Create the virtual environment and install the requirements file.
-setup_venv()
+# Create the virtual environment using uv and install the requirements file.
+setup_uv_venv()
 {
-  start_block "Creating virtual environment at ${VENV_PATH}."
+  start_block "Creating uv virtual environment at ${VENV_PATH}"
   if [[ -d ${VENV_PATH} ]];
   then
     echo_red "Virtual environment \"${VENV_PATH}\" already exists."
   else
-    python3 -m venv "${VENV_PATH}"
+    uv venv "${VENV_PATH}"
     if [[ $? -ne 0 ]];
     then
       echo_red "Failed to create virtual environment."
       exit 1
     fi
-    ${VENV_PATH}/bin/pip install -r ${SETUP_PATH}/requirements.txt
+    uv pip install -r ${SETUP_PATH}/requirements.txt --python ${VENV_PATH}/bin/python
     if [[ $? -ne 0 ]];
     then
       echo_red "Failed to install requirements."
@@ -129,7 +161,7 @@ setup_venv()
   end_block
 }
 
-# Run a python script in the virtual environment
+# Run a python script using uv run
 run_python_script()
 {
   if [ $IS_ROOT -eq 0 ];
@@ -139,12 +171,12 @@ run_python_script()
     PYTHON_SCRIPT="setup_dotfiles"
   fi
   echo_red "Executing setup script ${PYTHON_SCRIPT}.py."
-  PYTHONPATH=${SETUP_PATH} ${VENV_PATH}/bin/python -m ${PYTHON_SCRIPT}
+  PYTHONPATH=${SETUP_PATH} uv run --python ${VENV_PATH}/bin/python -m ${PYTHON_SCRIPT}
 }
 
 # Actually run the script
 prevent_restart_dialog
 install_dotfiles
-install_python_venv
-setup_venv
+install_uv
+setup_uv_venv
 run_python_script

@@ -73,9 +73,6 @@ def setup_root():
     # Install git lfs, which lets us download large files from git repos
     setup_utils.cached_apt_install("git-lfs")
 
-    # Need this for some more advanced Python ML packages that require C++ compilation
-    setup_utils.cached_apt_install("python3.13-dev")
-
     # Set the timezone properly
     setup_utils.cached_run(
         "Setting timezone",
