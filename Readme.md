@@ -3,7 +3,7 @@
 1. ssh in as `root`, and run this command:
 
 ```sh
-BRANCH=main; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${BRANCH}/setup/setup_bootstrap.bash)
+BRANCH=root-uv; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${BRANCH}/setup/setup_bootstrap.bash)
 ```
 
 2. ssh in, this time as `adrien`, and run the same command.
