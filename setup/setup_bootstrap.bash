@@ -9,7 +9,7 @@
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
-GIT_BRANCH="main"
+BRANCH="${BRANCH:-main}"
 DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
 VENV_PATH="${DOTFILES_PATH}/setup/uv_venv"
@@ -70,10 +70,10 @@ install_dotfiles()
     fi
 
     # Clone the repo
-    git clone -b ${GIT_BRANCH} ${GIT_REPO}
+    git clone -b ${BRANCH} ${GIT_REPO}
     if [[ $? -ne 0 ]];
     then
-      echo_red "Failed to clone branch \"${GIT_BRANCH}\" from \"${GIT_REPO}\"."
+      echo_red "Failed to clone branch \"${BRANCH}\" from \"${GIT_REPO}\"."
       exit 1
     fi
   fi
