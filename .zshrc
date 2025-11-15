@@ -46,17 +46,21 @@ prompt pure
 # uv, a better pip
 export PATH=${HOME}/.local/uv:${PATH}
 
-# Add API keys for OpenAI and Anthropic
-API_KEY_FILE=${HOME}/.config/nvim/api_keys.toml
-RED="\033[31m"
-RESET="\033[0m"
-if [[ -f ${API_KEY_FILE} ]]; then
-    export OPENAI_API_KEY=$(awk -F'= *"|"' '/^openai/ {print $2}' ${API_KEY_FILE})
-    export ANTHROPIC_API_KEY=$(awk -F'= *"|"' '/^anthropic/ {print $2}' ${API_KEY_FILE})
-elif [[ -z ${API_WARNING_SHOWN} ]]; then
-    echo "${RED}Warning: ${API_KEY_FILE} not found${RESET}"
-    export API_WARNING_SHOWN=1
-fi
+# I'm now focused on using copilot completions and
+# Claude code, both of which have their own login flows
+# so not sure if I need this next part anymore...
+
+# # Add API keys for OpenAI and Anthropic
+# API_KEY_FILE=${HOME}/.config/nvim/api_keys.toml
+# RED="\033[31m"
+# RESET="\033[0m"
+# if [[ -f ${API_KEY_FILE} ]]; then
+#     export OPENAI_API_KEY=$(awk -F'= *"|"' '/^openai/ {print $2}' ${API_KEY_FILE})
+#     export ANTHROPIC_API_KEY=$(awk -F'= *"|"' '/^anthropic/ {print $2}' ${API_KEY_FILE})
+# elif [[ -z ${API_WARNING_SHOWN} ]]; then
+#     echo "${RED}Warning: ${API_KEY_FILE} not found${RESET}"
+#     export API_WARNING_SHOWN=1
+# fi
 
 # Fzf config
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
