@@ -3,7 +3,7 @@
 1. ssh in as `root`, and run this command:
 
 ```sh
-export DOTFILES_BRANCH=root-uv; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+export DOTFILES_BRANCH=main; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
 2. ssh in, this time as `adrien`, and run the same command.
