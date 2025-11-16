@@ -105,15 +105,6 @@ def install_rust():
         ],
     )
 
-def install_python_tools():
-    """Make it possible to use the uv toolchain for Python development"""
-    # Install uv itself.
-    setup_utils.cached_run(
-        "Installing uv",
-        [
-            'curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="$HOME/.local/uv" UV_NO_MODIFY_PATH=1 sh',
-        ],
-    )
 
 def install_claude_code():
     """Install the Claude Code CLI"""
@@ -130,7 +121,6 @@ def main():
     install_dotfiles()
     install_tmux_plugins()
     install_rust()
-    install_python_tools()
     install_claude_code()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])

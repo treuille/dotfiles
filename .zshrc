@@ -50,9 +50,6 @@ fpath+=(${HOME}/.local/share/zsh/pure)
 autoload -U promptinit; promptinit
 prompt pure
 
-# uv, a better pip
-export PATH=${HOME}/.local/uv:${PATH}
-
 # I'm now focused on using copilot completions and
 # Claude code, both of which have their own login flows
 # so not sure if I need this next part anymore...
