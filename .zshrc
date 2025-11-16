@@ -21,8 +21,9 @@ export PATH=${PATH}:/opt/nvim/bin
 export EDITOR=nvim
 
 # A better find.
-# -I means don't respect .gitignore
-alias fd="fdfind"
+# --hidden: search hidden files/dirs (including .claude)
+# --exclude: skip common data directories
+alias fd="fdfind --hidden --exclude .git --exclude node_modules --exclude .venv --exclude __pycache__ --exclude .cache --exclude target --exclude build --exclude dist"
 
 # A better cat
 alias bat="batcat"
@@ -49,7 +50,7 @@ export PATH=${HOME}/.local/uv:${PATH}
 # I'm now focused on using copilot completions and
 # Claude code, both of which have their own login flows
 # so not sure if I need this next part anymore...
-
+#
 # # Add API keys for OpenAI and Anthropic
 # API_KEY_FILE=${HOME}/.config/nvim/api_keys.toml
 # RED="\033[31m"
@@ -63,7 +64,7 @@ export PATH=${HOME}/.local/uv:${PATH}
 # fi
 
 # Fzf config
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_DEFAULT_COMMAND='fdfind --type f --hidden --follow --exclude .git --exclude node_modules --exclude .venv --exclude __pycache__ --exclude .cache --exclude target --exclude build --exclude dist'
 export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
 FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 [ -f ${FZF_CONFIG}/completion.zsh ] && source ${FZF_CONFIG}/completion.zsh
