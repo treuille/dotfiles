@@ -19,7 +19,12 @@ bindkey -v
 # Nvim configuration
 export PATH=${PATH}:/opt/nvim/bin
 export EDITOR=nvim
+
+# Open all files affected by git changes in nvim
 alias nvim-diff="git ls-files --modified --others --exclude-standard | xargs nvim"
+
+# Open all files with merge conflicts in nvim
+alias nvim-conflict="git diff --name-only --diff-filter=U | xargs nvim"
 
 # A better find.
 # --hidden: search hidden files/dirs (including .claude)
