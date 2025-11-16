@@ -19,6 +19,7 @@ bindkey -v
 # Nvim configuration
 export PATH=${PATH}:/opt/nvim/bin
 export EDITOR=nvim
+alias nvim-diff="git ls-files --modified --others --exclude-standard | xargs nvim"
 
 # A better find.
 # --hidden: search hidden files/dirs (including .claude)
