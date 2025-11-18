@@ -66,6 +66,9 @@ def setup_root():
     # Installe bat, a prettier cat (quality of life)
     setup_utils.cached_apt_install("bat")
 
+    # Install btop, a prettier resource monitor (quality of life)
+    setup_utils.cached_apt_install("btop")
+
     # ZSH autosuggestions and highlighting (quality of life)
     setup_utils.cached_apt_install("zsh-autosuggestions")
     setup_utils.cached_apt_install("zsh-syntax-highlighting")
