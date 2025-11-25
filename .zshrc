@@ -13,6 +13,15 @@ alias uv-venv-info="uv venv --show"                   # show path, interpreter, 
 # A prettier ls
 alias ls=lsd
 
+# A better find.
+# --hidden: search hidden files/dirs (including .claude)
+# --exclude: skip common data directories
+alias fd="fdfind --hidden --exclude .git --exclude node_modules --exclude .venv --exclude __pycache__ --exclude .cache --exclude target --exclude build --exclude dist"
+
+# Fix ugly light green background on README files in fd/lsd
+# Remove background color (42) from specific file patterns
+export LS_COLORS="${LS_COLORS}:*README=01;33:*README.md=01;33:*README.txt=01;33:"
+
 # Vim keybindings
 bindkey -v
 
@@ -25,11 +34,6 @@ alias nvim-diff="git ls-files --modified --others --exclude-standard | xargs nvi
 
 # Open all files with merge conflicts in nvim
 alias nvim-conflict="git diff --name-only --diff-filter=U | xargs nvim"
-
-# A better find.
-# --hidden: search hidden files/dirs (including .claude)
-# --exclude: skip common data directories
-alias fd="fdfind --hidden --exclude .git --exclude node_modules --exclude .venv --exclude __pycache__ --exclude .cache --exclude target --exclude build --exclude dist"
 
 # A better cat
 alias bat="batcat"
