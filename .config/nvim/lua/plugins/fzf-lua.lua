@@ -66,7 +66,7 @@ return {
       },
       files = {
         -- Search hidden files such a .zshsrc
-        cmd = "rg --files --hidden --follow --no-ignore --glob '!.git/*'",
+        cmd = "rg --files --hidden --follow --glob '!.git/*'",
       },
       -- Not sure why necessary, but suggested by ChatGPT
       grep = {

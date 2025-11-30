@@ -15,8 +15,9 @@ alias ls=lsd
 
 # A better find.
 # --hidden: search hidden files/dirs (including .claude)
+# --no-ignore: search .gitignored files
 # --exclude: skip common data directories
-alias fd="fdfind --hidden --exclude .git --exclude node_modules --exclude .venv --exclude __pycache__ --exclude .cache --exclude target --exclude build --exclude dist"
+alias fd="fdfind --hidden --no-ignore --exclude .git --exclude node_modules --exclude .venv --exclude __pycache__ --exclude .cache --exclude target --exclude build --exclude dist"
 
 # Fix ugly light green background on README files in fd/lsd
 # Remove background color (42) from specific file patterns
