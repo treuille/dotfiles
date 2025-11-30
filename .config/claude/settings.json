@@ -3,5 +3,5 @@
     "EDITOR": "nano",
     "VISUAL": "nano"
   },
-  "alwaysThinkingEnabled": false
+  "alwaysThinkingEnabled": true
 }
