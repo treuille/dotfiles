@@ -41,6 +41,9 @@ return {
         -- For rust, just using rustfmt, not cargo fmt
         rust = { 'rustfmt' },
 
+        -- YAML formatting with yamlfix via uvx
+        yaml = { 'uvx_yamlfix' },
+
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
@@ -49,6 +52,11 @@ return {
         uvx_black = {
           command = 'uvx',
           args = { 'black', '--quiet', '-' },
+          stdin = true,
+        },
+        uvx_yamlfix = {
+          command = 'uvx',
+          args = { 'yamlfix', '-' },
           stdin = true,
         },
       },
