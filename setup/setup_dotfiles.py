@@ -115,12 +115,32 @@ def install_claude_code():
         ],
     )
 
+
+def install_gcloud():
+    """Install the Google Cloud SDK.
+
+    Used to authenticate with Google services and access higher API rate limits.
+    """
+    home_path = os.path.expanduser("~")
+    gcloud_install_dir = os.path.join(home_path, ".local/gcloud")
+    gcloud_sdk_path = os.path.join(gcloud_install_dir, "google-cloud-sdk")
+    setup_utils.cached_run(
+        "Installing Google Cloud SDK",
+        [
+            f"curl https://sdk.cloud.google.com | bash -s -- "
+            f"--install-dir={gcloud_install_dir} --disable-prompts",
+        ],
+        skip_if=os.path.exists(gcloud_sdk_path),
+    )
+
+
 def main():
     """Execution starts here."""
     install_pure()
     install_dotfiles()
     install_tmux_plugins()
     install_rust()
+    install_gcloud()
     install_claude_code()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])

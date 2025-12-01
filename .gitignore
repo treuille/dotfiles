@@ -17,6 +17,9 @@ original_dotfiles
 # GitHub Copilot stuff
 .config/github-copilot
 
+# Google cloud connection stuff
+.config/gcloud
+
 # btop - a prettier way of getting system stats
 .config/btop
 

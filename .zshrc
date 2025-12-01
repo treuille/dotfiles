@@ -50,6 +50,11 @@ export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup
 export PATH=${CARGO_HOME}/bin:${PATH}
 
+# Google Cloud SDK
+export CLOUDSDK_ROOT_DIR=${HOME}/.local/gcloud/google-cloud-sdk
+export PATH=${CLOUDSDK_ROOT_DIR}/bin:${PATH}
+[ -f ${CLOUDSDK_ROOT_DIR}/completion.zsh.inc ] && source ${CLOUDSDK_ROOT_DIR}/completion.zsh.inc
+
 # Pure, a prettier prompt
 fpath+=(${HOME}/.local/share/zsh/pure)
 autoload -U promptinit; promptinit
