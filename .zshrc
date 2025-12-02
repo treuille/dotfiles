@@ -42,6 +42,19 @@ alias bat="batcat"
 # Used by Claude Code and potentially other tools
 export PATH=${HOME}/.local/bin:${PATH}
 
+# Brancher: manage parallel working directories tied to Git branches
+brancher() {
+    local output
+    output="$(${HOME}/dotfiles/bin/brancher "$@")"
+    local rc=$?
+    if [[ $rc -eq 0 && "$output" == cd\ * ]]; then
+        eval "$output"
+    elif [[ -n "$output" ]]; then
+        echo "$output"
+    fi
+    return $rc
+}
+
 # Claude Code XDG config directory
 export CLAUDE_CONFIG_DIR=${HOME}/.config/claude
 

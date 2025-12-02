@@ -1,0 +1,407 @@
+#!/usr/bin/env bash
+#
+# brancher - Manage parallel working directories tied to Git branches
+#
+# Usage:
+#   brancher open <branch_name>  - Create a new branch and parallel workspace
+#   brancher sync                - Sync workspace with parent branch
+#   brancher close               - Merge branch back, delete branch and workspace
+#
+
+set -euo pipefail
+
+# ------------------------------------------------------------------------------
+# Helper functions
+# ------------------------------------------------------------------------------
+
+die() {
+    echo "Error: $*" >&2
+    exit 1
+}
+
+usage() {
+    cat >&2 <<'EOF'
+Usage:
+  brancher open <branch_name>
+  brancher sync
+  brancher close
+
+Description:
+  brancher open  - Create a new Git branch and a parallel workspace directory.
+  brancher sync  - Pull latest parent branch changes into the workspace branch.
+  brancher close - Sync, merge branch back to parent, delete branch and workspace.
+
+Notes:
+  - Run 'brancher open' from the Git repo root.
+  - Run 'brancher sync' and 'brancher close' from inside the branch workspace.
+EOF
+    exit 1
+}
+
+# Check if the script is being sourced
+is_sourced() {
+    # In bash, $0 != $BASH_SOURCE when sourced
+    [[ "${BASH_SOURCE[0]}" != "$0" ]]
+}
+
+# Check if we are inside a Git repository
+require_git_repo() {
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        die "not inside a Git repository."
+    fi
+}
+
+# Get the absolute path of a directory
+abs_path() {
+    (cd "$1" && pwd)
+}
+
+# Rename tmux pane title if inside tmux (errors are ignored)
+tmux_set_pane_title() {
+    local title="$1"
+    if [[ -n "${TMUX:-}" ]] && command -v tmux >/dev/null 2>&1; then
+        tmux select-pane -T "$title" 2>/dev/null || true
+    fi
+}
+
+# Output cd command or actually cd if sourced
+output_cd() {
+    local target_dir="$1"
+    if is_sourced; then
+        cd "$target_dir"
+    else
+        echo "cd '$target_dir'"
+    fi
+}
+
+# Require that we are in a brancher workspace and parse metadata
+# Sets global variables: WORKSPACE_ROOT, PARENT_REPO_ROOT, PARENT_BRANCH, BRANCH_NAME, START_COMMIT
+require_brancher_workspace() {
+    require_git_repo
+
+    WORKSPACE_ROOT="$(git rev-parse --show-toplevel)"
+
+    local meta_file="$WORKSPACE_ROOT/.brancher-meta"
+    if [[ ! -f "$meta_file" ]]; then
+        die "this does not look like a brancher workspace (missing .brancher-meta)."
+    fi
+
+    # Parse metadata
+    PARENT_REPO_ROOT=""
+    PARENT_BRANCH=""
+    BRANCH_NAME=""
+    START_COMMIT=""
+    while IFS='=' read -r key value; do
+        case "$key" in
+            parent_repo_root) PARENT_REPO_ROOT="$value" ;;
+            parent_branch) PARENT_BRANCH="$value" ;;
+            branch_name) BRANCH_NAME="$value" ;;
+            start_commit) START_COMMIT="$value" ;;
+        esac
+    done < "$meta_file"
+
+    if [[ -z "$PARENT_REPO_ROOT" || -z "$PARENT_BRANCH" || -z "$BRANCH_NAME" || -z "$START_COMMIT" ]]; then
+        die "malformed .brancher-meta file."
+    fi
+
+    # Check current branch matches expected branch
+    local current_branch
+    current_branch="$(git rev-parse --abbrev-ref HEAD)"
+    if [[ "$current_branch" != "$BRANCH_NAME" ]]; then
+        die "current branch '$current_branch' does not match expected branch '$BRANCH_NAME'."
+    fi
+
+    # Check if parent repo exists
+    if [[ ! -d "$PARENT_REPO_ROOT" ]]; then
+        die "parent repo '$PARENT_REPO_ROOT' does not exist."
+    fi
+}
+
+# ------------------------------------------------------------------------------
+# brancher open
+# ------------------------------------------------------------------------------
+
+do_open() {
+    local branch_name="${1:-}"
+
+    # Validate arguments
+    if [[ -z "$branch_name" ]]; then
+        echo "Error: missing branch name." >&2
+        usage
+    fi
+
+    # Validate we are inside a Git repository
+    require_git_repo
+
+    # Get repo root and check we are at it
+    local repo_root
+    repo_root="$(git rev-parse --show-toplevel)"
+
+    if [[ "$PWD" != "$repo_root" ]]; then
+        die "brancher open must be run from the Git repo root."
+    fi
+
+    # Determine names and paths
+    local repo_name
+    repo_name="$(basename "$repo_root")"
+    local parent_branch
+    parent_branch="$(git rev-parse --abbrev-ref HEAD)"
+    local start_commit
+    start_commit="$(git rev-parse HEAD)"
+
+    # Compute parallel directory path (absolute)
+    local parallel_dir
+    parallel_dir="$(abs_path "$repo_root/..")/${repo_name}_${branch_name}"
+
+    # Precondition checks
+    if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+        die "Git branch '$branch_name' already exists."
+    fi
+
+    if [[ -e "$parallel_dir" ]]; then
+        die "workspace directory '$parallel_dir' already exists."
+    fi
+
+    # Create the new branch (without switching to it)
+    if ! git branch "$branch_name"; then
+        die "failed to create branch '$branch_name'."
+    fi
+
+    # Create the parallel directory using git worktree
+    if ! git worktree add "$parallel_dir" "$branch_name" 2>/dev/null; then
+        # Clean up the branch we just created
+        git branch -D "$branch_name" 2>/dev/null || true
+        die "failed to create worktree at '$parallel_dir'."
+    fi
+
+    # Create metadata file in the new workspace
+    local meta_file="$parallel_dir/.brancher-meta"
+    cat > "$meta_file" <<EOF
+parent_repo_root=$repo_root
+parent_branch=$parent_branch
+branch_name=$branch_name
+start_commit=$start_commit
+EOF
+
+    # Add .brancher-meta to gitignore (worktrees share the main repo's info/exclude)
+    local git_common_dir
+    git_common_dir="$(git -C "$parallel_dir" rev-parse --git-common-dir)"
+    if ! grep -qxF ".brancher-meta" "$git_common_dir/info/exclude" 2>/dev/null; then
+        echo ".brancher-meta" >> "$git_common_dir/info/exclude"
+    fi
+
+    # tmux: rename pane to branch name
+    tmux_set_pane_title "$branch_name"
+
+    # User feedback
+    echo "Created branch '$branch_name' from '$parent_branch' in workspace '$parallel_dir'." >&2
+
+    # Output cd command
+    output_cd "$parallel_dir"
+}
+
+# ------------------------------------------------------------------------------
+# brancher sync
+# ------------------------------------------------------------------------------
+
+do_sync() {
+    require_brancher_workspace
+
+    # Check for uncommitted changes in workspace
+    if [[ -n "$(git status --porcelain)" ]]; then
+        die "workspace has uncommitted changes; please commit or stash before syncing."
+    fi
+
+    # Check parent repo is clean
+    if [[ -n "$(git -C "$PARENT_REPO_ROOT" status --porcelain)" ]]; then
+        die "parent repo has uncommitted changes; please commit or stash before syncing."
+    fi
+
+    # Fetch latest from remote in parent repo (if remote exists)
+    if git -C "$PARENT_REPO_ROOT" remote | grep -q .; then
+        echo "Fetching latest from remote..." >&2
+        git -C "$PARENT_REPO_ROOT" fetch origin 2>/dev/null || true
+    fi
+
+    # Pull parent branch in parent repo (if it has upstream)
+    if git -C "$PARENT_REPO_ROOT" rev-parse --abbrev-ref "$PARENT_BRANCH@{upstream}" >/dev/null 2>&1; then
+        echo "Pulling '$PARENT_BRANCH' in parent repo..." >&2
+        if ! git -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH" 2>/dev/null; then
+            die "failed to checkout '$PARENT_BRANCH' in parent repo."
+        fi
+        if ! git -C "$PARENT_REPO_ROOT" pull --ff-only 2>/dev/null; then
+            echo "Warning: could not fast-forward pull '$PARENT_BRANCH'; continuing with local state." >&2
+        fi
+    fi
+
+    # Merge parent branch into workspace branch
+    echo "Merging '$PARENT_BRANCH' into '$BRANCH_NAME'..." >&2
+    if ! git merge "$PARENT_BRANCH" --no-edit 2>/dev/null; then
+        git merge --abort 2>/dev/null || true
+        die "merge of '$PARENT_BRANCH' into '$BRANCH_NAME' has conflicts; please resolve manually."
+    fi
+
+    echo "Synced '$BRANCH_NAME' with '$PARENT_BRANCH'." >&2
+}
+
+# ------------------------------------------------------------------------------
+# brancher close
+# ------------------------------------------------------------------------------
+
+do_close() {
+    require_brancher_workspace
+
+    # Check for uncommitted changes
+    if [[ -n "$(git status --porcelain)" ]]; then
+        die "workspace has uncommitted changes; please commit or stash before closing."
+    fi
+
+    # Get current HEAD
+    local current_commit
+    current_commit="$(git rev-parse HEAD)"
+
+    # Determine workspace parent directory
+    local workspace_parent
+    workspace_parent="$(dirname "$WORKSPACE_ROOT")"
+
+    # Sync with parent branch first (pull latest changes)
+    # Only sync if parent repo is clean; otherwise just proceed with close
+    if [[ -z "$(git -C "$PARENT_REPO_ROOT" status --porcelain)" ]]; then
+        # Fetch and pull parent branch if it has upstream
+        if git -C "$PARENT_REPO_ROOT" remote | grep -q .; then
+            git -C "$PARENT_REPO_ROOT" fetch origin 2>/dev/null || true
+        fi
+        if git -C "$PARENT_REPO_ROOT" rev-parse --abbrev-ref "$PARENT_BRANCH@{upstream}" >/dev/null 2>&1; then
+            local original_branch
+            original_branch="$(git -C "$PARENT_REPO_ROOT" rev-parse --abbrev-ref HEAD)"
+            if git -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH" 2>/dev/null; then
+                git -C "$PARENT_REPO_ROOT" pull --ff-only 2>/dev/null || true
+                # Return to original branch if different
+                if [[ "$original_branch" != "$PARENT_BRANCH" ]]; then
+                    git -C "$PARENT_REPO_ROOT" checkout "$original_branch" 2>/dev/null || true
+                fi
+            fi
+        fi
+
+        # Merge parent into workspace to ensure we're up to date
+        if ! git merge "$PARENT_BRANCH" --no-edit 2>/dev/null; then
+            git merge --abort 2>/dev/null || true
+            die "merge of '$PARENT_BRANCH' into '$BRANCH_NAME' has conflicts; please resolve manually before closing."
+        fi
+
+        # Update current_commit after potential merge
+        current_commit="$(git rev-parse HEAD)"
+    fi
+
+    # Determine if there are new commits (compared to start_commit)
+    local has_new_commits=false
+    if [[ "$current_commit" != "$START_COMMIT" ]]; then
+        has_new_commits=true
+    fi
+
+    if [[ "$has_new_commits" == "true" ]]; then
+        # Case B: There are new commits - need to merge back to parent
+
+        # Check parent repo is clean
+        if [[ -n "$(git -C "$PARENT_REPO_ROOT" status --porcelain)" ]]; then
+            die "parent repo has uncommitted changes; please commit or stash before closing."
+        fi
+
+        # Checkout parent branch in parent repo
+        if ! git -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH" 2>/dev/null; then
+            die "failed to checkout '$PARENT_BRANCH' in parent repo."
+        fi
+
+        # Attempt merge
+        if ! git -C "$PARENT_REPO_ROOT" merge --ff-only "$BRANCH_NAME" 2>/dev/null; then
+            # Try regular merge
+            if ! git -C "$PARENT_REPO_ROOT" merge --no-edit "$BRANCH_NAME" 2>/dev/null; then
+                # Merge failed, abort it
+                git -C "$PARENT_REPO_ROOT" merge --abort 2>/dev/null || true
+                die "merge of '$BRANCH_NAME' into '$PARENT_BRANCH' is not clean; please resolve manually."
+            fi
+        fi
+
+        echo "Merged '$BRANCH_NAME' into '$PARENT_BRANCH'." >&2
+    else
+        # Case A: No new commits
+        echo "No new commits on branch '$BRANCH_NAME'; closing workspace cleanly." >&2
+    fi
+
+    # We need to leave the workspace directory before removing it
+    # First, cd to workspace_parent
+    cd "$workspace_parent"
+
+    # Remove the worktree from parent repo
+    git -C "$PARENT_REPO_ROOT" worktree remove "$WORKSPACE_ROOT" --force 2>/dev/null || true
+
+    # Delete the branch from parent repo
+    git -C "$PARENT_REPO_ROOT" branch -D "$BRANCH_NAME" 2>/dev/null || true
+
+    # Remove workspace directory if it still exists (belt and suspenders)
+    if [[ -d "$WORKSPACE_ROOT" ]]; then
+        rm -rf "$WORKSPACE_ROOT"
+    fi
+
+    # tmux: reset pane title
+    tmux_set_pane_title ""
+
+    # User feedback
+    if [[ "$has_new_commits" == "true" ]]; then
+        echo "Merged '$BRANCH_NAME' into '$PARENT_BRANCH', deleted branch and removed workspace." >&2
+    else
+        echo "No commits on '$BRANCH_NAME'; removed branch and workspace." >&2
+    fi
+    echo "You are now back at: $workspace_parent" >&2
+
+    # Output cd command
+    output_cd "$workspace_parent"
+}
+
+# ------------------------------------------------------------------------------
+# Main
+# ------------------------------------------------------------------------------
+
+main() {
+    local subcommand="${1:-}"
+
+    case "$subcommand" in
+        open)
+            shift
+            if [[ $# -ne 1 ]]; then
+                echo "Error: 'brancher open' requires exactly one argument (branch name)." >&2
+                usage
+            fi
+            do_open "$1"
+            ;;
+        sync)
+            shift
+            if [[ $# -ne 0 ]]; then
+                echo "Error: 'brancher sync' takes no arguments." >&2
+                usage
+            fi
+            do_sync
+            ;;
+        close)
+            shift
+            if [[ $# -ne 0 ]]; then
+                echo "Error: 'brancher close' takes no arguments." >&2
+                usage
+            fi
+            do_close
+            ;;
+        -h|--help|help)
+            usage
+            ;;
+        "")
+            echo "Error: missing subcommand." >&2
+            usage
+            ;;
+        *)
+            echo "Error: unknown subcommand '$subcommand'." >&2
+            usage
+            ;;
+    esac
+}
+
+main "$@"
