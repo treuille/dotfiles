@@ -42,6 +42,9 @@ alias bat="batcat"
 # Used by Claude Code and potentially other tools
 export PATH=${HOME}/.local/bin:${PATH}
 
+# Custom scripts from dotfiles
+export PATH=${HOME}/dotfiles/bin:${PATH}
+
 # Claude Code XDG config directory
 export CLAUDE_CONFIG_DIR=${HOME}/.config/claude
 
