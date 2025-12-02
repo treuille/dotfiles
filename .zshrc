@@ -42,13 +42,10 @@ alias bat="batcat"
 # Used by Claude Code and potentially other tools
 export PATH=${HOME}/.local/bin:${PATH}
 
-# Custom scripts from dotfiles
-export PATH=${HOME}/dotfiles/bin:${PATH}
-
-# Wrapper for brancher to auto-cd into workspaces
+# Brancher: manage parallel working directories tied to Git branches
 brancher() {
     local output
-    output="$(command brancher "$@")"
+    output="$(${HOME}/dotfiles/bin/brancher "$@")"
     local rc=$?
     if [[ $rc -eq 0 && "$output" == cd\ * ]]; then
         eval "$output"
