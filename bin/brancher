@@ -7,10 +7,6 @@
 #   brancher sync                - Sync workspace with parent branch
 #   brancher close               - Merge branch back, delete branch and workspace
 #
-# For automatic directory changing, use:
-#   eval "$(brancher open <branch_name>)"
-#   eval "$(brancher close)"
-#
 
 set -euo pipefail
 
@@ -38,8 +34,6 @@ Description:
 Notes:
   - Run 'brancher open' from the Git repo root.
   - Run 'brancher sync' and 'brancher close' from inside the branch workspace.
-  - Consider using: eval "$(brancher open <branch_name>)" and eval "$(brancher close)"
-    so your shell changes directory automatically.
 EOF
     exit 1
 }
@@ -194,12 +188,6 @@ EOF
 
     # User feedback
     echo "Created branch '$branch_name' from '$parent_branch' in workspace '$parallel_dir'." >&2
-
-    if ! is_sourced; then
-        echo "To enter the workspace, run:" >&2
-        echo "  eval \"\$(brancher open $branch_name)\"" >&2
-        echo "Or manually:" >&2
-    fi
 
     # Output cd command
     output_cd "$parallel_dir"

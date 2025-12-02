@@ -45,6 +45,19 @@ export PATH=${HOME}/.local/bin:${PATH}
 # Custom scripts from dotfiles
 export PATH=${HOME}/dotfiles/bin:${PATH}
 
+# Wrapper for brancher to auto-cd into workspaces
+brancher() {
+    local output
+    output="$(command brancher "$@")"
+    local rc=$?
+    if [[ $rc -eq 0 && "$output" == cd\ * ]]; then
+        eval "$output"
+    elif [[ -n "$output" ]]; then
+        echo "$output"
+    fi
+    return $rc
+}
+
 # Claude Code XDG config directory
 export CLAUDE_CONFIG_DIR=${HOME}/.config/claude
 
