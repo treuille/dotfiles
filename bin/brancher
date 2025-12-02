@@ -183,6 +183,13 @@ branch_name=$branch_name
 start_commit=$start_commit
 EOF
 
+    # Add .brancher-meta to gitignore (worktrees share the main repo's info/exclude)
+    local git_common_dir
+    git_common_dir="$(git -C "$parallel_dir" rev-parse --git-common-dir)"
+    if ! grep -qxF ".brancher-meta" "$git_common_dir/info/exclude" 2>/dev/null; then
+        echo ".brancher-meta" >> "$git_common_dir/info/exclude"
+    fi
+
     # tmux: rename pane to branch name
     tmux_set_pane_title "$branch_name"
 
