@@ -2,10 +2,30 @@
 #
 # brancher - Manage parallel working directories tied to Git branches
 #
-# Usage:
-#   brancher open <branch_name>  - Create a new branch and parallel workspace
-#   brancher sync                - Sync workspace with parent branch
-#   brancher close               - Merge branch back, delete branch and workspace
+# USAGE:
+#   brancher open <branch_name>  - Create new branch and workspace, cd into it
+#   brancher sync                - Bidirectionally sync with parent branch
+#   brancher close               - Merge back, cleanup, cd to parent repo
+#
+# SHELL WRAPPER REQUIREMENT:
+#   This script outputs "cd '/path'" to stdout for directory changes.
+#   To actually change directories, you need a shell wrapper function.
+#   Add this to your .zshrc or .bashrc:
+#
+#     brancher() {
+#         local output
+#         output="$(${HOME}/dotfiles/bin/brancher "$@")"
+#         local rc=$?
+#         if [[ $rc -eq 0 && "$output" == cd\ * ]]; then
+#             eval "$output"
+#         elif [[ -n "$output" ]]; then
+#             echo "$output"
+#         fi
+#         return $rc
+#     }
+#
+#   Without this wrapper, you'll see the cd command printed but won't
+#   actually change directories.
 #
 
 set -euo pipefail
@@ -14,9 +34,51 @@ set -euo pipefail
 # Helper functions
 # ------------------------------------------------------------------------------
 
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+info() {
+    echo -e "${BLUE}▸${RESET} $*" >&2
+}
+
+success() {
+    echo -e "${GREEN}✓${RESET} $*" >&2
+}
+
+warn() {
+    echo -e "${YELLOW}⚠${RESET} $*" >&2
+}
+
 die() {
-    echo "Error: $*" >&2
+    echo -e "${RED}✗ Error:${RESET} $*" >&2
     exit 1
+}
+
+# Run a git command with stdout redirected to stderr (prevents polluting cd output)
+# Usage: git_safe <git args...>
+# Usage: git_safe -C <dir> <git args...>
+git_safe() {
+    git "$@" >&2
+}
+
+# Run a git command with stdout to stderr, stderr hidden
+# Use for commands where we want user to see success output but not errors
+# Usage: git_quiet <git args...>
+git_quiet() {
+    git "$@" >&2 2>/dev/null
+}
+
+# Run a git command completely silently (all output hidden)
+# Use for cleanup operations where we don't need any output
+# Usage: git_silent <git args...>
+git_silent() {
+    git "$@" >/dev/null 2>&1
 }
 
 usage() {
@@ -163,14 +225,14 @@ do_open() {
     fi
 
     # Create the new branch (without switching to it)
-    if ! git branch "$branch_name"; then
+    if ! git_safe branch "$branch_name"; then
         die "failed to create branch '$branch_name'."
     fi
 
     # Create the parallel directory using git worktree
-    if ! git worktree add "$parallel_dir" "$branch_name" 2>/dev/null; then
+    if ! git_quiet worktree add "$parallel_dir" "$branch_name"; then
         # Clean up the branch we just created
-        git branch -D "$branch_name" 2>/dev/null || true
+        git_silent branch -D "$branch_name" || true
         die "failed to create worktree at '$parallel_dir'."
     fi
 
@@ -194,7 +256,8 @@ EOF
     tmux_set_pane_title "$branch_name"
 
     # User feedback
-    echo "Created branch '$branch_name' from '$parent_branch' in workspace '$parallel_dir'." >&2
+    success "Created branch ${CYAN}${branch_name}${RESET} from ${CYAN}${parent_branch}${RESET}"
+    info "Workspace: ${BOLD}${parallel_dir}${RESET}"
 
     # Output cd command
     output_cd "$parallel_dir"
@@ -203,56 +266,185 @@ EOF
 # ------------------------------------------------------------------------------
 # brancher sync
 # ------------------------------------------------------------------------------
+#
+# WHAT SYNC DOES:
+#   Bidirectionally synchronizes the current branch with its parent branch.
+#   After sync, both branches point to the same commit and both worktrees
+#   reflect all changes from both branches.
+#
+# WORKFLOW:
+#   1. Pre-validation (no changes made):
+#      - Check current workspace is clean
+#      - Check parent worktree is clean
+#      - Check merge would succeed (no conflicts)
+#
+#   2. Sync (if validation passes):
+#      a. Merge parent → current (get parent's changes)
+#      b. Fast-forward parent to current (give parent our changes)
+#      c. Update parent worktree to reflect merged state
+#
+# EXAMPLE:
+#   You're in repo_test_01 (branch: test_01, parent: katha_v2)
+#   - katha_v2 has commits A, B
+#   - test_01 has commits A, B, C, D (your work)
+#
+#   After sync:
+#   - Both test_01 and katha_v2 point to commit D
+#   - repo_katha_v2 directory now has commits C, D
+#   - repo_test_01 directory unchanged (already had everything)
+#
+# ------------------------------------------------------------------------------
+
+# Find the worktree path for a given branch (if any)
+# Returns empty string if no worktree exists for the branch
+find_worktree_for_branch() {
+    local branch="$1"
+    local repo_dir="$2"
+    # Parse "git worktree list --porcelain" output:
+    #   worktree /path/to/worktree    (10 chars before path)
+    #   branch refs/heads/branchname  (19 chars before branch name)
+    git -C "$repo_dir" worktree list --porcelain 2>/dev/null | \
+        awk -v branch="$branch" '
+            /^worktree / { wt = substr($0, 10) }
+            /^branch refs\/heads\// {
+                b = substr($0, 19)
+                if (b == branch) print wt
+            }
+        '
+}
 
 do_sync() {
     require_brancher_workspace
 
-    # Check for uncommitted changes in workspace
-    if [[ -n "$(git status --porcelain)" ]]; then
+    info "Validating sync prerequisites..."
+
+    # --------------------------------------------------------------------------
+    # Phase 1: Pre-validation (no changes made)
+    # --------------------------------------------------------------------------
+
+    # Check 1: Current workspace must be clean (untracked files are OK)
+    if [[ -n "$(git status --porcelain | grep -v '^??')" ]]; then
         die "workspace has uncommitted changes; please commit or stash before syncing."
     fi
 
-    # Check parent repo is clean
-    if [[ -n "$(git -C "$PARENT_REPO_ROOT" status --porcelain)" ]]; then
-        die "parent repo has uncommitted changes; please commit or stash before syncing."
-    fi
-
-    # Fetch latest from remote in parent repo (if remote exists)
-    if git -C "$PARENT_REPO_ROOT" remote | grep -q .; then
-        echo "Fetching latest from remote..." >&2
-        git -C "$PARENT_REPO_ROOT" fetch origin 2>/dev/null || true
-    fi
-
-    # Pull parent branch in parent repo (if it has upstream)
-    if git -C "$PARENT_REPO_ROOT" rev-parse --abbrev-ref "$PARENT_BRANCH@{upstream}" >/dev/null 2>&1; then
-        echo "Pulling '$PARENT_BRANCH' in parent repo..." >&2
-        if ! git -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH" 2>/dev/null; then
-            die "failed to checkout '$PARENT_BRANCH' in parent repo."
-        fi
-        if ! git -C "$PARENT_REPO_ROOT" pull --ff-only 2>/dev/null; then
-            echo "Warning: could not fast-forward pull '$PARENT_BRANCH'; continuing with local state." >&2
+    # Check 2: Find parent worktree and ensure it has no uncommitted changes
+    # Note: Untracked files (??) are OK - only block on staged/modified tracked files
+    local parent_worktree
+    parent_worktree="$(find_worktree_for_branch "$PARENT_BRANCH" "$PARENT_REPO_ROOT")"
+    if [[ -n "$parent_worktree" ]]; then
+        # Filter out untracked files (lines starting with ??) from status check
+        if [[ -n "$(git -C "$parent_worktree" status --porcelain 2>/dev/null | grep -v '^??')" ]]; then
+            die "parent worktree (${parent_worktree}) has uncommitted changes; please commit or stash before syncing."
         fi
     fi
 
-    # Merge parent branch into workspace branch
-    echo "Merging '$PARENT_BRANCH' into '$BRANCH_NAME'..." >&2
-    if ! git merge "$PARENT_BRANCH" --no-edit 2>/dev/null; then
-        git merge --abort 2>/dev/null || true
-        die "merge of '$PARENT_BRANCH' into '$BRANCH_NAME' has conflicts; please resolve manually."
+    # Check 3: Compute merge status
+    local merge_base current_head parent_head
+    merge_base="$(git merge-base HEAD "$PARENT_BRANCH" 2>/dev/null)" || die "cannot find common ancestor with '$PARENT_BRANCH'."
+    current_head="$(git rev-parse HEAD)"
+    parent_head="$(git rev-parse "$PARENT_BRANCH")"
+
+    # Determine what needs to happen
+    local need_merge_parent=false    # parent has commits we don't have
+    local need_update_parent=false   # we have commits parent doesn't have
+
+    if [[ "$merge_base" != "$parent_head" ]]; then
+        need_merge_parent=true
+    fi
+    if [[ "$merge_base" != "$current_head" ]]; then
+        need_update_parent=true
     fi
 
-    echo "Synced '$BRANCH_NAME' with '$PARENT_BRANCH'." >&2
+    # Already in sync
+    if [[ "$need_merge_parent" == "false" && "$need_update_parent" == "false" ]]; then
+        success "Already in sync with ${CYAN}${PARENT_BRANCH}${RESET}"
+        return 0
+    fi
+
+    # Check 4: If we need to merge parent's changes, verify no conflicts
+    if [[ "$need_merge_parent" == "true" ]]; then
+        info "Checking for merge conflicts..."
+        # Try merge in-memory using git merge-tree (available in git 2.38+)
+        if git merge-tree --write-tree HEAD "$PARENT_BRANCH" >/dev/null 2>&1; then
+            : # Merge would succeed
+        else
+            # Fallback: try actual merge with --no-commit, then abort
+            if ! git merge --no-commit --no-ff "$PARENT_BRANCH" >/dev/null 2>&1; then
+                git merge --abort 2>/dev/null || true
+                die "merge would have conflicts; please resolve manually with 'git merge $PARENT_BRANCH'."
+            fi
+            git merge --abort 2>/dev/null || true
+        fi
+    fi
+
+    success "Pre-validation passed"
+
+    # --------------------------------------------------------------------------
+    # Phase 2: Sync (make changes)
+    # --------------------------------------------------------------------------
+
+    # Step A: Merge parent → current (if parent has new commits)
+    if [[ "$need_merge_parent" == "true" ]]; then
+        info "Merging ${CYAN}${PARENT_BRANCH}${RESET} → ${CYAN}${BRANCH_NAME}${RESET}..."
+        if ! git_quiet merge "$PARENT_BRANCH" --no-edit; then
+            git merge --abort 2>/dev/null || true
+            die "merge failed unexpectedly; please resolve manually."
+        fi
+    fi
+
+    # Step B: Fast-forward parent to current (if we have new commits)
+    # After the merge above, current branch has everything, so parent can ff
+    if [[ "$need_update_parent" == "true" ]]; then
+        info "Updating ${CYAN}${PARENT_BRANCH}${RESET} ← ${CYAN}${BRANCH_NAME}${RESET}..."
+
+        # Update the parent branch ref to point to our current HEAD
+        local new_head
+        new_head="$(git rev-parse HEAD)"
+        if ! git_silent update-ref "refs/heads/$PARENT_BRANCH" "$new_head"; then
+            die "failed to update '$PARENT_BRANCH' branch."
+        fi
+
+        # If parent has a worktree, update it to reflect the new state
+        if [[ -n "$parent_worktree" ]]; then
+            info "Updating parent worktree..."
+            # Reset the parent worktree to match the updated branch
+            if ! git -C "$parent_worktree" reset --hard HEAD >/dev/null 2>&1; then
+                warn "Could not update parent worktree; you may need to run 'git reset --hard' in ${parent_worktree}"
+            fi
+        fi
+    fi
+
+    success "Synced ${CYAN}${BRANCH_NAME}${RESET} ↔ ${CYAN}${PARENT_BRANCH}${RESET}"
 }
 
 # ------------------------------------------------------------------------------
 # brancher close
 # ------------------------------------------------------------------------------
+#
+# WHAT CLOSE DOES:
+#   Merges any new commits back to parent, then cleans up the workspace.
+#   Returns you to the parent repo directory (where you ran 'brancher open').
+#
+# WORKFLOW:
+#   1. Check workspace is clean (no uncommitted changes)
+#   2. If there are new commits on this branch:
+#      - Merge them into parent branch
+#   3. Remove the worktree and delete the branch
+#   4. Output "cd '/path/to/parent/repo'" to stdout
+#
+# IMPORTANT:
+#   The cd command is output to stdout. The shell wrapper function (see top
+#   of this file) must eval this command to actually change directories.
+#   If you see "cd '/path'" printed instead of changing dirs, you're likely
+#   calling the script directly instead of through the wrapper function.
+#
+# ------------------------------------------------------------------------------
 
 do_close() {
     require_brancher_workspace
 
-    # Check for uncommitted changes
-    if [[ -n "$(git status --porcelain)" ]]; then
+    # Check for uncommitted changes (untracked files are OK)
+    if [[ -n "$(git status --porcelain | grep -v '^??')" ]]; then
         die "workspace has uncommitted changes; please commit or stash before closing."
     fi
 
@@ -260,13 +452,9 @@ do_close() {
     local current_commit
     current_commit="$(git rev-parse HEAD)"
 
-    # Determine workspace parent directory
-    local workspace_parent
-    workspace_parent="$(dirname "$WORKSPACE_ROOT")"
-
     # Sync with parent branch first (pull latest changes)
-    # Only sync if parent repo is clean; otherwise just proceed with close
-    if [[ -z "$(git -C "$PARENT_REPO_ROOT" status --porcelain)" ]]; then
+    # Only sync if parent repo is clean (untracked files OK); otherwise just proceed with close
+    if [[ -z "$(git -C "$PARENT_REPO_ROOT" status --porcelain | grep -v '^??')" ]]; then
         # Fetch and pull parent branch if it has upstream
         if git -C "$PARENT_REPO_ROOT" remote | grep -q .; then
             git -C "$PARENT_REPO_ROOT" fetch origin 2>/dev/null || true
@@ -274,17 +462,17 @@ do_close() {
         if git -C "$PARENT_REPO_ROOT" rev-parse --abbrev-ref "$PARENT_BRANCH@{upstream}" >/dev/null 2>&1; then
             local original_branch
             original_branch="$(git -C "$PARENT_REPO_ROOT" rev-parse --abbrev-ref HEAD)"
-            if git -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH" 2>/dev/null; then
-                git -C "$PARENT_REPO_ROOT" pull --ff-only 2>/dev/null || true
+            if git_silent -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH"; then
+                git_silent -C "$PARENT_REPO_ROOT" pull --ff-only || true
                 # Return to original branch if different
                 if [[ "$original_branch" != "$PARENT_BRANCH" ]]; then
-                    git -C "$PARENT_REPO_ROOT" checkout "$original_branch" 2>/dev/null || true
+                    git_silent -C "$PARENT_REPO_ROOT" checkout "$original_branch" || true
                 fi
             fi
         fi
 
         # Merge parent into workspace to ensure we're up to date
-        if ! git merge "$PARENT_BRANCH" --no-edit 2>/dev/null; then
+        if ! git_quiet merge "$PARENT_BRANCH" --no-edit; then
             git merge --abort 2>/dev/null || true
             die "merge of '$PARENT_BRANCH' into '$BRANCH_NAME' has conflicts; please resolve manually before closing."
         fi
@@ -302,41 +490,42 @@ do_close() {
     if [[ "$has_new_commits" == "true" ]]; then
         # Case B: There are new commits - need to merge back to parent
 
-        # Check parent repo is clean
-        if [[ -n "$(git -C "$PARENT_REPO_ROOT" status --porcelain)" ]]; then
+        # Check parent repo is clean (untracked files are OK)
+        if [[ -n "$(git -C "$PARENT_REPO_ROOT" status --porcelain | grep -v '^??')" ]]; then
             die "parent repo has uncommitted changes; please commit or stash before closing."
         fi
 
         # Checkout parent branch in parent repo
-        if ! git -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH" 2>/dev/null; then
+        if ! git_silent -C "$PARENT_REPO_ROOT" checkout "$PARENT_BRANCH"; then
             die "failed to checkout '$PARENT_BRANCH' in parent repo."
         fi
 
         # Attempt merge
-        if ! git -C "$PARENT_REPO_ROOT" merge --ff-only "$BRANCH_NAME" 2>/dev/null; then
+        if ! git_quiet -C "$PARENT_REPO_ROOT" merge --ff-only "$BRANCH_NAME"; then
             # Try regular merge
-            if ! git -C "$PARENT_REPO_ROOT" merge --no-edit "$BRANCH_NAME" 2>/dev/null; then
+            if ! git_quiet -C "$PARENT_REPO_ROOT" merge --no-edit "$BRANCH_NAME"; then
                 # Merge failed, abort it
                 git -C "$PARENT_REPO_ROOT" merge --abort 2>/dev/null || true
                 die "merge of '$BRANCH_NAME' into '$PARENT_BRANCH' is not clean; please resolve manually."
             fi
         fi
 
-        echo "Merged '$BRANCH_NAME' into '$PARENT_BRANCH'." >&2
+        success "Merged ${CYAN}${BRANCH_NAME}${RESET} into ${CYAN}${PARENT_BRANCH}${RESET}"
     else
         # Case A: No new commits
-        echo "No new commits on branch '$BRANCH_NAME'; closing workspace cleanly." >&2
+        info "No new commits on branch ${CYAN}${BRANCH_NAME}${RESET}"
     fi
 
     # We need to leave the workspace directory before removing it
-    # First, cd to workspace_parent
-    cd "$workspace_parent"
+    # First, cd to parent repo (where we originally ran 'brancher open')
+    cd "$PARENT_REPO_ROOT"
 
     # Remove the worktree from parent repo
-    git -C "$PARENT_REPO_ROOT" worktree remove "$WORKSPACE_ROOT" --force 2>/dev/null || true
+    info "Cleaning up workspace..."
+    git_silent worktree remove "$WORKSPACE_ROOT" --force || true
 
     # Delete the branch from parent repo
-    git -C "$PARENT_REPO_ROOT" branch -D "$BRANCH_NAME" 2>/dev/null || true
+    git_silent branch -D "$BRANCH_NAME" || true
 
     # Remove workspace directory if it still exists (belt and suspenders)
     if [[ -d "$WORKSPACE_ROOT" ]]; then
@@ -348,14 +537,14 @@ do_close() {
 
     # User feedback
     if [[ "$has_new_commits" == "true" ]]; then
-        echo "Merged '$BRANCH_NAME' into '$PARENT_BRANCH', deleted branch and removed workspace." >&2
+        success "Closed ${CYAN}${BRANCH_NAME}${RESET} → merged into ${CYAN}${PARENT_BRANCH}${RESET}"
     else
-        echo "No commits on '$BRANCH_NAME'; removed branch and workspace." >&2
+        success "Closed ${CYAN}${BRANCH_NAME}${RESET} (no changes)"
     fi
-    echo "You are now back at: $workspace_parent" >&2
+    info "Back to: ${BOLD}${PARENT_REPO_ROOT}${RESET}"
 
-    # Output cd command
-    output_cd "$workspace_parent"
+    # Output cd command - return to the original repo where 'brancher open' was run
+    output_cd "$PARENT_REPO_ROOT"
 }
 
 # ------------------------------------------------------------------------------
