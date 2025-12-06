@@ -100,12 +100,6 @@ EOF
     exit 1
 }
 
-# Check if the script is being sourced
-is_sourced() {
-    # In bash, $0 != $BASH_SOURCE when sourced
-    [[ "${BASH_SOURCE[0]}" != "$0" ]]
-}
-
 # Check if we are inside a Git repository
 require_git_repo() {
     if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -118,6 +112,13 @@ abs_path() {
     (cd "$1" && pwd)
 }
 
+# Check if a directory has uncommitted changes (staged or unstaged)
+# Untracked files are ignored. Returns 0 (true) if dirty.
+has_uncommitted_changes() {
+    local dir="${1:-.}"
+    [[ -n "$(git -C "$dir" status --porcelain 2>/dev/null | grep -v '^??')" ]]
+}
+
 # Rename tmux pane title if inside tmux (errors are ignored)
 tmux_set_pane_title() {
     local title="$1"
@@ -126,14 +127,9 @@ tmux_set_pane_title() {
     fi
 }
 
-# Output cd command or actually cd if sourced
+# Output cd command for the shell wrapper to eval
 output_cd() {
-    local target_dir="$1"
-    if is_sourced; then
-        cd "$target_dir"
-    else
-        echo "cd '$target_dir'"
-    fi
+    echo "cd '$1'"
 }
 
 # Require that we are in a brancher workspace and parse metadata
@@ -323,7 +319,7 @@ do_sync() {
     # --------------------------------------------------------------------------
 
     # Check 1: Current workspace must be clean (untracked files are OK)
-    if [[ -n "$(git status --porcelain | grep -v '^??')" ]]; then
+    if has_uncommitted_changes; then
         die "workspace has uncommitted changes; please commit or stash before syncing."
     fi
 
@@ -331,11 +327,8 @@ do_sync() {
     # Note: Untracked files (??) are OK - only block on staged/modified tracked files
     local parent_worktree
     parent_worktree="$(find_worktree_for_branch "$PARENT_BRANCH" "$PARENT_REPO_ROOT")"
-    if [[ -n "$parent_worktree" ]]; then
-        # Filter out untracked files (lines starting with ??) from status check
-        if [[ -n "$(git -C "$parent_worktree" status --porcelain 2>/dev/null | grep -v '^??')" ]]; then
-            die "parent worktree (${parent_worktree}) has uncommitted changes; please commit or stash before syncing."
-        fi
+    if [[ -n "$parent_worktree" ]] && has_uncommitted_changes "$parent_worktree"; then
+        die "parent worktree (${parent_worktree}) has uncommitted changes; please commit or stash before syncing."
     fi
 
     # Check 3: Compute merge status
@@ -444,7 +437,7 @@ do_close() {
     require_brancher_workspace
 
     # Check for uncommitted changes (untracked files are OK)
-    if [[ -n "$(git status --porcelain | grep -v '^??')" ]]; then
+    if has_uncommitted_changes; then
         die "workspace has uncommitted changes; please commit or stash before closing."
     fi
 
@@ -454,7 +447,7 @@ do_close() {
 
     # Sync with parent branch first (pull latest changes)
     # Only sync if parent repo is clean (untracked files OK); otherwise just proceed with close
-    if [[ -z "$(git -C "$PARENT_REPO_ROOT" status --porcelain | grep -v '^??')" ]]; then
+    if ! has_uncommitted_changes "$PARENT_REPO_ROOT"; then
         # Fetch and pull parent branch if it has upstream
         if git -C "$PARENT_REPO_ROOT" remote | grep -q .; then
             git -C "$PARENT_REPO_ROOT" fetch origin 2>/dev/null || true
@@ -491,7 +484,7 @@ do_close() {
         # Case B: There are new commits - need to merge back to parent
 
         # Check parent repo is clean (untracked files are OK)
-        if [[ -n "$(git -C "$PARENT_REPO_ROOT" status --porcelain | grep -v '^??')" ]]; then
+        if has_uncommitted_changes "$PARENT_REPO_ROOT"; then
             die "parent repo has uncommitted changes; please commit or stash before closing."
         fi
 
