@@ -112,8 +112,10 @@ bash <(curl "RAW_URL")
 
 For example:
 ```sh
-bash <(curl "https://raw.githubusercontent.com/treuille/dev-env/main/dev-env/install.bash?token=AAMYONPNMWD5T64VOLQH3WTAVFFL6")
+bash <(curl "RAW_URL_FROM_GITHUB")
 ```
+
+> **Note:** Get the raw URL from GitHub's UI. Never commit tokens to version control.
 
 Type in `adrien`'s password at the right time, then reboot:
 
@@ -133,14 +135,16 @@ At some point, we need to ensure `~/.ssh/config` refers to the server:
 
 ```
 Host fish-dev
-     HostName 157.245.167.154
+     HostName <YOUR_SERVER_IP>
      Port 22
      User root
      ForwardAgent yes
-     
+
      # TODO: Setup a firewall so that I need to do local forwarding.
-     # LocalForward 8501 157.245.167.154:8501
+     # LocalForward 8501 <YOUR_SERVER_IP>:8501
 ```
+
+> **Note:** Replace `<YOUR_SERVER_IP>` with your actual server IP. Never commit real IPs to version control.
 
 # Beautiful fonts
 

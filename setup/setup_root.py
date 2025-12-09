@@ -4,6 +4,8 @@ TODO: Add documentation
 
 import sys
 import os
+import subprocess
+import shutil
 import setup_utils
 from termcolor import cprint
 import getpass
@@ -145,8 +147,15 @@ def create_user(user):
     encrypted_password = sha512_crypt.hash(password)
 
     # Create user with sudo privileges
-    add_user_cmd = f"sudo useradd -b /home -G sudo -m -p '{encrypted_password}' -s $(which zsh) -U {user}"
-    os.system(add_user_cmd)
+    zsh_path = shutil.which("zsh")
+    if not zsh_path:
+        print("Error: zsh not found in PATH")
+        sys.exit(-1)
+    subprocess.run(
+        ["sudo", "useradd", "-b", "/home", "-G", "sudo", "-m",
+         "-p", encrypted_password, "-s", zsh_path, "-U", user],
+        check=True
+    )
 
     temp_user_status = f'Adding {user} with {len(password)}-char password "{password[:2]}...{password[-2:]}"...'
     cprint(temp_user_status, "magenta", attrs=["bold"], end="\r")
@@ -192,10 +201,14 @@ def lock_down_ssh():
             temp_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
             temp_file.writelines(sshd_config)
             temp_file.close()
-            os.system(
-                f"sudo chmod -v --reference={sshd_config_filename} {temp_file.name}"
+            subprocess.run(
+                ["sudo", "chmod", "-v", f"--reference={sshd_config_filename}", temp_file.name],
+                check=True
             )
-            os.system(f"sudo mv -v {temp_file.name} {sshd_config_filename}")
+            subprocess.run(
+                ["sudo", "mv", "-v", temp_file.name, sshd_config_filename],
+                check=True
+            )
             print(f"Overwrote {sshd_config_filename}")
             print("Please restart the computer.")
         cprint("Done\n", "green")
