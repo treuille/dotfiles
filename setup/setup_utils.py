@@ -11,7 +11,6 @@ import pickle
 import subprocess
 from typing import Optional, Literal
 import platform
-import socket
 
 # This is the command to install apt packages
 APT_INSTALL = "sudo DEBIAN_FRONTEND=noninteractive apt install -y"
@@ -25,7 +24,6 @@ def detect_environment() -> Environment:
 
     Lima VMs have specific markers:
     - /etc/lima-cidata/ directory exists (lima cloud-init data)
-    - /.limactl or /lima.yaml existence
     - LIMA_CIDATA_* environment variables
 
     Returns "lima" or "digitalocean".
@@ -38,11 +36,6 @@ def detect_environment() -> Environment:
     for key in os.environ:
         if key.startswith("LIMA_"):
             return "lima"
-
-    # Check for lima in the hostname (common pattern)
-    hostname = socket.gethostname().lower()
-    if "lima" in hostname:
-        return "lima"
 
     # Default to Digital Ocean
     return "digitalocean"
