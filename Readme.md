@@ -4,32 +4,29 @@ Personal dotfiles for development environments on Digital Ocean and Lima VMs.
 
 ## Quick Start
 
-### Lima VM (Local Development)
+### Lima VM with Dauphin (Recommended)
 
-**Prerequisites**: Create a Lima VM with the `adrien` user using [treuille/dauphin](https://github.com/treuille/dauphin) bootstrap.
+**Two-user security model**: `lima-admin` has sudo for system operations, `adrien` has no sudo for security isolation.
 
-1. SSH into your Lima VM as the admin user (with sudo access):
+**Prerequisites**: Create a Lima VM using [treuille/dauphin](https://github.com/treuille/dauphin).
 
-```sh
-limactl shell <vm-name>
-```
-
-2. Run the bootstrap script (installs system packages):
+**Step 1**: As `lima-admin` (has sudo), install system packages:
 
 ```sh
+limactl shell dauphin
 export DOTFILES_BRANCH=main
-bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
-3. Switch to the `adrien` user and run again (installs dotfiles):
+**Step 2**: As `adrien` (no sudo), install user dotfiles:
 
 ```sh
-sudo -u adrien -i
+limactl shell dauphin --user adrien
 export DOTFILES_BRANCH=main
-bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
-4. Next step: Install [treuille/dauphin](https://github.com/treuille/dauphin) as your life orchestrator.
+**Step 3**: Install [treuille/dauphin](https://github.com/treuille/dauphin) as your life orchestrator.
 
 ### Digital Ocean (Remote Server)
 
@@ -37,7 +34,7 @@ bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANC
 
 ```sh
 export DOTFILES_BRANCH=main
-bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
 2. SSH in, this time as `adrien`, and run the same command.
@@ -48,11 +45,17 @@ bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANC
 scp <oldhost>:.config/nvim/chatgpt_nvim.txt <newhost>:.config/nvim/chatgpt_nvim.txt
 ```
 
-## Environment Detection
+## Environment & Sudo Detection
 
-The setup scripts automatically detect your environment:
-- **Lima**: Skips server hardening (user creation, SSH lockdown, firewall)
-- **Digital Ocean**: Full setup including security hardening
+The setup scripts automatically detect:
+
+| Condition | Behavior |
+|-----------|----------|
+| **Has sudo + Digital Ocean** | Full setup: packages, user creation, SSH hardening, firewall |
+| **Has sudo + Lima** | Package installation only (no hardening for local VM) |
+| **No sudo** | User dotfiles only (assumes packages installed by admin) |
+
+If you run without sudo and system packages aren't installed, you'll see a helpful error message directing you to ask your system administrator to run the script first.
 
 ## (Optional) Install bacon
 
@@ -64,18 +67,21 @@ cargo install --locked bacon
 
 See [the website](https://dystroy.org/bacon/).
 
-# Lima VM Setup (via limactl)
+## Manual Lima Setup (without Dauphin)
 
-Create a Lima VM configured for this dotfiles setup:
+For a simpler Lima setup where the admin user runs everything:
 
 ```sh
-# Create VM (dauphin handles this, but for manual setup:)
 limactl create --name=dev --cpus=4 --memory=8 --disk=50 template://ubuntu
 limactl start dev
 limactl shell dev
+
+# As the default lima user (has sudo):
+export DOTFILES_BRANCH=main
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
-For full Lima VM bootstrap with `adrien` user pre-configured, use [treuille/dauphin](https://github.com/treuille/dauphin).
+For the full security-isolated setup with `adrien` user pre-configured, use [treuille/dauphin](https://github.com/treuille/dauphin).
 
 # Blink Shell Installation Instructions
 
