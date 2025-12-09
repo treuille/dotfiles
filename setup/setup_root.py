@@ -1,5 +1,9 @@
 """
-TODO: Add documentation
+Root-level setup script for dotfiles installation.
+
+Supports two environments:
+- Digital Ocean: Full setup including user creation, SSH hardening, firewall
+- Lima: Package installation only (user exists, no hardening needed for local VM)
 """
 
 import sys
@@ -114,6 +118,27 @@ def setup_root():
         ],
     )
 
+    # Server hardening (Digital Ocean only - not needed for local Lima VMs)
+    if setup_utils.is_digitalocean():
+        harden_server()
+    else:
+        env = setup_utils.detect_environment()
+        cprint(f"Skipping server hardening (environment: {env})", "cyan")
+
+
+def harden_server():
+    """Harden the server for public internet exposure (Digital Ocean).
+
+    This includes:
+    - Creating the adrien user with password
+    - Locking down SSH (disable password auth, root login)
+    - Enabling UFW firewall
+
+    Not needed for local Lima VMs where the user already exists
+    and network security is handled by the host.
+    """
+    cprint("Hardening server for Digital Ocean...", "blue", attrs=["bold"])
+
     # Create a user to SSH into this box.
     create_user("adrien")
 
@@ -222,12 +247,24 @@ def main():
     if not setup_utils.user_is_root():
         raise RuntimeError("Must run this script as root or with sudo privileges.")
 
+    # Show environment info
+    env = setup_utils.detect_environment()
+    cprint(f"Detected environment: {env}", "blue", attrs=["bold"])
+
     # Run the setup script.
     setup_root()
 
-    # Tell the root user to reboot.
-    cprint(f"Please reboot the computer:", "red", attrs=["bold"])
-    print("  sudo reboot")
+    # Completion message depends on environment
+    if setup_utils.is_digitalocean():
+        cprint("Please reboot the computer:", "red", attrs=["bold"])
+        print("  sudo reboot")
+        print("\nThen SSH in as 'adrien' and run the bootstrap script again.")
+    else:
+        cprint("Root setup complete!", "green", attrs=["bold"])
+        print("\nNow run the bootstrap script as the 'adrien' user to install dotfiles.")
+        print("If you're in a Lima VM, you may need to:")
+        print("  sudo -u adrien -i")
+        print("Then run the bootstrap script.")
 
 
 if __name__ == "__main__":

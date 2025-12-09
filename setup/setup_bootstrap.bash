@@ -1,11 +1,15 @@
-# Bootstrap the setup of a digital ocean installation by:
+# Bootstrap the setup of a development environment by:
 #
 # 1. Installing the dotfiles repo
-# 2. Installing python3 virtual environmnet (venv) if necessary
-# 3. Creating a venv
-# 4. Running a script in the venv
-#     - if root: setup_root.py
-#     - not root: setup_user.py
+# 2. Installing uv and creating a Python virtual environment
+# 3. Running the appropriate setup script:
+#     - With sudo access: setup_root.py (installs system packages)
+#     - Without sudo: setup_dotfiles.py (installs user dotfiles)
+#
+# Supports three deployment scenarios:
+# - Digital Ocean: Run as root first, then as adrien user
+# - Lima VM (single user): Run as admin user (has sudo), then as adrien user
+# - Lima VM (dauphin): lima-admin installs packages, adrien runs dotfiles only
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
@@ -38,16 +42,53 @@ echo_red()
     echo -e "\e[1m\e[31m$@\e[0m"
 }
 
-# Prevent interactive restart dialogs
+# Detect and display environment (Lima vs Digital Ocean)
+detect_environment()
+{
+  if [ -d "/etc/lima-cidata" ];
+  then
+    echo "lima"
+  else
+    echo "digitalocean"
+  fi
+}
+
+# Display environment info at startup
+show_environment()
+{
+  local env=$(detect_environment)
+  echo -e "\e[1m\e[34mDetected environment: ${env}\e[0m"
+
+  if [ $IS_ROOT -eq 0 ];
+  then
+    echo -e "\e[32mRunning with sudo access - will install system packages\e[0m"
+  else
+    echo -e "\e[33mRunning without sudo - will install user dotfiles only\e[0m"
+  fi
+
+  if [ "$env" = "lima" ];
+  then
+    echo -e "\e[36mLima VM detected - server hardening will be skipped\e[0m"
+  fi
+  echo
+}
+
+# Prevent interactive restart dialogs (Digital Ocean specific)
 prevent_restart_dialog()
 {
   if [ $IS_ROOT -eq 0 ];
   then
-    echo_red "Turning off interactive restart during install process...\n"
-    sudo sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l';/g" /etc/needrestart/needrestart.conf
-    if [[ $? -ne 0 ]];
+    local needrestart_conf="/etc/needrestart/needrestart.conf"
+    if [ -f "$needrestart_conf" ];
     then
-      echo_red "Failed to disable restart dialogs. Continuing anyway..."
+      echo_red "Turning off interactive restart during install process...\n"
+      sudo sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l';/g" "$needrestart_conf"
+      if [[ $? -ne 0 ]];
+      then
+        echo_red "Failed to disable restart dialogs. Continuing anyway..."
+      fi
+    else
+      echo_red "needrestart.conf not found - skipping restart dialog config"
     fi
   fi
 }
@@ -81,36 +122,59 @@ install_dotfiles()
   end_block
 }
 
-# Install uv globally to /usr/local/bin
+# Ensure uv is available (install if needed and possible)
 install_uv()
 {
-  # Only run if the user has sudo access
-  if [ $IS_ROOT -ne 0 ];
-  then
-    return 255
-  fi
+  start_block "Checking for uv package manager"
 
-  start_block "Installing uv globally into /usr/local/bin"
-  # Check if uv is already installed
+  # Check if uv is already installed (by admin or previous run)
   if command -v uv >/dev/null 2>&1;
   then
     echo_red "uv is already installed."
     uv --version || true
-  else
-    # Install uv system-wide
-    curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
-
-    # Verify installation
-    if ! command -v uv >/dev/null 2>&1;
+    end_block
+    # Skip zsh completion setup if no sudo (already done by admin)
+    if [ $IS_ROOT -eq 0 ];
     then
-      echo_red "ERROR: uv not found in PATH after install."
-      exit 1
+      setup_uv_zsh_completion
     fi
-
-    uv --version || true
+    return 0
   fi
+
+  # uv not installed - need to install it
+  if [ $IS_ROOT -ne 0 ];
+  then
+    # No sudo access and uv not installed - can't proceed
+    echo_red "ERROR: uv is not installed and you don't have sudo access."
+    echo_red ""
+    echo_red "Please ask your system administrator (lima-admin) to run:"
+    echo_red "  bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup_bootstrap.bash)"
+    echo_red ""
+    echo_red "This will install system packages including uv."
+    exit 1
+  fi
+
+  # Has sudo - install uv system-wide
+  echo_red "Installing uv globally into /usr/local/bin"
+  curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
+
+  # Verify installation
+  if ! command -v uv >/dev/null 2>&1;
+  then
+    echo_red "ERROR: uv not found in PATH after install."
+    exit 1
+  fi
+
+  uv --version || true
   end_block
 
+  # Setup zsh completion (requires sudo)
+  setup_uv_zsh_completion
+}
+
+# Setup zsh completion for uv (requires sudo)
+setup_uv_zsh_completion()
+{
   start_block "Installing zsh completion for uv for all users"
   # Ensure zsh site-functions directory exists
   ZSH_COMPLETION_DIR="/usr/share/zsh/site-functions"
@@ -175,6 +239,7 @@ run_python_script()
 }
 
 # Actually run the script
+show_environment
 prevent_restart_dialog
 install_dotfiles
 install_uv

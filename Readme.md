@@ -1,22 +1,65 @@
-# Install in a Ubuntu Container
+# Dotfiles Setup
 
-1. ssh in as `root`, and run this command:
+Personal dotfiles for development environments on Digital Ocean and Lima VMs.
+
+## Quick Start
+
+### Lima VM with Dauphin (Recommended)
+
+**Two-user security model**: `lima-admin` has sudo for system operations, `adrien` has no sudo for security isolation.
+
+**Prerequisites**: Create a Lima VM using [treuille/dauphin](https://github.com/treuille/dauphin).
+
+**Step 1**: As `lima-admin` (has sudo), install system packages:
 
 ```sh
-export DOTFILES_BRANCH=main; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+limactl shell dauphin
+export DOTFILES_BRANCH=main
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
-2. ssh in, this time as `adrien`, and run the same command.
+**Step 2**: As `adrien` (no sudo), install user dotfiles:
 
-3. copy over the OpenAI key as follows:
+```sh
+limactl shell dauphin --user adrien
+export DOTFILES_BRANCH=main
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+```
+
+**Step 3**: Install [treuille/dauphin](https://github.com/treuille/dauphin) as your life orchestrator.
+
+### Digital Ocean (Remote Server)
+
+1. SSH in as `root`, and run this command:
+
+```sh
+export DOTFILES_BRANCH=main
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+```
+
+2. SSH in, this time as `adrien`, and run the same command.
+
+3. Copy over the OpenAI key as follows:
 
 ```sh
 scp <oldhost>:.config/nvim/chatgpt_nvim.txt <newhost>:.config/nvim/chatgpt_nvim.txt
 ```
 
-## (Optional) install bacon
+## Environment & Sudo Detection
 
-1. Install `bacon` (the new `cargo-watch`)
+The setup scripts automatically detect:
+
+| Condition | Behavior |
+|-----------|----------|
+| **Has sudo + Digital Ocean** | Full setup: packages, user creation, SSH hardening, firewall |
+| **Has sudo + Lima** | Package installation only (no hardening for local VM) |
+| **No sudo** | User dotfiles only (assumes packages installed by admin) |
+
+If you run without sudo and system packages aren't installed, you'll see a helpful error message directing you to ask your system administrator to run the script first.
+
+## (Optional) Install bacon
+
+Install `bacon` (the new `cargo-watch`):
 
 ```sh
 cargo install --locked bacon
@@ -24,22 +67,21 @@ cargo install --locked bacon
 
 See [the website](https://dystroy.org/bacon/).
 
-# Multipass setup instructions
+## Manual Lima Setup (without Dauphin)
 
-Run these commands:
-
-```sh
-INSTANCE_NAME=test-4 # or whatever
-multipass launch --cpus $(sysctl -n hw.physicalcpu) --disk 50G --memory $(echo "scale=1; $(sysctl -n hw.memsize) / 4 / 1073741824" | bc)G --name ${INSTANCE_NAME}
-multipass exec ${INSTANCE_NAME} -- sh -c "echo '$(cat ~/.ssh/id_ed25519.pub)' >> /home/ubuntu/.ssh/authorized_keys"
-multipass info ${INSTANCE_NAME}
-```
-
-Then update `.ssh/config` and run:
+For a simpler Lima setup where the admin user runs everything:
 
 ```sh
-ssh <instance-name>
+limactl create --name=dev --cpus=4 --memory=8 --disk=50 template://ubuntu
+limactl start dev
+limactl shell dev
+
+# As the default lima user (has sudo):
+export DOTFILES_BRANCH=main
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
+
+For the full security-isolated setup with `adrien` user pre-configured, use [treuille/dauphin](https://github.com/treuille/dauphin).
 
 # Blink Shell Installation Instructions
 
