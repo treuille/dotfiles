@@ -1,22 +1,62 @@
-# Install in a Ubuntu Container
+# Dotfiles Setup
 
-1. ssh in as `root`, and run this command:
+Personal dotfiles for development environments on Digital Ocean and Lima VMs.
+
+## Quick Start
+
+### Lima VM (Local Development)
+
+**Prerequisites**: Create a Lima VM with the `adrien` user using [treuille/dauphin](https://github.com/treuille/dauphin) bootstrap.
+
+1. SSH into your Lima VM as the admin user (with sudo access):
 
 ```sh
-export DOTFILES_BRANCH=main; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+limactl shell <vm-name>
 ```
 
-2. ssh in, this time as `adrien`, and run the same command.
+2. Run the bootstrap script (installs system packages):
 
-3. copy over the OpenAI key as follows:
+```sh
+export DOTFILES_BRANCH=main
+bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+```
+
+3. Switch to the `adrien` user and run again (installs dotfiles):
+
+```sh
+sudo -u adrien -i
+export DOTFILES_BRANCH=main
+bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+```
+
+4. Next step: Install [treuille/dauphin](https://github.com/treuille/dauphin) as your life orchestrator.
+
+### Digital Ocean (Remote Server)
+
+1. SSH in as `root`, and run this command:
+
+```sh
+export DOTFILES_BRANCH=main
+bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+```
+
+2. SSH in, this time as `adrien`, and run the same command.
+
+3. Copy over the OpenAI key as follows:
 
 ```sh
 scp <oldhost>:.config/nvim/chatgpt_nvim.txt <newhost>:.config/nvim/chatgpt_nvim.txt
 ```
 
-## (Optional) install bacon
+## Environment Detection
 
-1. Install `bacon` (the new `cargo-watch`)
+The setup scripts automatically detect your environment:
+- **Lima**: Skips server hardening (user creation, SSH lockdown, firewall)
+- **Digital Ocean**: Full setup including security hardening
+
+## (Optional) Install bacon
+
+Install `bacon` (the new `cargo-watch`):
 
 ```sh
 cargo install --locked bacon
@@ -24,22 +64,18 @@ cargo install --locked bacon
 
 See [the website](https://dystroy.org/bacon/).
 
-# Multipass setup instructions
+# Lima VM Setup (via limactl)
 
-Run these commands:
-
-```sh
-INSTANCE_NAME=test-4 # or whatever
-multipass launch --cpus $(sysctl -n hw.physicalcpu) --disk 50G --memory $(echo "scale=1; $(sysctl -n hw.memsize) / 4 / 1073741824" | bc)G --name ${INSTANCE_NAME}
-multipass exec ${INSTANCE_NAME} -- sh -c "echo '$(cat ~/.ssh/id_ed25519.pub)' >> /home/ubuntu/.ssh/authorized_keys"
-multipass info ${INSTANCE_NAME}
-```
-
-Then update `.ssh/config` and run:
+Create a Lima VM configured for this dotfiles setup:
 
 ```sh
-ssh <instance-name>
+# Create VM (dauphin handles this, but for manual setup:)
+limactl create --name=dev --cpus=4 --memory=8 --disk=50 template://ubuntu
+limactl start dev
+limactl shell dev
 ```
+
+For full Lima VM bootstrap with `adrien` user pre-configured, use [treuille/dauphin](https://github.com/treuille/dauphin).
 
 # Blink Shell Installation Instructions
 

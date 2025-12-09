@@ -1,11 +1,14 @@
-# Bootstrap the setup of a digital ocean installation by:
+# Bootstrap the setup of a development environment by:
 #
 # 1. Installing the dotfiles repo
-# 2. Installing python3 virtual environmnet (venv) if necessary
-# 3. Creating a venv
-# 4. Running a script in the venv
-#     - if root: setup_root.py
-#     - not root: setup_user.py
+# 2. Installing uv and creating a Python virtual environment
+# 3. Running the appropriate setup script:
+#     - With sudo access: setup_root.py (installs system packages)
+#     - Without sudo: setup_dotfiles.py (installs user dotfiles)
+#
+# Supports two environments:
+# - Digital Ocean: Run as root first, then as adrien user
+# - Lima VM: Run as admin user (has sudo), then as adrien user
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
@@ -38,16 +41,45 @@ echo_red()
     echo -e "\e[1m\e[31m$@\e[0m"
 }
 
-# Prevent interactive restart dialogs
+# Detect and display environment (Lima vs Digital Ocean)
+detect_environment()
+{
+  if [ -d "/etc/lima-cidata" ];
+  then
+    echo "lima"
+  else
+    echo "digitalocean"
+  fi
+}
+
+# Display environment info at startup
+show_environment()
+{
+  local env=$(detect_environment)
+  echo -e "\e[1m\e[34mDetected environment: ${env}\e[0m"
+  if [ "$env" = "lima" ];
+  then
+    echo -e "\e[36mRunning in Lima VM - server hardening will be skipped\e[0m"
+  fi
+  echo
+}
+
+# Prevent interactive restart dialogs (Digital Ocean specific)
 prevent_restart_dialog()
 {
   if [ $IS_ROOT -eq 0 ];
   then
-    echo_red "Turning off interactive restart during install process...\n"
-    sudo sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l';/g" /etc/needrestart/needrestart.conf
-    if [[ $? -ne 0 ]];
+    local needrestart_conf="/etc/needrestart/needrestart.conf"
+    if [ -f "$needrestart_conf" ];
     then
-      echo_red "Failed to disable restart dialogs. Continuing anyway..."
+      echo_red "Turning off interactive restart during install process...\n"
+      sudo sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l';/g" "$needrestart_conf"
+      if [[ $? -ne 0 ]];
+      then
+        echo_red "Failed to disable restart dialogs. Continuing anyway..."
+      fi
+    else
+      echo_red "needrestart.conf not found - skipping restart dialog config"
     fi
   fi
 }
@@ -175,6 +207,7 @@ run_python_script()
 }
 
 # Actually run the script
+show_environment
 prevent_restart_dialog
 install_dotfiles
 install_uv
