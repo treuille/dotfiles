@@ -1,8 +1,20 @@
-# This is because conform.lua uses `uvx yamlfix` to format YAML files.
-# I don't want to start every YAML file with `---`
+# yamlfix configuration
+# https://lyz-code.github.io/yamlfix/
+#
+# Used by conform.nvim via `uvx yamlfix` to format YAML files.
+# This file is symlinked to ~/.yamlfix.toml by setup/setup_dotfiles.py
+
+# Don't start every YAML file with `---`
 explicit_start = false
 
-# Use 3 spaces for indentation instead of the default 2
+# Preserve blank lines between content (default: 0 removes all blank lines)
+# Won't insert blank lines, only normalizes existing ones to this count
+whitelines = 1
+
+# Blank lines before/after top-level sections (default: 0)
+section_whitelines = 1
+
+# Indentation settings (commented out = use defaults)
 # indent_mapping = 3    # indentation for mappings/dictionaries (default: 2)
 # indent_sequence = 5   # indentation for sequences/lists (default: 4)
 # indent_offset = 3     # indentation offset for elements (default: 2)
