@@ -166,7 +166,7 @@ install_uv()
 
   # Has sudo - install uv system-wide
   echo_red "Installing uv globally into /usr/local/bin"
-  curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
+  curl -LsSf https://astral.sh/uv/install.sh | sudo UV_INSTALL_DIR=/usr/local/bin sh
 
   # Verify installation
   if ! command -v uv >/dev/null 2>&1;
