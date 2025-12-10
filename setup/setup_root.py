@@ -189,7 +189,12 @@ def create_user(user):
     user_home = f"/home/{user}"
     cprint(f"Creating user {user}...", "blue", attrs=["bold"])
     if setup_utils.user_exists(user):
-        cprint(f"User {user} already exists\n", "cyan")
+        cprint(f"User {user} already exists", "cyan")
+        # Lima: ensure user is NOT in sudo group (Lima auto-provisions user with sudo)
+        if setup_utils.is_lima():
+            cprint("Removing from sudo group (Lima security mode)...", "cyan")
+            subprocess.run(["sudo", "deluser", user, "sudo"], check=False)  # OK if not in group
+        cprint("")
         return
 
     zsh_path = shutil.which("zsh")
