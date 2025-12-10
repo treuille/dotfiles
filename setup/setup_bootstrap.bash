@@ -11,14 +11,19 @@
 # - Lima VM (single user): Run as admin user (has sudo), then as adrien user
 # - Lima VM (dauphin): lima-admin installs packages, adrien runs dotfiles only
 
-# Require environment as first argument
-if [[ $# -ne 1 ]] || [[ "$1" != "lima" && "$1" != "digitalocean" ]]; then
-    echo "Usage: $0 <lima|digitalocean>"
+# Require environment as first argument, optional second argument for phase
+if [[ $# -lt 1 ]] || [[ $# -gt 2 ]] || [[ "$1" != "lima" && "$1" != "digitalocean" ]]; then
+    echo "Usage: $0 <lima|digitalocean> [user]"
     echo "  lima         - Local Lima VM (no password, no sudo for adrien)"
     echo "  digitalocean - Remote server (password + sudo for adrien)"
+    echo "  user         - Optional: force user-only mode (skip root setup)"
     exit 1
 fi
 export DOTFILES_ENV="$1"
+FORCE_USER_MODE=0
+if [[ $# -eq 2 ]] && [[ "$2" == "user" ]]; then
+    FORCE_USER_MODE=1
+fi
 
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
@@ -27,9 +32,13 @@ DOTFILES_PATH="dotfiles"
 SETUP_PATH="${DOTFILES_PATH}/setup"
 VENV_PATH="${DOTFILES_PATH}/setup/uv_venv"
 
-# Determine if we have passwordless sudo access
-sudo -n true &> /dev/null
-IS_ROOT=$?  # $? is 0 (true) if user has passwordless sudo, 1 (false) otherwise
+# Determine if we have passwordless sudo access (unless forced to user mode)
+if [[ $FORCE_USER_MODE -eq 1 ]]; then
+    IS_ROOT=1  # Force user mode - pretend no sudo access
+else
+    sudo -n true &> /dev/null
+    IS_ROOT=$?  # $? is 0 (true) if user has passwordless sudo, 1 (false) otherwise
+fi
 
 # Tell the user what we're doing at the start of each block.
 start_block()
@@ -59,13 +68,13 @@ show_environment()
   if [ $IS_ROOT -eq 0 ];
   then
     echo -e "\e[32mRunning with sudo access - will install system packages\e[0m"
+    # Only show Lima-specific info during root phase (when we actually create the user)
+    if [ "$DOTFILES_ENV" = "lima" ];
+    then
+      echo -e "\e[36mLima: adrien user will have no password and no sudo\e[0m"
+    fi
   else
     echo -e "\e[33mRunning without sudo - will install user dotfiles only\e[0m"
-  fi
-
-  if [ "$DOTFILES_ENV" = "lima" ];
-  then
-    echo -e "\e[36mLima VM - adrien will have no password and no sudo\e[0m"
   fi
   echo
 }
