@@ -90,30 +90,7 @@ def setup_root():
         ],
     )
 
-    # Install neovim via PPA (maintained by neovim team, provides latest stable)
-    setup_utils.cached_run(
-        "Installing neovim from PPA",
-        [
-            "sudo add-apt-repository -y ppa:neovim-ppa/stable",
-            "sudo apt-get update",
-            "sudo apt-get install -y neovim",
-        ],
-    )
-
-    # # OLD METHOD: Build neovim from source (kept for reference)
-    # # Install neovim build dependencies
-    # setup_utils.cached_apt_install("cmake")
-    # setup_utils.cached_apt_install("gettext")
-    # # Now build neovim from source
-    # setup_utils.cached_run(
-    #     "Building neovim from source",
-    #     [
-    #         "git clone https://github.com/neovim/neovim ./neovim",
-    #         "git -C ./neovim checkout stable",
-    #         f"make -C ./neovim -j$(nproc) CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=/opt/nvim",
-    #         "sudo make -C ./neovim install",
-    #     ],
-    # )
+    # Neovim is installed as user via AppImage in setup_dotfiles.py
 
     # I nice TUI for GIT - need to test thi
     arch_suffix = "Linux_arm64" if setup_utils.machine_is_arm64() else "Linux_x86_64"

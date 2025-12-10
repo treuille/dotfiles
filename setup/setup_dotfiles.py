@@ -116,6 +116,24 @@ def install_claude_code():
     )
 
 
+def install_neovim():
+    """Install neovim via AppImage from official GitHub releases."""
+    home_path = os.path.expanduser("~")
+    local_bin = os.path.join(home_path, ".local/bin")
+    nvim_path = os.path.join(local_bin, "nvim")
+    arch = "arm64" if setup_utils.machine_is_arm64() else "x86_64"
+    appimage_url = f"https://github.com/neovim/neovim/releases/latest/download/nvim-linux-{arch}.appimage"
+    setup_utils.cached_run(
+        "Installing neovim AppImage",
+        [
+            f"mkdir -p {local_bin}",
+            f"curl -L -o {nvim_path} {appimage_url}",
+            f"chmod +x {nvim_path}",
+        ],
+        skip_if=os.path.exists(nvim_path),
+    )
+
+
 def install_gcloud():
     """Install the Google Cloud SDK.
 
@@ -139,6 +157,7 @@ def main():
     install_pure()
     install_dotfiles()
     install_tmux_plugins()
+    install_neovim()
     # install_rust()
     install_gcloud()
     install_claude_code()
