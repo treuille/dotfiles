@@ -2,8 +2,12 @@
 Root-level setup script for dotfiles installation.
 
 Supports two environments:
-- Digital Ocean: Full setup including user creation, SSH hardening, firewall
-- Lima: Package installation only (user exists, no hardening needed for local VM)
+- Digital Ocean: Full setup including user creation (with password/sudo), SSH hardening, firewall
+- Lima: Full setup including user creation (no password/no sudo), SSH hardening, firewall, vault dir
+
+Both environments share most hardening code. Key differences:
+- Lima: adrien has NO sudo (security), NO password (SSH key only), has vault directory
+- DO: adrien HAS sudo (admin needs), HAS password (interactive login), no vault directory
 """
 
 import sys
@@ -93,34 +97,44 @@ def setup_root():
         ],
     )
 
-    # Server hardening (Digital Ocean only - not needed for local Lima VMs)
-    if setup_utils.is_digitalocean():
-        harden_server()
-    else:
-        env = setup_utils.detect_environment()
-        cprint(f"Skipping server hardening (environment: {env})", "cyan")
+    # Server hardening (shared between Lima and DO, with env-specific differences)
+    setup_hardening()
 
 
-def harden_server():
-    """Harden the server for public internet exposure (Digital Ocean).
+def setup_hardening():
+    """Harden the server for both Lima and Digital Ocean.
 
-    This includes:
-    - Creating the adrien user with password
+    Shared hardening:
+    - Creating the adrien user (parameterized by env)
     - Locking down SSH (disable password auth, root login)
     - Enabling UFW firewall
+    - Disabling core dumps
 
-    Not needed for local Lima VMs where the user already exists
-    and network security is handled by the host.
+    Lima-only:
+    - Vault directory /var/lib/agents (for MCP server secrets)
     """
-    cprint("Hardening server for Digital Ocean...", "blue", attrs=["bold"])
+    env = setup_utils.detect_environment()
+    cprint(f"Setting up hardening for {env}...", "blue", attrs=["bold"])
 
-    # Create a user to SSH into this box.
+    # Create adrien user (parameterized by environment)
     create_user("adrien")
 
-    # Lock down ssh logins
+    # Lock down SSH logins (same for both)
     lock_down_ssh()
 
-    # Turn on the firewall
+    # Turn on the firewall (same for both)
+    setup_firewall()
+
+    # Disable core dumps (same for both)
+    disable_core_dumps()
+
+    # Lima-only: create vault directory for MCP server secrets
+    if setup_utils.is_lima():
+        create_vault_dir()
+
+
+def setup_firewall():
+    """Enable UFW firewall with restrictive rules."""
     setup_utils.cached_run(
         "Turn on the firewall",
         [
@@ -130,46 +144,92 @@ def harden_server():
     )
 
 
+def disable_core_dumps():
+    """Disable core dumps to prevent secret leakage from crashes."""
+    setup_utils.cached_run(
+        "Disabling core dumps",
+        [
+            # Set hard and soft limits to 0
+            "echo '* hard core 0' | sudo tee -a /etc/security/limits.conf",
+            "echo '* soft core 0' | sudo tee -a /etc/security/limits.conf",
+            # Disable setuid core dumps
+            "echo 'fs.suid_dumpable=0' | sudo tee -a /etc/sysctl.conf",
+            # Apply sysctl changes
+            "sudo sysctl -p",
+        ],
+    )
+
+
+def create_vault_dir():
+    """Create vault directory for MCP server secrets (Lima only)."""
+    setup_utils.cached_run(
+        "Creating vault directory",
+        [
+            "sudo mkdir -p /var/lib/agents",
+            "sudo chown root:root /var/lib/agents",
+            "sudo chmod 700 /var/lib/agents",
+        ],
+    )
+
+
 def create_user(user):
-    """Create a new user"""
+    """Create a new user with environment-specific settings.
+
+    Lima: No password, no sudo group (security hardening)
+    Digital Ocean: Password prompt, sudo group (admin needs)
+
+    Both: Copy SSH authorized_keys from current user to new user.
+    """
     user_home = f"/home/{user}"
     cprint(f"Creating user {user}...", "blue", attrs=["bold"])
     if setup_utils.user_exists(user):
         cprint(f"User {user} already exists\n", "cyan")
         return
-    password = getpass.getpass(f"Password for user {user}: ")
-    password_again = getpass.getpass("Reenter password: ")
-    if password != password_again:
-        print("Passwords don't match.")
-        sys.exit(-1)
 
-    # Generate hash using passlib
-    encrypted_password = sha512_crypt.hash(password)
-
-    # Create user with sudo privileges
     zsh_path = shutil.which("zsh")
     if not zsh_path:
         print("Error: zsh not found in PATH")
         sys.exit(-1)
-    subprocess.run(
-        ["sudo", "useradd", "-b", "/home", "-G", "sudo", "-m",
-         "-p", encrypted_password, "-s", zsh_path, "-U", user],
-        check=True
-    )
 
-    temp_user_status = f'Adding {user} with {len(password)}-char password "{password[:2]}...{password[-2:]}"...'
-    cprint(temp_user_status, "magenta", attrs=["bold"], end="\r")
-    time.sleep(4.0)
-    print(" " * len(temp_user_status), end="\r")  # clear the temp buffer
-    cprint(f"Added user {user}.\n", "green")
+    if setup_utils.is_lima():
+        # Lima: No password, no sudo group
+        cprint("Creating user without password or sudo (Lima security mode)", "cyan")
+        subprocess.run(
+            ["sudo", "useradd", "-b", "/home", "-m", "-s", zsh_path, "-U", user],
+            check=True
+        )
+        cprint(f"Added user {user} (no password, no sudo).\n", "green")
+    else:
+        # Digital Ocean: Password prompt, sudo group
+        password = getpass.getpass(f"Password for user {user}: ")
+        password_again = getpass.getpass("Reenter password: ")
+        if password != password_again:
+            print("Passwords don't match.")
+            sys.exit(-1)
 
-    # Setting up the new user
+        # Generate hash using passlib
+        encrypted_password = sha512_crypt.hash(password)
+
+        subprocess.run(
+            ["sudo", "useradd", "-b", "/home", "-G", "sudo", "-m",
+             "-p", encrypted_password, "-s", zsh_path, "-U", user],
+            check=True
+        )
+
+        temp_user_status = f'Adding {user} with {len(password)}-char password "{password[:2]}...{password[-2:]}"...'
+        cprint(temp_user_status, "magenta", attrs=["bold"], end="\r")
+        time.sleep(4.0)
+        print(" " * len(temp_user_status), end="\r")  # clear the temp buffer
+        cprint(f"Added user {user} (with password and sudo).\n", "green")
+
+    # Setting up the new user (same for both environments)
+    # Copy SSH keys from current user (lima user or root) to adrien
     setup_utils.cached_run(
         f"Setting up {user}",
         [
-            f"sudo mkdir {user_home}/.ssh",
+            f"sudo mkdir -p {user_home}/.ssh",
             f"sudo cp -v ~/.ssh/authorized_keys {user_home}/.ssh",
-            f"sudo cp -v ~/.ssh/known_hosts {user_home}/.ssh",
+            f"sudo cp -v ~/.ssh/known_hosts {user_home}/.ssh" if os.path.exists(os.path.expanduser("~/.ssh/known_hosts")) else "true",
             f"sudo cp -v ~/dotfiles/setup/ssh_rc.bash {user_home}/.ssh/rc",
             f"sudo chmod 0700 {user_home}/.ssh",
             f"sudo touch {user_home}/.zshrc",
@@ -236,10 +296,8 @@ def main():
         print("\nThen SSH in as 'adrien' and run the bootstrap script again.")
     else:
         cprint("Root setup complete!", "green", attrs=["bold"])
-        print("\nNow run the bootstrap script as the 'adrien' user to install dotfiles.")
-        print("If you're in a Lima VM, you may need to:")
-        print("  sudo -u adrien -i")
-        print("Then run the bootstrap script.")
+        print("\nNow run the bootstrap script as 'adrien' to install user dotfiles:")
+        print("  sudo -u adrien bash -c 'cd ~ && bash <(curl ...) lima'")
 
 
 if __name__ == "__main__":
