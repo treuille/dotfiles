@@ -9,7 +9,7 @@ Personal dotfiles for development environments.
 1. SSH in as `root`, and run:
 
 ```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/main/setup/setup_bootstrap.bash) digitalocean
+export DOTFILES_BRANCH=main; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash) digitalocean
 ```
 
 2. SSH in as `adrien`, and run the same command.
