@@ -93,6 +93,17 @@ prevent_restart_dialog()
   fi
 }
 
+# Add GitHub's SSH host key to known_hosts (avoids interactive prompt)
+add_github_host_key()
+{
+  mkdir -p ~/.ssh
+  chmod 700 ~/.ssh
+  # Use GitHub's published host key (https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints)
+  if ! grep -q "github.com" ~/.ssh/known_hosts 2>/dev/null; then
+    ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+  fi
+}
+
 # Install the dotfiles repo
 install_dotfiles()
 {
@@ -109,6 +120,9 @@ install_dotfiles()
       echo "Unable to log into Github. Exiting."
       exit 255
     fi
+
+    # Add GitHub host key to avoid interactive prompt
+    add_github_host_key
 
     # Clone the repo
     git clone -b ${BRANCH} ${GIT_REPO}
