@@ -55,8 +55,8 @@ def setup_root():
     setup_utils.cached_run(
         "Installing nodejs",
         [
-            "apt-get purge -y nodejs",
-            "curl -fsSL https://deb.nodesource.com/setup_22.x | bash",
+            "sudo apt-get purge -y nodejs",
+            "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash",
         ],
     )
     setup_utils.cached_apt_install("nodejs")
