@@ -139,7 +139,7 @@ def main():
     install_pure()
     install_dotfiles()
     install_tmux_plugins()
-    install_rust()
+    # install_rust()
     install_gcloud()
     install_claude_code()
 
