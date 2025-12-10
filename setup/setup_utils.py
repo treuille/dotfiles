@@ -20,25 +20,18 @@ Environment = Literal["lima", "digitalocean"]
 
 
 def detect_environment() -> Environment:
-    """Detect whether we're running in a Lima VM or Digital Ocean.
-
-    Lima VMs have specific markers:
-    - /etc/lima-cidata/ directory exists (lima cloud-init data)
-    - LIMA_CIDATA_* environment variables
+    """Get environment from DOTFILES_ENV (set by setup_bootstrap.bash).
 
     Returns "lima" or "digitalocean".
+    Raises RuntimeError if not set (script must be run via bootstrap).
     """
-    # Check for Lima cloud-init data directory (most reliable)
-    if os.path.isdir("/etc/lima-cidata"):
-        return "lima"
-
-    # Check for Lima environment variables
-    for key in os.environ:
-        if key.startswith("LIMA_"):
-            return "lima"
-
-    # Default to Digital Ocean
-    return "digitalocean"
+    env = os.environ.get("DOTFILES_ENV")
+    if env not in ("lima", "digitalocean"):
+        raise RuntimeError(
+            "DOTFILES_ENV not set. Run via setup_bootstrap.bash, not directly.\n"
+            "Usage: bash setup_bootstrap.bash <lima|digitalocean>"
+        )
+    return env
 
 
 def is_lima() -> bool:
