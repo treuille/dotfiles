@@ -21,27 +21,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES
 scp <oldhost>:.config/nvim/chatgpt_nvim.txt <newhost>:.config/nvim/chatgpt_nvim.txt
 ```
 
-> **Local Lima VM?** Replace `digitalocean` with `lima` to skip server hardening. See [treuille/dauphin](https://github.com/treuille/dauphin) for a full local setup.
-
-## Environment & Sudo Detection
-
-The first argument specifies the environment (`lima` or `digitalocean`):
-
-| Condition | Behavior |
-|-----------|----------|
-| **Has sudo + `digitalocean`** | Full setup: packages, user creation, SSH hardening, firewall |
-| **Has sudo + `lima`** | Package installation only (no hardening for local VM) |
-| **No sudo** | User dotfiles only (assumes packages installed by admin) |
-
-## (Optional) Install bacon
-
-Install `bacon` (the new `cargo-watch`):
-
-```sh
-cargo install --locked bacon
-```
-
-See [the website](https://dystroy.org/bacon/).
+> **Local Lima VM?** Replace `digitalocean` with `lima` to skip server hardening.
 
 # Blink Shell Installation Instructions
 
