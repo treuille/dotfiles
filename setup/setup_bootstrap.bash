@@ -250,7 +250,9 @@ run_python_script()
 
 # Actually run the script
 show_environment
-prevent_restart_dialog
+if [ "$DOTFILES_ENV" = "digitalocean" ]; then
+  prevent_restart_dialog
+fi
 install_dotfiles
 install_uv
 setup_uv_venv

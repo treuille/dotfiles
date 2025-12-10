@@ -47,27 +47,15 @@ def setup_root():
     # Install lsd, a prettier ls
     setup_utils.cached_apt_install("lsd")
 
-    # # Installing nodejs (for the GitHub plugin)
-    # setup_utils.cached_apt_install("nodejs")
-    # setup_utils.cached_run("Installing npm",
-    #    ["curl -L https://www.npmjs.com/install.sh | sudo sh"])
-
-    # Installing nodejs v22 (for the GitHub plugin)
+    # Installing nodejs v22 (for GitHub Copilot plugin)
     setup_utils.cached_run(
         "Installing nodejs",
         [
             "apt-get purge -y nodejs",
             "curl -fsSL https://deb.nodesource.com/setup_22.x | bash",
-            # "rm -f /etc/apt/sources.list.d/nodesource*.list",
-            # "apt-get update",
-            # "curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg",
-            # 'echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list >/dev/null',
         ],
     )
     setup_utils.cached_apt_install("nodejs")
-    # setup_utils.cached_run(
-    #     "Installing npm", ["curl -L https://www.npmjs.com/install.sh | sudo sh"]
-    # )
 
     # Installe bat, a prettier cat (quality of life)
     setup_utils.cached_apt_install("bat")
@@ -236,7 +224,7 @@ def main():
 
     # Show environment info
     env = setup_utils.detect_environment()
-    cprint(f"Detected environment: {env}", "blue", attrs=["bold"])
+    cprint(f"Environment: {env}", "blue", attrs=["bold"])
 
     # Run the setup script.
     setup_root()
