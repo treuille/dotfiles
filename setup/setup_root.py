@@ -24,6 +24,12 @@ from passlib.hash import sha512_crypt
 
 def setup_root():
     """These are the installation steps which should happen as root."""
+    # Update package lists first (cloud images have stale cache)
+    setup_utils.cached_run(
+        "Updating package lists",
+        ["sudo apt-get update"],
+    )
+
     # Installing cc linker and compiler which cargo will need.
     setup_utils.cached_apt_install("build-essential")
 
