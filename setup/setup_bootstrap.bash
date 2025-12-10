@@ -11,6 +11,15 @@
 # - Lima VM (single user): Run as admin user (has sudo), then as adrien user
 # - Lima VM (dauphin): lima-admin installs packages, adrien runs dotfiles only
 
+# Require environment as first argument
+if [[ $# -ne 1 ]] || [[ "$1" != "lima" && "$1" != "digitalocean" ]]; then
+    echo "Usage: $0 <lima|digitalocean>"
+    echo "  lima         - Local Lima VM (skip server hardening)"
+    echo "  digitalocean - Remote server (full hardening)"
+    exit 1
+fi
+export DOTFILES_ENV="$1"
+
 # Variables
 GIT_REPO="git@github.com:treuille/dotfiles.git"
 BRANCH="${DOTFILES_BRANCH:-main}"
@@ -42,22 +51,10 @@ echo_red()
     echo -e "\e[1m\e[31m$@\e[0m"
 }
 
-# Detect and display environment (Lima vs Digital Ocean)
-detect_environment()
-{
-  if [ -d "/etc/lima-cidata" ];
-  then
-    echo "lima"
-  else
-    echo "digitalocean"
-  fi
-}
-
 # Display environment info at startup
 show_environment()
 {
-  local env=$(detect_environment)
-  echo -e "\e[1m\e[34mDetected environment: ${env}\e[0m"
+  echo -e "\e[1m\e[34mEnvironment: ${DOTFILES_ENV}\e[0m"
 
   if [ $IS_ROOT -eq 0 ];
   then
@@ -66,14 +63,14 @@ show_environment()
     echo -e "\e[33mRunning without sudo - will install user dotfiles only\e[0m"
   fi
 
-  if [ "$env" = "lima" ];
+  if [ "$DOTFILES_ENV" = "lima" ];
   then
-    echo -e "\e[36mLima VM detected - server hardening will be skipped\e[0m"
+    echo -e "\e[36mLima VM - server hardening will be skipped\e[0m"
   fi
   echo
 }
 
-# Prevent interactive restart dialogs (Digital Ocean specific)
+# Prevent interactive restart dialogs
 prevent_restart_dialog()
 {
   if [ $IS_ROOT -eq 0 ];
@@ -82,11 +79,10 @@ prevent_restart_dialog()
     if [ -f "$needrestart_conf" ];
     then
       echo_red "Turning off interactive restart during install process...\n"
+      # Set restart mode to 'l' (list only, no prompts)
       sudo sed -i "s/^#\$nrconf{restart}\ =\ '.';/\$nrconf{restart} = 'l';/g" "$needrestart_conf"
-      if [[ $? -ne 0 ]];
-      then
-        echo_red "Failed to disable restart dialogs. Continuing anyway..."
-      fi
+      # Disable "newer kernel available" prompts (0 = disable, -1 = stderr only)
+      sudo sed -i "s/^#\$nrconf{kernelhints}\ =\ -1;/\$nrconf{kernelhints} = 0;/g" "$needrestart_conf"
     else
       echo_red "needrestart.conf not found - skipping restart dialog config"
     fi

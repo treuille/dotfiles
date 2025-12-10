@@ -15,7 +15,7 @@ Personal dotfiles for development environments on Digital Ocean and Lima VMs.
 ```sh
 limactl shell dauphin
 export DOTFILES_BRANCH=simplify_lima
-bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash) lima
 ```
 
 **Step 2**: As `adrien` (no sudo), install user dotfiles:
@@ -23,7 +23,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES
 ```sh
 limactl shell dauphin --user adrien
 export DOTFILES_BRANCH=simplify_lima
-bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash) lima
 ```
 
 **Step 3**: Install [treuille/dauphin](https://github.com/treuille/dauphin) as your life orchestrator.
@@ -34,10 +34,10 @@ bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES
 
 ```sh
 export DOTFILES_BRANCH=simplify_lima
-bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash) digitalocean
 ```
 
-2. SSH in, this time as `adrien`, and run the same command.
+2. SSH in, this time as `adrien`, and run the same command (with `digitalocean` at the end).
 
 3. Copy over the OpenAI key as follows:
 
@@ -47,12 +47,12 @@ scp <oldhost>:.config/nvim/chatgpt_nvim.txt <newhost>:.config/nvim/chatgpt_nvim.
 
 ## Environment & Sudo Detection
 
-The setup scripts automatically detect:
+The first argument specifies the environment (`lima` or `digitalocean`):
 
 | Condition | Behavior |
 |-----------|----------|
-| **Has sudo + Digital Ocean** | Full setup: packages, user creation, SSH hardening, firewall |
-| **Has sudo + Lima** | Package installation only (no hardening for local VM) |
+| **Has sudo + `digitalocean`** | Full setup: packages, user creation, SSH hardening, firewall |
+| **Has sudo + `lima`** | Package installation only (no hardening for local VM) |
 | **No sudo** | User dotfiles only (assumes packages installed by admin) |
 
 If you run without sudo and system packages aren't installed, you'll see a helpful error message directing you to ask your system administrator to run the script first.
@@ -78,7 +78,7 @@ limactl shell dev
 
 # As the default lima user (has sudo):
 export DOTFILES_BRANCH=simplify_lima
-bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
+bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash) lima
 ```
 
 For the full security-isolated setup with `adrien` user pre-configured, use [treuille/dauphin](https://github.com/treuille/dauphin).
