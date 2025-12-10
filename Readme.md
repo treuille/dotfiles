@@ -14,7 +14,7 @@ Personal dotfiles for development environments on Digital Ocean and Lima VMs.
 
 ```sh
 limactl shell dauphin
-export DOTFILES_BRANCH=main
+export DOTFILES_BRANCH=simplify_lima
 bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
@@ -22,7 +22,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES
 
 ```sh
 limactl shell dauphin --user adrien
-export DOTFILES_BRANCH=main
+export DOTFILES_BRANCH=simplify_lima
 bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
@@ -33,7 +33,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES
 1. SSH in as `root`, and run this command:
 
 ```sh
-export DOTFILES_BRANCH=main
+export DOTFILES_BRANCH=simplify_lima
 bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
@@ -77,7 +77,7 @@ limactl start dev
 limactl shell dev
 
 # As the default lima user (has sudo):
-export DOTFILES_BRANCH=main
+export DOTFILES_BRANCH=simplify_lima
 bash <(curl -fsSL https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash)
 ```
 
