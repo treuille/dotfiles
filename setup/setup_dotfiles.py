@@ -117,21 +117,43 @@ def install_claude_code():
 
 
 def install_neovim():
-    """Install neovim via AppImage from official GitHub releases."""
+    """Install neovim from official GitHub releases.
+
+    Uses tarball for ARM64 (AppImage doesn't work on aarch64 Linux).
+    Uses AppImage for x86_64.
+    """
     home_path = os.path.expanduser("~")
-    local_bin = os.path.join(home_path, ".local/bin")
+    local_dir = os.path.join(home_path, ".local")
+    local_bin = os.path.join(local_dir, "bin")
     nvim_path = os.path.join(local_bin, "nvim")
-    arch = "arm64" if setup_utils.machine_is_arm64() else "x86_64"
-    appimage_url = f"https://github.com/neovim/neovim/releases/latest/download/nvim-linux-{arch}.appimage"
-    setup_utils.cached_run(
-        "Installing neovim AppImage",
-        [
-            f"mkdir -p {local_bin}",
-            f"curl -L -o {nvim_path} {appimage_url}",
-            f"chmod +x {nvim_path}",
-        ],
-        skip_if=os.path.exists(nvim_path),
-    )
+
+    if setup_utils.machine_is_arm64():
+        # ARM64: Use tarball (AppImage is 32-bit ARM launcher, doesn't work)
+        tarball_url = "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-arm64.tar.gz"
+        nvim_dir = os.path.join(local_dir, "nvim-linux-arm64")
+        setup_utils.cached_run(
+            "Installing neovim (tarball for ARM64)",
+            [
+                f"mkdir -p {local_bin}",
+                f"curl -L -o /tmp/nvim-linux-arm64.tar.gz {tarball_url}",
+                f"tar -xzf /tmp/nvim-linux-arm64.tar.gz -C {local_dir}",
+                f"ln -sf {nvim_dir}/bin/nvim {nvim_path}",
+                "rm /tmp/nvim-linux-arm64.tar.gz",
+            ],
+            skip_if=os.path.exists(nvim_path),
+        )
+    else:
+        # x86_64: Use AppImage
+        appimage_url = "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage"
+        setup_utils.cached_run(
+            "Installing neovim (AppImage for x86_64)",
+            [
+                f"mkdir -p {local_bin}",
+                f"curl -L -o {nvim_path} {appimage_url}",
+                f"chmod +x {nvim_path}",
+            ],
+            skip_if=os.path.exists(nvim_path),
+        )
 
 
 def install_gcloud():
