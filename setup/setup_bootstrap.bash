@@ -14,8 +14,8 @@
 # Require environment as first argument
 if [[ $# -ne 1 ]] || [[ "$1" != "lima" && "$1" != "digitalocean" ]]; then
     echo "Usage: $0 <lima|digitalocean>"
-    echo "  lima         - Local Lima VM (skip server hardening)"
-    echo "  digitalocean - Remote server (full hardening)"
+    echo "  lima         - Local Lima VM (no password, no sudo for adrien)"
+    echo "  digitalocean - Remote server (password + sudo for adrien)"
     exit 1
 fi
 export DOTFILES_ENV="$1"
@@ -65,7 +65,7 @@ show_environment()
 
   if [ "$DOTFILES_ENV" = "lima" ];
   then
-    echo -e "\e[36mLima VM - server hardening will be skipped\e[0m"
+    echo -e "\e[36mLima VM - adrien will have no password and no sudo\e[0m"
   fi
   echo
 }
