@@ -165,7 +165,7 @@ def setup_firewall():
             "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
             "sudo ufw allow out 53 comment 'DNS resolution'",
             "sudo ufw allow out 22/tcp comment 'SSH for git'",
-            "sudo ufw --force enable",
+            "yes | sudo ufw enable",
         ],
     )
 
