@@ -1,6 +1,28 @@
 # Dotfiles Setup
 
-Personal dotfiles for development environments.
+Personal dotfiles for development environments. Supports two deployment targets:
+- **Digital Ocean** - Remote cloud servers for development
+- **Lima** - Local macOS VMs with enhanced security for running AI agents
+
+## Environment Differences
+
+The bootstrap script accepts `lima` or `digitalocean` as an argument, which affects user creation and security settings:
+
+| Aspect | `lima` | `digitalocean` |
+|--------|--------|----------------|
+| **User `adrien`** | No password, no sudo | Has password, has sudo |
+| **Root password** | Locked (no login) | Set during bootstrap |
+| **Vault directory** | Created at `/var/lib/agents` | Not created |
+| **Use case** | Sandboxed AI agent VM | Interactive dev server |
+
+### Why the difference?
+
+**Lima VMs** run AI agents that process untrusted content (emails, web pages). If an agent is compromised, the attacker should NOT be able to:
+- Escalate to root (no sudo)
+- Extract encrypted secrets (vault is root-owned)
+- Access the host machine (Lima sandboxing)
+
+**Digital Ocean servers** need interactive administration, so `adrien` retains sudo access for manual maintenance.
 
 ## Quick Start
 
@@ -12,7 +34,7 @@ Personal dotfiles for development environments.
 export DOTFILES_BRANCH=main; bash <(curl https://raw.githubusercontent.com/treuille/dotfiles/${DOTFILES_BRANCH}/setup/setup_bootstrap.bash) digitalocean
 ```
 
-2. SSH in as `adrien`, and run the same command.
+2. Reboot, then SSH in as `adrien` and run the same command.
 
 3. Copy over the OpenAI key:
 
@@ -20,7 +42,19 @@ export DOTFILES_BRANCH=main; bash <(curl https://raw.githubusercontent.com/treui
 scp <oldhost>:.config/nvim/chatgpt_nvim.txt <newhost>:.config/nvim/chatgpt_nvim.txt
 ```
 
-> **Local Lima VM?** Replace `digitalocean` with `lima` to skip server hardening.
+### Lima VM (Local macOS)
+
+For Lima VMs, use the `dauphin` repository which orchestrates the full setup:
+
+```sh
+git clone git@github.com:treuille/dauphin.git
+cd dauphin
+./scripts/dauphin-setup.sh
+```
+
+This automatically runs the dotfiles bootstrap with the `lima` flag. See the [dauphin docs](https://github.com/treuille/dauphin) for details.
+
+> **Manual Lima setup?** You can run the bootstrap directly with `lima` instead of `digitalocean`, but using `dauphin-setup.sh` is recommended as it also runs security verification.
 
 # Blink Shell Installation Instructions
 
