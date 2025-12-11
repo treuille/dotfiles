@@ -153,8 +153,9 @@ def setup_firewall():
 
     Loopback (lo) traffic must be allowed for Lima's vsock/control communication.
     """
+    # Configure firewall rules (these don't prompt)
     setup_utils.cached_run(
-        "Turn on the firewall",
+        "Configure firewall rules",
         [
             "sudo ufw default deny incoming",
             "sudo ufw default deny outgoing",
@@ -165,15 +166,23 @@ def setup_firewall():
             "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
             "sudo ufw allow out 53 comment 'DNS resolution'",
             "sudo ufw allow out 22/tcp comment 'SSH for git'",
-            # Note on non-interactive ufw enable:
-            # - "yes | ufw enable" doesn't work: ufw reads from stdin but sudo/bash
-            #   interfere with the pipe when run via os.system()
-            # - "ufw --force enable" doesn't work: still prompts (unclear why, possibly
-            #   ufw version or environment issue)
-            # Using echo piped directly to ufw without bash wrapper:
-            "echo y | sudo ufw enable",
         ],
     )
+
+    # Enable firewall using subprocess to pipe 'y' to stdin
+    # Note: os.system() and shell pipes don't work because ufw reads from stdin
+    # but sudo/bash interfere. subprocess.run with input= works properly.
+    print("DEBUG: trying the subprocess thing to enable ufw...")
+    result = subprocess.run(
+        ["sudo", "ufw", "enable"],
+        input="y\n",
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        cprint(f"Error enabling firewall: {result.stderr}", "red", attrs=["bold"])
+        sys.exit(result.returncode)
+    cprint("Firewall enabled", "green")
 
 
 def disable_core_dumps():
