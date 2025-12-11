@@ -148,16 +148,18 @@ def setup_hardening():
 def setup_firewall():
     """Enable UFW firewall - ISOLATING HANG ISSUE.
 
-    Adding rules back one at a time. Order (most likely to cause hang first):
-    1. Loopback rules (interface-specific syntax) - PASSED
-    2. Default deny outgoing <- TESTING NOW
-    3. Other egress rules
+    ROOT CAUSE FOUND: 'default deny outgoing' blocks something ufw needs.
+    TEST 3: Add allow rules BEFORE deny outgoing.
     """
     setup_utils.cached_run(
         "Turn on the firewall",
         [
             "sudo ufw allow ssh",
-            # TEST 2: Add default deny outgoing
+            # Allow outbound traffic BEFORE denying (order matters!)
+            "sudo ufw allow out 443/tcp",   # HTTPS
+            "sudo ufw allow out 53",         # DNS
+            "sudo ufw allow out 22/tcp",     # SSH/git
+            # Now deny outgoing (allowed rules above will still work)
             "sudo ufw default deny outgoing",
             "echo y | sudo ufw enable",
         ],
