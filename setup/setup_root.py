@@ -145,17 +145,22 @@ def setup_firewall():
     Rules:
     - Default deny incoming (except SSH)
     - Default deny outgoing (except allowed ports)
-    - Allow in: 22/tcp (SSH from host)
-    - Allow out: 443/tcp (HTTPS for APIs), 53 (DNS), 22/tcp (SSH for git)
+    - Allow in: 22/tcp (SSH from host), loopback
+    - Allow out: 443/tcp (HTTPS for APIs), 53 (DNS), 22/tcp (SSH for git), loopback
 
     Note: Port 80 (HTTP) is intentionally blocked. If APT fails, configure
     HTTPS mirrors in /etc/apt/sources.list.
+
+    Loopback (lo) traffic must be allowed for Lima's vsock/control communication.
     """
     setup_utils.cached_run(
         "Turn on the firewall",
         [
             "sudo ufw default deny incoming",
             "sudo ufw default deny outgoing",
+            # Allow loopback for Lima control socket and local services
+            "sudo ufw allow in on lo",
+            "sudo ufw allow out on lo",
             "sudo ufw allow in 22/tcp comment 'SSH from host'",
             "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
             "sudo ufw allow out 53 comment 'DNS resolution'",
