@@ -173,14 +173,17 @@ def setup_firewall():
     # All attempts to run 'ufw enable' non-interactively failed:
     # - yes|ufw, echo y|sudo ufw, subprocess input="y\n", --force with /dev/null
     # The hang wasn't ufw waiting for "y" - pressing Enter alone would proceed.
-    # Solution: Write ENABLED=yes to config and start the service directly.
+    # Solution: Write ENABLED=yes to config and reload/restart the service.
     cprint("Enabling firewall...", "blue", attrs=["bold"])
     os.system("sudo sed -i 's/ENABLED=no/ENABLED=yes/' /etc/ufw/ufw.conf")
     os.system("sudo systemctl enable ufw")
-    os.system("sudo systemctl start ufw")
+    os.system("sudo systemctl restart ufw")
+    # Reload to apply the rules we configured above
+    os.system("sudo ufw reload")
 
     # Verify it worked
     result = subprocess.run(["sudo", "ufw", "status"], capture_output=True, text=True)
+    print(f"DEBUG ufw status: {result.stdout}")
     if "Status: active" in result.stdout:
         cprint("Firewall enabled", "green")
     else:
