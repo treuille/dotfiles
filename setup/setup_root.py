@@ -140,11 +140,26 @@ def setup_hardening():
 
 
 def setup_firewall():
-    """Enable UFW firewall with restrictive rules."""
+    """Enable UFW firewall with restrictive rules.
+
+    Rules:
+    - Default deny incoming (except SSH)
+    - Default deny outgoing (except allowed ports)
+    - Allow in: 22/tcp (SSH from host)
+    - Allow out: 443/tcp (HTTPS for APIs), 53 (DNS), 22/tcp (SSH for git)
+
+    Note: Port 80 (HTTP) is intentionally blocked. If APT fails, configure
+    HTTPS mirrors in /etc/apt/sources.list.
+    """
     setup_utils.cached_run(
         "Turn on the firewall",
         [
-            "sudo ufw allow ssh",
+            "sudo ufw default deny incoming",
+            "sudo ufw default deny outgoing",
+            "sudo ufw allow in 22/tcp comment 'SSH from host'",
+            "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
+            "sudo ufw allow out 53 comment 'DNS resolution'",
+            "sudo ufw allow out 22/tcp comment 'SSH for git'",
             "echo y | sudo ufw enable",
         ],
     )
