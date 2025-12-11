@@ -169,22 +169,22 @@ def setup_firewall():
         ],
     )
 
-    # Enable firewall non-interactively
-    # Tried: yes|ufw, echo y|sudo ufw, subprocess input="y\n" - all hang
-    # Solution: --force flag with stdin from /dev/null (like Ansible does)
-    print("DEBUG: trying ufw --force enable with stdin=/dev/null...")
-    with open("/dev/null", "r") as devnull:
-        result = subprocess.run(
-            ["sudo", "ufw", "--force", "enable"],
-            stdin=devnull,
-            capture_output=True,
-            text=True,
-        )
-    if result.returncode != 0:
-        cprint(f"Error enabling firewall: {result.stderr}", "red", attrs=["bold"])
-        sys.exit(result.returncode)
-    print(f"stdout: {result.stdout}")
-    cprint("Firewall enabled", "green")
+    # Enable firewall by writing config directly (bypasses interactive prompt)
+    # All attempts to run 'ufw enable' non-interactively failed:
+    # - yes|ufw, echo y|sudo ufw, subprocess input="y\n", --force with /dev/null
+    # The hang wasn't ufw waiting for "y" - pressing Enter alone would proceed.
+    # Solution: Write ENABLED=yes to config and start the service directly.
+    cprint("Enabling firewall...", "blue", attrs=["bold"])
+    os.system("sudo sed -i 's/ENABLED=no/ENABLED=yes/' /etc/ufw/ufw.conf")
+    os.system("sudo systemctl enable ufw")
+    os.system("sudo systemctl start ufw")
+
+    # Verify it worked
+    result = subprocess.run(["sudo", "ufw", "status"], capture_output=True, text=True)
+    if "Status: active" in result.stdout:
+        cprint("Firewall enabled", "green")
+    else:
+        cprint(f"Warning: Firewall status: {result.stdout}", "yellow")
 
 
 def disable_core_dumps():
