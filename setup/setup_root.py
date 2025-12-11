@@ -140,34 +140,16 @@ def setup_hardening():
 
 
 def setup_firewall():
-    """Enable UFW firewall with restrictive rules.
+    """Enable UFW firewall - SIMPLE VERSION from pre-Lima days (c189d80).
 
-    REVERTED TO ORIGINAL VERSION (commit 7fe4181) to test if hang is new.
-
-    Rules:
-    - Default deny incoming (except SSH)
-    - Default deny outgoing (except allowed ports)
-    - Allow in: 22/tcp (SSH from host), loopback
-    - Allow out: 443/tcp (HTTPS for APIs), 53 (DNS), 22/tcp (SSH for git), loopback
-
-    Note: Port 80 (HTTP) is intentionally blocked. If APT fails, configure
-    HTTPS mirrors in /etc/apt/sources.list.
-
-    Loopback (lo) traffic must be allowed for Lima's vsock/control communication.
+    Testing if the simple firewall works without hanging.
+    No egress deny, just allow SSH and enable.
     """
     setup_utils.cached_run(
         "Turn on the firewall",
         [
-            "sudo ufw default deny incoming",
-            "sudo ufw default deny outgoing",
-            # Allow loopback for Lima control socket and local services
-            "sudo ufw allow in on lo",
-            "sudo ufw allow out on lo",
-            "sudo ufw allow in 22/tcp comment 'SSH from host'",
-            "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
-            "sudo ufw allow out 53 comment 'DNS resolution'",
-            "sudo ufw allow out 22/tcp comment 'SSH for git'",
-            "sudo bash -c 'yes | ufw enable'",
+            "sudo ufw allow ssh",
+            "echo y | sudo ufw enable",
         ],
     )
 
