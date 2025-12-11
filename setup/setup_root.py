@@ -140,15 +140,20 @@ def setup_hardening():
 
 
 def setup_firewall():
-    """Enable UFW firewall - SIMPLE VERSION from pre-Lima days (c189d80).
+    """Enable UFW firewall - ISOLATING HANG ISSUE.
 
-    Testing if the simple firewall works without hanging.
-    No egress deny, just allow SSH and enable.
+    Adding rules back one at a time. Order (most likely to cause hang first):
+    1. Loopback rules (interface-specific syntax) <- TESTING NOW
+    2. Default deny outgoing
+    3. Other egress rules
     """
     setup_utils.cached_run(
         "Turn on the firewall",
         [
             "sudo ufw allow ssh",
+            # TEST 1: Add loopback rules (interface-specific syntax)
+            "sudo ufw allow in on lo",
+            "sudo ufw allow out on lo",
             "echo y | sudo ufw enable",
         ],
     )
