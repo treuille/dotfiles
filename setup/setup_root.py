@@ -176,11 +176,15 @@ def setup_firewall():
     # Solution: Write ENABLED=yes to config and reload/restart the service.
     cprint("Enabling firewall...", "blue", attrs=["bold"])
     # Use < /dev/null to prevent commands from waiting on stdin (Lima terminal issue)
+    print("DEBUG: Writing ENABLED=yes to /etc/ufw/ufw.conf...")
     os.system("sudo sed -i 's/ENABLED=no/ENABLED=yes/' /etc/ufw/ufw.conf")
+    print("DEBUG: Running systemctl enable ufw...")
     os.system("sudo systemctl enable ufw < /dev/null")
+    print("DEBUG: Running systemctl restart ufw...")
     os.system("sudo systemctl restart ufw < /dev/null")
-    # Reload to apply the rules we configured above
+    print("DEBUG: Running ufw reload...")
     os.system("sudo ufw reload < /dev/null")
+    print("DEBUG: Done with ufw commands.")
 
     # Verify it worked
     result = subprocess.run(["sudo", "ufw", "status"], capture_output=True, text=True)
