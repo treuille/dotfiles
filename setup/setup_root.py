@@ -169,19 +169,21 @@ def setup_firewall():
         ],
     )
 
-    # Enable firewall using subprocess to pipe 'y' to stdin
-    # Note: os.system() and shell pipes don't work because ufw reads from stdin
-    # but sudo/bash interfere. subprocess.run with input= works properly.
-    print("DEBUG: trying the subprocess thing to enable ufw...")
-    result = subprocess.run(
-        ["sudo", "ufw", "enable"],
-        input="y\n",
-        text=True,
-        capture_output=True,
-    )
+    # Enable firewall non-interactively
+    # Tried: yes|ufw, echo y|sudo ufw, subprocess input="y\n" - all hang
+    # Solution: --force flag with stdin from /dev/null (like Ansible does)
+    print("DEBUG: trying ufw --force enable with stdin=/dev/null...")
+    with open("/dev/null", "r") as devnull:
+        result = subprocess.run(
+            ["sudo", "ufw", "--force", "enable"],
+            stdin=devnull,
+            capture_output=True,
+            text=True,
+        )
     if result.returncode != 0:
         cprint(f"Error enabling firewall: {result.stderr}", "red", attrs=["bold"])
         sys.exit(result.returncode)
+    print(f"stdout: {result.stdout}")
     cprint("Firewall enabled", "green")
 
 
