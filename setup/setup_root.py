@@ -142,6 +142,8 @@ def setup_hardening():
 def setup_firewall():
     """Enable UFW firewall with restrictive rules.
 
+    REVERTED TO ORIGINAL VERSION (commit 7fe4181) to test if hang is new.
+
     Rules:
     - Default deny incoming (except SSH)
     - Default deny outgoing (except allowed ports)
@@ -153,59 +155,21 @@ def setup_firewall():
 
     Loopback (lo) traffic must be allowed for Lima's vsock/control communication.
     """
-    # Configure firewall rules (these don't prompt)
     setup_utils.cached_run(
-        "Configure firewall rules",
+        "Turn on the firewall",
         [
             "sudo ufw default deny incoming",
             "sudo ufw default deny outgoing",
-            # TEMPORARILY COMMENTED - testing if loopback rules cause hang
             # Allow loopback for Lima control socket and local services
-            # "sudo ufw allow in on lo",
-            # "sudo ufw allow out on lo",
+            "sudo ufw allow in on lo",
+            "sudo ufw allow out on lo",
             "sudo ufw allow in 22/tcp comment 'SSH from host'",
             "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
             "sudo ufw allow out 53 comment 'DNS resolution'",
             "sudo ufw allow out 22/tcp comment 'SSH for git'",
+            "sudo bash -c 'yes | ufw enable'",
         ],
     )
-
-    # Enable firewall by writing config directly (bypasses interactive prompt)
-    # All attempts to run 'ufw enable' non-interactively failed:
-    # - yes|ufw, echo y|sudo ufw, subprocess input="y\n", --force with /dev/null
-    # The hang wasn't ufw waiting for "y" - pressing Enter alone would proceed.
-    # Solution: Write ENABLED=yes to config and reload/restart the service.
-    cprint("Enabling firewall...", "blue", attrs=["bold"])
-    # Use subprocess with stdin=DEVNULL to prevent commands waiting on stdin
-    # os.system() with < /dev/null still hung - Lima terminal issue
-    import subprocess
-    DEVNULL = subprocess.DEVNULL
-
-    print("DEBUG: Writing ENABLED=yes to /etc/ufw/ufw.conf...")
-    subprocess.run(["sudo", "sed", "-i", "s/ENABLED=no/ENABLED=yes/", "/etc/ufw/ufw.conf"],
-                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
-
-    print("DEBUG: Running systemctl enable ufw...")
-    subprocess.run(["sudo", "systemctl", "enable", "ufw"],
-                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
-
-    print("DEBUG: Running systemctl restart ufw...")
-    subprocess.run(["sudo", "systemctl", "restart", "ufw"],
-                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
-
-    print("DEBUG: Running ufw reload...")
-    subprocess.run(["sudo", "ufw", "reload"],
-                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
-
-    print("DEBUG: Done with ufw commands.")
-
-    # Verify it worked
-    result = subprocess.run(["sudo", "ufw", "status"], capture_output=True, text=True)
-    print(f"DEBUG ufw status: {result.stdout}")
-    if "Status: active" in result.stdout:
-        cprint("Firewall enabled", "green")
-    else:
-        cprint(f"Warning: Firewall status: {result.stdout}", "yellow")
 
 
 def disable_core_dumps():
