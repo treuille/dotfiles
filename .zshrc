@@ -102,6 +102,16 @@ FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 # If session exists, attaches to it. If not, creates new session.
 alias tmxa='tmux new-session -A -s $(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g" | sed "s/^_//")'
 
+# Fix SSH auth socket for tmux compatibility.
+# When connecting via SSH (Digital Ocean) or limactl shell (Lima VM), the
+# SSH_AUTH_SOCK path varies. Tmux expects a fixed path (~/.ssh/ssh_auth_sock).
+# This creates/updates a symlink so tmux always finds the agent.
+if [ -n "$SSH_AUTH_SOCK" ] && [ "$SSH_AUTH_SOCK" != "$HOME/.ssh/ssh_auth_sock" ]; then
+    ln -sf "$SSH_AUTH_SOCK" ~/.ssh/ssh_auth_sock
+elif [ -z "$SSH_AUTH_SOCK" ] && [ -L ~/.ssh/ssh_auth_sock ]; then
+    rm ~/.ssh/ssh_auth_sock
+fi
+
 # Enable autosuggestions
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
