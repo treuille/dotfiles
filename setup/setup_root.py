@@ -175,15 +175,27 @@ def setup_firewall():
     # The hang wasn't ufw waiting for "y" - pressing Enter alone would proceed.
     # Solution: Write ENABLED=yes to config and reload/restart the service.
     cprint("Enabling firewall...", "blue", attrs=["bold"])
-    # Use < /dev/null to prevent commands from waiting on stdin (Lima terminal issue)
+    # Use subprocess with stdin=DEVNULL to prevent commands waiting on stdin
+    # os.system() with < /dev/null still hung - Lima terminal issue
+    import subprocess
+    DEVNULL = subprocess.DEVNULL
+
     print("DEBUG: Writing ENABLED=yes to /etc/ufw/ufw.conf...")
-    os.system("sudo sed -i 's/ENABLED=no/ENABLED=yes/' /etc/ufw/ufw.conf")
+    subprocess.run(["sudo", "sed", "-i", "s/ENABLED=no/ENABLED=yes/", "/etc/ufw/ufw.conf"],
+                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
+
     print("DEBUG: Running systemctl enable ufw...")
-    os.system("sudo systemctl enable ufw < /dev/null")
+    subprocess.run(["sudo", "systemctl", "enable", "ufw"],
+                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
+
     print("DEBUG: Running systemctl restart ufw...")
-    os.system("sudo systemctl restart ufw < /dev/null")
+    subprocess.run(["sudo", "systemctl", "restart", "ufw"],
+                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
+
     print("DEBUG: Running ufw reload...")
-    os.system("sudo ufw reload < /dev/null")
+    subprocess.run(["sudo", "ufw", "reload"],
+                   stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
+
     print("DEBUG: Done with ufw commands.")
 
     # Verify it worked
