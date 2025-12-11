@@ -165,7 +165,13 @@ def setup_firewall():
             "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
             "sudo ufw allow out 53 comment 'DNS resolution'",
             "sudo ufw allow out 22/tcp comment 'SSH for git'",
-            "sudo bash -c 'yes | ufw enable'",
+            # Note on non-interactive ufw enable:
+            # - "yes | ufw enable" doesn't work: ufw reads from stdin but sudo/bash
+            #   interfere with the pipe when run via os.system()
+            # - "ufw --force enable" doesn't work: still prompts (unclear why, possibly
+            #   ufw version or environment issue)
+            # Using echo piped directly to ufw without bash wrapper:
+            "echo y | sudo ufw enable",
         ],
     )
 
