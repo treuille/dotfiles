@@ -159,9 +159,10 @@ def setup_firewall():
         [
             "sudo ufw default deny incoming",
             "sudo ufw default deny outgoing",
+            # TEMPORARILY COMMENTED - testing if loopback rules cause hang
             # Allow loopback for Lima control socket and local services
-            "sudo ufw allow in on lo",
-            "sudo ufw allow out on lo",
+            # "sudo ufw allow in on lo",
+            # "sudo ufw allow out on lo",
             "sudo ufw allow in 22/tcp comment 'SSH from host'",
             "sudo ufw allow out 443/tcp comment 'HTTPS for APIs'",
             "sudo ufw allow out 53 comment 'DNS resolution'",
