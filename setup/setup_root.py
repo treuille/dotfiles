@@ -30,6 +30,12 @@ def setup_root():
         ["sudo apt-get update"],
     )
 
+    # Install ufw early so we can test firewall setup quickly
+    setup_utils.cached_apt_install("ufw")
+
+    # TEMPORARILY MOVED EARLY FOR DEBUGGING - firewall setup
+    setup_firewall()
+
     # Installing cc linker and compiler which cargo will need.
     setup_utils.cached_apt_install("build-essential")
 
@@ -128,8 +134,8 @@ def setup_hardening():
     # Lock down SSH logins (same for both)
     lock_down_ssh()
 
-    # Turn on the firewall (same for both)
-    setup_firewall()
+    # NOTE: Firewall setup moved early in setup_root() for debugging
+    # setup_firewall()
 
     # Disable core dumps (same for both)
     disable_core_dumps()
