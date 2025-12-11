@@ -7,6 +7,18 @@ import os
 from termcolor import cprint
 
 
+def install_pure():
+    """Installs a prettier prompt for zsh."""
+    pure_repo = "https://github.com/sindresorhus/pure.git"
+    zsh_plugin_path = os.path.expanduser("~/.local/share/zsh")
+    pure_path = os.path.join(zsh_plugin_path, "pure")
+    setup_utils.cached_run(
+        "Installing pure, a prettier prompt for zsh",
+        [f"mkdir -pv {zsh_plugin_path}", f"git clone {pure_repo} {pure_path}"],
+        skip_if=os.path.exists(pure_path),
+    )
+
+
 def install_dotfiles():
     """Install all the dotfiles from the dotfiles dirctory into the home
     directory, moving all backups to ~/dofiles/setup/backup."""
@@ -53,18 +65,6 @@ def install_dotfiles():
     )
 
 
-def install_pure():
-    """Installs a prettier prompt for zsh."""
-    pure_repo = "https://github.com/sindresorhus/pure.git"
-    zsh_plugin_path = os.path.expanduser("~/.local/share/zsh")
-    pure_path = os.path.join(zsh_plugin_path, "pure")
-    setup_utils.cached_run(
-        "Installing pure, a prettier prompt for zsh",
-        [f"mkdir -pv {zsh_plugin_path}", f"git clone {pure_repo} {pure_path}"],
-        skip_if=os.path.exists(pure_path),
-    )
-
-
 def install_tmux_plugins():
     """Make tmux work with its plugins."""
     tmux_plugin_path = os.path.expanduser("~/.config/tmux/plugins")
@@ -78,41 +78,6 @@ def install_tmux_plugins():
             f"{tpm_plugin_path}/bindings/install_plugins || true",
         ],
         skip_if=os.path.exists(os.path.expanduser(tpm_plugin_path)),
-    )
-
-
-def install_rust():
-    """Installs in the home directory."""
-    # Install rust itself.
-    home_path = os.path.expanduser("~")
-    cargo_home = os.path.join(home_path, ".local/rust/cargo")
-    rustup_home = os.path.join(home_path, ".local/rust/rustup")
-    rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
-    setup_utils.cached_run(
-        "Installing rust",
-        [f"curl https://sh.rustup.rs -sSf | {rust_env} sh -s -- -y"],
-        skip_if=(os.path.exists(cargo_home) and os.path.exists(rustup_home)),
-    )
-
-    # Additional rust configuration.
-    rustup_bin = os.path.join(cargo_home, "bin/rustup")
-    # cargo_bin = os.path.join(cargo_home, "bin/cargo")
-    setup_utils.cached_run(
-        "Configuring rust",
-        [
-            f"{rust_env} {rustup_bin} default stable",
-            f"{rust_env} {rustup_bin} component add rust-analyzer",
-        ],
-    )
-
-
-def install_claude_code():
-    """Install the Claude Code CLI"""
-    setup_utils.cached_run(
-        "Installing Claude Code",
-        [
-            "curl -fsSL https://claude.ai/install.sh | bash",
-        ],
     )
 
 
@@ -156,6 +121,31 @@ def install_neovim():
         )
 
 
+def install_rust():
+    """Installs in the home directory."""
+    # Install rust itself.
+    home_path = os.path.expanduser("~")
+    cargo_home = os.path.join(home_path, ".local/rust/cargo")
+    rustup_home = os.path.join(home_path, ".local/rust/rustup")
+    rust_env = f"CARGO_HOME={cargo_home} RUSTUP_HOME={rustup_home}"
+    setup_utils.cached_run(
+        "Installing rust",
+        [f"curl https://sh.rustup.rs -sSf | {rust_env} sh -s -- -y"],
+        skip_if=(os.path.exists(cargo_home) and os.path.exists(rustup_home)),
+    )
+
+    # Additional rust configuration.
+    rustup_bin = os.path.join(cargo_home, "bin/rustup")
+    # cargo_bin = os.path.join(cargo_home, "bin/cargo")
+    setup_utils.cached_run(
+        "Configuring rust",
+        [
+            f"{rust_env} {rustup_bin} default stable",
+            f"{rust_env} {rustup_bin} component add rust-analyzer",
+        ],
+    )
+
+
 def install_gcloud():
     """Install the Google Cloud SDK.
 
@@ -174,6 +164,16 @@ def install_gcloud():
     )
 
 
+def install_claude_code():
+    """Install the Claude Code CLI"""
+    setup_utils.cached_run(
+        "Installing Claude Code",
+        [
+            "curl -fsSL https://claude.ai/install.sh | bash",
+        ],
+    )
+
+
 def main():
     """Execution starts here."""
     install_pure()
@@ -181,8 +181,8 @@ def main():
     install_tmux_plugins()
     install_neovim()
     # install_rust()
-    install_gcloud()
-    install_claude_code()
+    # install_gcloud()
+    # install_claude_code()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
     print(". ~/.zshrc")
