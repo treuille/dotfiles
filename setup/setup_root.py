@@ -149,17 +149,16 @@ def setup_firewall():
     """Enable UFW firewall - ISOLATING HANG ISSUE.
 
     Adding rules back one at a time. Order (most likely to cause hang first):
-    1. Loopback rules (interface-specific syntax) <- TESTING NOW
-    2. Default deny outgoing
+    1. Loopback rules (interface-specific syntax) - PASSED
+    2. Default deny outgoing <- TESTING NOW
     3. Other egress rules
     """
     setup_utils.cached_run(
         "Turn on the firewall",
         [
             "sudo ufw allow ssh",
-            # TEST 1: Add loopback rules (interface-specific syntax)
-            "sudo ufw allow in on lo",
-            "sudo ufw allow out on lo",
+            # TEST 2: Add default deny outgoing
+            "sudo ufw default deny outgoing",
             "echo y | sudo ufw enable",
         ],
     )
