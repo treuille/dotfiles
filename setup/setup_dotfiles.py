@@ -182,7 +182,7 @@ def main():
     install_neovim()
     # install_rust()
     # install_gcloud()
-    # install_claude_code()
+    install_claude_code()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])
     print(". ~/.zshrc")
