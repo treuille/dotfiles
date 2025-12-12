@@ -161,7 +161,7 @@ def setup_firewall():
             "sudo ufw allow out 22/tcp",     # SSH/git
             # Now deny outgoing (allowed rules above will still work)
             "sudo ufw default deny outgoing",
-            "echo y | sudo ufw enable",
+            "yes | sudo ufw enable",
         ],
     )
 
