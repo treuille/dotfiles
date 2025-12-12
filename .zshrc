@@ -58,6 +58,14 @@ brancher() {
 # Claude Code XDG config directory
 export CLAUDE_CONFIG_DIR=${HOME}/.config/claude
 
+# Claude Code privacy controls
+# These disable operational telemetry (separate from the training opt-out toggle
+# on claude.ai). Even with training disabled, Claude Code sends telemetry for
+# error reporting and usage analytics. These vars disable that additional logging.
+# See: https://privacy.claude.com/en/articles/10023580-is-my-data-used-for-model-training
+export DISABLE_TELEMETRY=1
+export DISABLE_ERROR_REPORTING=1
+
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup
