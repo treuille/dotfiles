@@ -30,12 +30,6 @@ def setup_root():
         ["sudo apt-get update"],
     )
 
-    # Install ufw early so we can test firewall setup quickly
-    setup_utils.cached_apt_install("ufw")
-
-    # TEMPORARILY MOVED EARLY FOR DEBUGGING - firewall setup
-    setup_firewall()
-
     # Installing cc linker and compiler which cargo will need.
     setup_utils.cached_apt_install("build-essential")
 
@@ -134,8 +128,8 @@ def setup_hardening():
     # Lock down SSH logins (same for both)
     lock_down_ssh()
 
-    # NOTE: Firewall setup moved early in setup_root() for debugging
-    # setup_firewall()
+    # Turn on the firewall (same for both)
+    setup_firewall()
 
     # Disable core dumps (same for both)
     disable_core_dumps()
@@ -146,21 +140,22 @@ def setup_hardening():
 
 
 def setup_firewall():
-    """Enable UFW firewall - ISOLATING HANG ISSUE.
+    """Enable UFW firewall with incoming deny.
 
-    ROOT CAUSE FOUND: 'default deny outgoing' blocks something ufw needs.
-    TEST 3: Add allow rules BEFORE deny outgoing.
+    NOTE: Egress deny (default deny outgoing) is DEFERRED. When enabled,
+    'ufw enable' hangs requiring interactive input, even with --force,
+    yes pipes, or subprocess stdin tricks. This breaks non-interactive
+    VM creation. See docs/security-hardening.md for details.
+
+    Current rules:
+    - Default deny incoming (except SSH)
+    - Default allow outgoing (deferred hardening)
     """
     setup_utils.cached_run(
         "Turn on the firewall",
         [
+            "sudo ufw default deny incoming",
             "sudo ufw allow ssh",
-            # Allow outbound traffic BEFORE denying (order matters!)
-            "sudo ufw allow out 443/tcp",   # HTTPS
-            "sudo ufw allow out 53",         # DNS
-            "sudo ufw allow out 22/tcp",     # SSH/git
-            # Now deny outgoing (allowed rules above will still work)
-            "sudo ufw default deny outgoing",
             "yes | sudo ufw --force enable",
         ],
     )
