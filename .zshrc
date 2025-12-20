@@ -66,6 +66,11 @@ export CLAUDE_CONFIG_DIR=${HOME}/.config/claude
 export DISABLE_TELEMETRY=1
 export DISABLE_ERROR_REPORTING=1
 
+# Claude Code with Bedrock
+export AWS_PROFILE=dauphin
+export CLAUDE_CODE_USE_BEDROCK=1
+export ANTHROPIC_MODEL='global.anthropic.claude-opus-4-5-20250514-v1:0'
+
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup
@@ -126,3 +131,4 @@ source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # Enable syntax highlighting (must be last)
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
