@@ -36,6 +36,9 @@ original_dotfiles
 # Claude - local settings overrides
 .claude
 
+# Credentials for Claude access via Amazon
+.aws/credentials
+
 # The virtual environment used for installation script
 setup/venv
 setup/backup

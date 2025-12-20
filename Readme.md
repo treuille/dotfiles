@@ -8,12 +8,12 @@ Personal dotfiles for development environments. Supports two deployment targets:
 
 The bootstrap script accepts `lima` or `digitalocean` as an argument, which affects user creation and security settings:
 
-| Aspect | `lima` | `digitalocean` |
-|--------|--------|----------------|
-| **User `adrien`** | No password, no sudo | Has password, has sudo |
-| **Root password** | Locked (no login) | Set during bootstrap |
-| **Vault directory** | Created at `/var/lib/agents` | Not created |
-| **Use case** | Sandboxed AI agent VM | Interactive dev server |
+| Aspect        | `lima`           | `digitalocean`   |
+|---------------|------------------|------------------|
+| User adrien   | No pwd, no sudo  | Has pwd & sudo   |
+| Root password | Locked           | Set at bootstrap |
+| Vault dir     | /var/lib/agents  | Not created      |
+| Use case      | AI agent sandbox | Interactive dev  |
 
 ### Why the difference?
 
