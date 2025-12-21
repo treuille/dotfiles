@@ -56,6 +56,10 @@ This automatically runs the dotfiles bootstrap with the `lima` flag. See the [da
 
 > **Manual Lima setup?** You can run the bootstrap directly with `lima` instead of `digitalocean`, but using `dauphin-setup.sh` is recommended as it also runs security verification.
 
+# AWS Credentials
+
+Se the `dauphin` for the AWS credentials setup.
+
 # Blink Shell Installation Instructions
 
 Make sure the following settings are set for your host:
