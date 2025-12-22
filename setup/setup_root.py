@@ -103,6 +103,10 @@ def setup_root():
         ],
     )
 
+    # Dependencies for dauphin
+    setup_utils.cached_apt_install("tesseract-ocr")
+    setup_utils.cached_apt_install("tesseract-ocr-eng")
+
     # Server hardening (shared between Lima and DO, with env-specific differences)
     setup_hardening()
 
