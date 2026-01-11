@@ -69,7 +69,10 @@ export DISABLE_ERROR_REPORTING=1
 # Claude Code with Bedrock
 export AWS_PROFILE=dauphin
 export CLAUDE_CODE_USE_BEDROCK=1
-export ANTHROPIC_MODEL='global.anthropic.claude-opus-4-5-20250514-v1:0'
+export ANTHROPIC_MODEL='us.anthropic.claude-opus-4-5-20251101-v1:0'
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:0'
+export CLAUDE_CODE_SUBAGENT_MODEL=${ANTHROPIC_DEFAULT_HAIKU_MODEL}
+# export ANTHROPIC_SMALL_FAST_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:0'
 
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
