@@ -74,6 +74,10 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:
 export CLAUDE_CODE_SUBAGENT_MODEL=${ANTHROPIC_DEFAULT_HAIKU_MODEL}
 # export ANTHROPIC_SMALL_FAST_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:0'
 
+# Go
+export GOPATH=${HOME}/.local/go
+export PATH=$PATH:/usr/local/go/bin:${GOPATH}/bin
+
 # Rust
 export CARGO_HOME=${HOME}/.local/rust/cargo
 export RUSTUP_HOME=${HOME}/.local/rust/rustup

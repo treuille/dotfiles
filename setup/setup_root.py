@@ -107,6 +107,20 @@ def setup_root():
     setup_utils.cached_apt_install("tesseract-ocr")
     setup_utils.cached_apt_install("tesseract-ocr-eng")
 
+    # Install Go (for dauphin)
+    go_arch = "arm64" if setup_utils.machine_is_arm64() else "amd64"
+    go_version = "1.25.6"
+    go_tarball = f"go{go_version}.linux-{go_arch}.tar.gz"
+    setup_utils.cached_run(
+        "Installing Go",
+        [
+            "sudo rm -rfv /usr/local/go",
+            f"curl -vL https://go.dev/dl/{go_tarball} -o /tmp/{go_tarball}",
+            f"sudo tar -C /usr/local -xzvf /tmp/{go_tarball}",
+            f"rm -v /tmp/{go_tarball}",
+        ],
+    )
+
     # Server hardening (shared between Lima and DO, with env-specific differences)
     setup_hardening()
 
