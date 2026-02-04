@@ -29,6 +29,9 @@ original_dotfiles
 # uv.. a better way to handle python dependencies and venv
 .config/uv
 
+# Go module cache and build artifacts
+.config/go
+
 # Claude - ignore everything except settings.json
 .config/claude/*
 !.config/claude/settings.json
