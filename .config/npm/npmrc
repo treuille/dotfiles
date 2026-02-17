@@ -1,0 +1,2 @@
+; Global prefix in user space (no root needed). Found via NPM_CONFIG_USERCONFIG in .zshrc.
+prefix=~/.local/share/npm

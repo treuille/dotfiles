@@ -164,6 +164,33 @@ def install_gcloud():
     )
 
 
+def install_npm():
+    """Set up npm with XDG config and user-space global prefix, then install packages.
+
+    Runs after install_dotfiles() so the symlinked npmrc is in place. Sets env
+    vars explicitly since .zshrc hasn't been sourced during setup.
+    """
+    home_path = os.path.expanduser("~")
+    npm_prefix = os.path.join(home_path, ".local/share/npm")
+    npmrc = os.path.join(home_path, ".config/npm/npmrc")
+    npm_env = f"NPM_CONFIG_USERCONFIG={npmrc}"
+    npm_bin = os.path.join(npm_prefix, "bin")
+    path_with_npm = f"PATH={npm_bin}:$PATH"
+
+    # Create the prefix directory
+    setup_utils.cached_run(
+        "Configuring npm global prefix",
+        [f"mkdir -pv {npm_prefix}"],
+        skip_if=os.path.exists(npm_prefix),
+    )
+
+    # Install global npm packages
+    setup_utils.cached_run(
+        "Installing OpenAI Codex CLI",
+        [f"{npm_env} {path_with_npm} npm i -g @openai/codex"],
+    )
+
+
 def install_claude_code():
     """Install the Claude Code CLI"""
     setup_utils.cached_run(
@@ -182,6 +209,7 @@ def main():
     install_neovim()
     # install_rust()
     # install_gcloud()
+    install_npm()
     install_claude_code()
 
     cprint("Everythign installed. To get all the goodies, run:", "blue", attrs=["bold"])

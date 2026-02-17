@@ -75,6 +75,10 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:
 export CLAUDE_CODE_SUBAGENT_MODEL=${ANTHROPIC_DEFAULT_HAIKU_MODEL}
 # export ANTHROPIC_SMALL_FAST_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:0'
 
+# npm: XDG config path (instead of ~/.npmrc), user-space global prefix, and its bin dir
+export NPM_CONFIG_USERCONFIG=${XDG_CONFIG_HOME:-${HOME}/.config}/npm/npmrc
+export PATH=${HOME}/.local/share/npm/bin:${PATH}
+
 # Go
 export GOPATH=${HOME}/.local/go
 export PATH=$PATH:/usr/local/go/bin:${GOPATH}/bin
