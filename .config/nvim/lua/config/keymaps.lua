@@ -8,6 +8,9 @@ vim.keymap.set('n', '<leader>n', '<cmd>nohlsearch<CR>', { desc = '[N]o search hi
 -- Makes saving files easier
 vim.keymap.set('n', '<leader>u', ':update<cr>', { desc = '[U]pdate file' })
 
+-- Toggle whitespace/indent visibility
+vim.keymap.set('n', '<leader>i', ':set list!<CR>', { desc = 'Toggle [I]ndent/whitespace markers' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
