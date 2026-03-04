@@ -1,7 +1,7 @@
 {
   "env": {
-    "EDITOR": "nano",
-    "VISUAL": "nano"
+    "EDITOR": "nvim",
+    "VISUAL": "nvim"
   },
-  "alwaysThinkingEnabled": false
+  "skipDangerousModePermissionPrompt": true
 }

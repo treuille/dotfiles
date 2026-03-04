@@ -32,9 +32,10 @@ original_dotfiles
 # Go module cache and build artifacts
 .config/go
 
-# Claude - ignore everything except settings.json
+# Claude - ignore everything except settings and scripts
 .config/claude/*
 !.config/claude/settings.json
+!.config/claude/scripts
 
 # Claude - local settings overrides
 .claude
