@@ -66,14 +66,8 @@ export CLAUDE_CONFIG_DIR=${HOME}/.config/claude
 export DISABLE_TELEMETRY=1
 export DISABLE_ERROR_REPORTING=1
 
-# Claude Code with Bedrock
+# AWS profile for d2 (TCB uses Bedrock via aws-sdk-go)
 export AWS_PROFILE=dauphin
-export CLAUDE_CODE_USE_BEDROCK=1
-# export ANTHROPIC_MODEL='us.anthropic.claude-opus-4-5-20251101-v1:0'
-export ANTHROPIC_MODEL='us.anthropic.claude-opus-4-6-v1'
-export ANTHROPIC_DEFAULT_HAIKU_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:0'
-export CLAUDE_CODE_SUBAGENT_MODEL=${ANTHROPIC_DEFAULT_HAIKU_MODEL}
-# export ANTHROPIC_SMALL_FAST_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:0'
 
 # npm: XDG config path (instead of ~/.npmrc), user-space global prefix, and its bin dir
 export NPM_CONFIG_USERCONFIG=${XDG_CONFIG_HOME:-${HOME}/.config}/npm/npmrc

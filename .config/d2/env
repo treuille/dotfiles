@@ -1,0 +1,2 @@
+export D2_PROVIDER="${D2_PROVIDER:-bedrock}"
+export AWS_PROFILE="${AWS_PROFILE:-dauphin}"

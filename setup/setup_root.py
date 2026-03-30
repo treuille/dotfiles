@@ -103,6 +103,10 @@ def setup_root():
         ],
     )
 
+    # Dependencies for d2
+    setup_utils.cached_apt_install("bubblewrap")
+    setup_utils.cached_apt_install("socat")
+
     # Dependencies for dauphin
     setup_utils.cached_apt_install("tesseract-ocr")
     setup_utils.cached_apt_install("tesseract-ocr-eng")
