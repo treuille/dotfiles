@@ -9,3 +9,15 @@ pane_borders = false
 
 [ui.toast]
 delivery = "herdr"
+
+[keys]
+# Vim-style pane navigation (Alt+hjkl), as in tmux config
+focus_pane_left = "alt+h"
+focus_pane_down = "alt+j"
+focus_pane_up = "alt+k"
+focus_pane_right = "alt+l"
+# Swap pane in direction (Alt+Shift+hjkl)
+swap_pane_left = "alt+shift+h"
+swap_pane_down = "alt+shift+j"
+swap_pane_up = "alt+shift+k"
+swap_pane_right = "alt+shift+l"
