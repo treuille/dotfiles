@@ -122,6 +122,26 @@ FZF_CONFIG=${HOME}/.config/fzf/0.44.1
 # If session exists, attaches to it. If not, creates new session.
 alias tmxa='tmux new-session -A -s $(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g" | sed "s/^_//")'
 
+# Herdr analog of tmxa: create or focus a workspace named after the cwd.
+# Example: ~/projects/my-app -> projects_my_app
+# New panes/tabs in the workspace open in its directory (new_cwd = "follow").
+hrda() {
+    local label id
+    label=$(pwd | sed "s|^$HOME/||" | sed "s/[^a-zA-Z0-9]/_/g" | sed "s/^_//")
+    id=$(herdr workspace list 2>/dev/null |
+        jq -r --arg l "$label" '.result.workspaces[] | select(.label == $l) | .workspace_id' |
+        head -n1)
+    if [ -n "$id" ]; then
+        herdr workspace focus "$id" > /dev/null
+    else
+        herdr workspace create --cwd "$PWD" --label "$label" --focus > /dev/null
+    fi
+    # Outside a herdr pane: attach the terminal too (tmxa-style)
+    if [ -z "$HERDR_ENV" ]; then
+        herdr
+    fi
+}
+
 # Fix SSH auth socket for tmux compatibility.
 # When connecting via SSH (Digital Ocean) or limactl shell (Lima VM), the
 # SSH_AUTH_SOCK path varies. Tmux expects a fixed path (~/.ssh/ssh_auth_sock).
