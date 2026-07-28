@@ -37,6 +37,10 @@ original_dotfiles
 !.config/claude/settings.json
 !.config/claude/scripts
 
+# Herdr - ignore runtime state (logs, sockets, session), keep config
+.config/herdr/*
+!.config/herdr/config.toml
+
 # Claude - local settings overrides
 .claude
 
