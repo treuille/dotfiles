@@ -65,6 +65,27 @@ def install_dotfiles():
     )
 
 
+def install_local_bin():
+    """Symlink every executable in dotfiles/bin into ~/.local/bin.
+
+    ~/.local/bin is on PATH (exported in .zshrc), so anything dropped
+    into dotfiles/bin — brancher, herdr-mark, herdr-swap-marked,
+    future scripts — becomes a command on every machine after setup.
+    Idempotent: ln -sf replaces stale or existing links."""
+    home_path = os.path.expanduser("~")
+    bin_src = os.path.join(home_path, "dotfiles", "bin")
+    local_bin = os.path.join(home_path, ".local", "bin")
+
+    cprint("Installing dotfiles/bin into ~/.local/bin...", "blue", attrs=["bold"])
+    os.system(f"mkdir -p {local_bin}")
+    for name in sorted(os.listdir(bin_src)):
+        src = os.path.join(bin_src, name)
+        if os.path.isdir(src) or not os.access(src, os.X_OK):
+            continue
+        os.system(f"ln -sfv {src} {os.path.join(local_bin, name)}")
+    cprint("Done\n", "green")
+
+
 def install_tmux_plugins():
     """Make tmux work with its plugins."""
     tmux_plugin_path = os.path.expanduser("~/.config/tmux/plugins")
@@ -205,6 +226,7 @@ def main():
     """Execution starts here."""
     install_pure()
     install_dotfiles()
+    install_local_bin()
     install_tmux_plugins()
     install_neovim()
     # install_rust()
