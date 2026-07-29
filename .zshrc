@@ -19,6 +19,15 @@ alias ls=lsd
 # --exclude: skip common data directories
 alias fd="fdfind --hidden --no-ignore --exclude .git --exclude node_modules --exclude .venv --exclude __pycache__ --exclude .cache --exclude target --exclude build --exclude dist"
 
+# --- Terminal colors ---
+
+# Hint to TUIs (nvim, bat, delta, ...) that we support 24-bit color.
+# Terminal emulators like wezterm set this themselves, but tmux strips it on
+# its way into panes. `:=` only fills in when missing, so we defer to whatever
+# the outer terminal provided and just patch the tmux case.
+: ${COLORTERM:=truecolor}
+export COLORTERM
+
 # Fix ugly light green background on README files in fd/lsd
 # Remove background color (42) from specific file patterns
 export LS_COLORS="${LS_COLORS}:*README=01;33:*README.md=01;33:*README.txt=01;33:"
