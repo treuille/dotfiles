@@ -29,6 +29,8 @@ next_workspace = "alt+n"
 previous_workspace = "alt+p"
 # Vertical split (side by side): keep default prefix+v, add direct alt+w
 split_vertical = ["prefix+v", "alt+w"]
+# Zoom (fullscreen pane): keep default prefix+z, add direct alt+z
+zoom = ["prefix+z", "alt+z"]
 # Navigate mode: prefixed and direct
 goto = ["prefix+g", "alt+g"]
 # Sidebar toggle: keep the default prefix+b, add direct alt+b
