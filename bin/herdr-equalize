@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""herdr-equalize — equalize column widths in the focused herdr tab.
+
+Recreates tmux's `select-layout even-horizontal` for herdr, which
+has no native equalize. Walks the focused tab's split tree
+(layout.export) and, for every horizontal-axis split (direction
+left/right), sets ratio = leaf-panes(first) / leaf-panes(total)
+via layout.set_split_ratio — so N side-by-side columns each get
+1/N of the width, including nested chains. Vertical (up/down)
+splits are left untouched.
+
+No herdr CLI wraps the layout.* methods, so this speaks the
+socket API directly: newline-delimited JSON requests over the
+Unix socket (HERDR_SOCKET_PATH inside panes, else the default
+socket). Companions: herdr-mark, herdr-swap-marked.
+
+Requires: herdr protocol >= 17 (layout.set_split_ratio).
+Bound in .config/herdr/config.toml: alt+e and prefix+e.
+"""
+
+import json
+import os
+import socket
+import sys
+
+
+def usage() -> None:
+    print("Usage: herdr-equalize [--tab TAB_ID]")
+    print("  Equalize column widths in the focused (or given) tab.")
+
+
+def api(sock_path: str, seq: int, method: str, params: dict) -> dict:
+    """Send one request on a fresh connection and return its result.
+    Herdr closes the socket after each request/response cycle, so a
+    persistent connection breaks on the second send (EPIPE)."""
+    rid = f"equalize:{seq}"
+    sock = socket.socket(socket.AF_UNIX)
+    try:
+        sock.connect(sock_path)
+        sock.sendall((json.dumps({"id": rid, "method": method, "params": params}) + "\n").encode())
+        buf = b""
+        while b"\n" not in buf:
+            chunk = sock.recv(65536)
+            if not chunk:
+                sys.exit(f"herdr-equalize: {method}: connection closed without a response")
+            buf += chunk
+    except OSError as e:
+        sys.exit(f"herdr-equalize: {sock_path}: {e}")
+    finally:
+        sock.close()
+    for line in buf.split(b"\n"):
+        if not line:
+            continue
+        msg = json.loads(line)
+        if msg.get("id") != rid:
+            continue
+        if "error" in msg:
+            sys.exit(f"herdr-equalize: {method}: {msg['error'].get('message')}")
+        return msg["result"]
+    sys.exit(f"herdr-equalize: {method}: no matching response")
+
+
+def leaves(node: dict) -> int:
+    """Count leaf panes under a layout node."""
+    if node["type"] == "pane":
+        return 1
+    return leaves(node["first"]) + leaves(node["second"])
+
+
+def plan(node: dict, path: list, out: list) -> None:
+    """Collect (path, target-ratio) for every horizontal-axis split."""
+    if node["type"] != "split":
+        return
+    if node["direction"] in ("left", "right"):
+        out.append((path, leaves(node["first"]) / leaves(node)))
+    plan(node["first"], path + [False], out)
+    plan(node["second"], path + [True], out)
+
+
+def main() -> None:
+    tab_id = None
+    args = sys.argv[1:]
+    if args and args[0] in ("-h", "--help"):
+        usage()
+        return
+    if args and args[0] == "--tab" and len(args) == 2:
+        tab_id = args[1]
+    elif args:
+        usage()
+        sys.exit(2)
+
+    sock_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser(
+        "~/.config/herdr/herdr.sock"
+    )
+    export = api(sock_path, 0, "layout.export", {"tab_id": tab_id})
+    layout = export["layout"]
+    targets: list = []
+    plan(layout["root"], [], targets)
+    for seq, (path, ratio) in enumerate(targets, start=1):
+        api(sock_path, seq, "layout.set_split_ratio",
+            {"tab_id": layout["tab_id"], "path": path, "ratio": ratio})
+
+
+if __name__ == "__main__":
+    main()
