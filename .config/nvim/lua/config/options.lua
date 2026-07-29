@@ -79,6 +79,9 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+-- Allow ctrl-a/ctrl-x to increment/decrement letters (a→b, z→a)
+vim.opt.nrformats:append 'alpha'
+
 -- Enable auto-reloading of changed files
 -- This is to make Neovim eaiser to work with the Claude command line tool
 vim.o.autoread = true -- Enable auto-reloading of changed files
