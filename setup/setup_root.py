@@ -107,6 +107,15 @@ def setup_root():
     setup_utils.cached_apt_install("bubblewrap")
     setup_utils.cached_apt_install("socat")
 
+    # Remote server management (doctl + Tailscale)
+    setup_utils.cached_run(
+        "Installing doctl and Tailscale",
+        [
+            "sudo snap install doctl",
+            "curl -fsSL https://tailscale.com/install.sh | sh",
+        ],
+    )
+
     # Dependencies for dauphin
     setup_utils.cached_apt_install("tesseract-ocr")
     setup_utils.cached_apt_install("tesseract-ocr-eng")
