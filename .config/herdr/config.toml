@@ -33,8 +33,8 @@ split_vertical = ["prefix+v", "alt+w"]
 zoom = ["prefix+z", "alt+z"]
 # Navigate mode: prefixed and direct
 goto = ["prefix+g", "alt+g"]
-# Sidebar toggle: keep the default prefix+b, add direct alt+b
-toggle_sidebar = ["prefix+b", "alt+b"]
+# Sidebar toggle: prefix only — direct alt+b fired too easily
+toggle_sidebar = "prefix+b"
 # Vim-style pane navigation (Alt+hjkl), as in tmux config
 focus_pane_left = "alt+h"
 focus_pane_down = "alt+j"
