@@ -3,5 +3,8 @@
     "EDITOR": "nvim",
     "VISUAL": "nvim"
   },
-  "skipDangerousModePermissionPrompt": true
+  "model": "claude-fable-5[1m]",
+  "effortLevel": "high",
+  "skipDangerousModePermissionPrompt": true,
+  "editorMode": "vim"
 }
