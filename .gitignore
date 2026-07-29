@@ -51,3 +51,10 @@ original_dotfiles
 setup/venv
 setup/backup
 setup/__pycache__
+
+# doctl (DigitalOcean CLI) - config contains the API access token
+.config/doctl
+.config/doctl-bak
+
+# PulseAudio runtime state
+.config/pulse
