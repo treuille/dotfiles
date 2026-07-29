@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# herdr-mark — toggle a tmux-style mark on the active herdr pane.
+#
+# Recreates tmux's `select-pane -m` for herdr, which has no native
+# mark. Companion: herdr-swap-marked (tmux's `swap-pane`).
+#
+# Behavior:
+#   - Marking prefixes the pane's displayed title with "(marked) ".
+#     The base title mirrors herdr's own display precedence:
+#     custom label > detected agent name ("claude", "d2") > live
+#     terminal title. Never freezes long OSC task-summary titles
+#     when a shorter display name exists.
+#   - Marking the marked pane again unmarks it (toggle).
+#   - Marking a different pane moves the mark (old pane restored).
+#   - While marked, the title is pinned (herdr label semantics);
+#     unmark/swap restores the custom label or the dynamic title.
+#
+# State: $XDG_RUNTIME_DIR/herdr-mark (falls back to /tmp), two
+# lines: pane_id, then the original label ("__NONE__" = no custom
+# label existed, restore via `pane rename --clear`).
+#
+# Requires: herdr >= 0.7.4 (keys.command bindings), jq.
+# Bound in .config/herdr/config.toml: alt+m and prefix+m.
+set -uo pipefail
+
+MARKFILE="${XDG_RUNTIME_DIR:-/tmp}/herdr-mark"
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+    echo "Usage: herdr-mark"
+    echo "  Toggle mark on the active pane (title gains '(marked) ')."
+    exit 0
+fi
+
+# Keybindings provide HERDR_ACTIVE_PANE_ID; fall back to the CLI
+# so the script also works from a shell prompt.
+cur="${HERDR_ACTIVE_PANE_ID:-$(herdr pane current | jq -r .result.pane.pane_id)}"
+
+# Restore a previously marked pane's title.
+unmark() {
+    local id="$1" orig="$2"
+    if [ "$orig" = "__NONE__" ]; then
+        herdr pane rename "$id" --clear >/dev/null 2>&1 || true
+    else
+        herdr pane rename "$id" "$orig" >/dev/null 2>&1 || true
+    fi
+}
+
+if [ -f "$MARKFILE" ]; then
+    marked_id=$(sed -n 1p "$MARKFILE")
+    orig=$(sed -n '2,$p' "$MARKFILE")
+    unmark "$marked_id" "$orig"
+    rm -f "$MARKFILE"
+    if [ "$marked_id" = "$cur" ]; then
+        exit 0  # toggle off
+    fi
+    # Different pane: the mark moves — fall through to mark $cur.
+fi
+
+info=$(herdr pane get "$cur")
+label=$(jq -r '.result.pane.label // "__NONE__"' <<<"$info")
+if [ "$label" = "__NONE__" ]; then
+    base=$(jq -r '.result.pane.agent // .result.pane.terminal_title_stripped // "pane"' <<<"$info")
+else
+    base="$label"
+fi
+printf '%s\n%s\n' "$cur" "$label" > "$MARKFILE"
+herdr pane rename "$cur" "(marked) $base" >/dev/null

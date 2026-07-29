@@ -3,14 +3,32 @@ onboarding = false
 name = "catppuccin"
 auto_switch = false
 
+# Hide unfocused pane borders: match them to the pane background
+# (catppuccin mocha base) so only the focused accent border shows
+[theme.custom]
+surface_dim = "#1e1e2e"
+
 [ui]
 show_agent_labels_on_pane_borders = true
-pane_borders = false
+pane_borders = true
+pane_gaps = false
+
+agent_panel_sort = "spaces"
+[ui.sidebar.agents]
+rows = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent"]]
 
 [ui.toast]
 delivery = "herdr"
 
 [keys]
+# Workspace-first numbering: prefix+N jumps to workspace, shift for tabs
+switch_workspace = "prefix+1..9"
+switch_tab = "prefix+shift+1..9"
+# Cycle workspaces without the prefix
+next_workspace = "alt+n"
+previous_workspace = "alt+p"
+# Navigate mode: prefixed and direct
+goto = ["prefix+g", "alt+g"]
 # Vim-style pane navigation (Alt+hjkl), as in tmux config
 focus_pane_left = "alt+h"
 focus_pane_down = "alt+j"
@@ -21,3 +39,32 @@ swap_pane_left = "alt+shift+h"
 swap_pane_down = "alt+shift+j"
 swap_pane_up = "alt+shift+k"
 swap_pane_right = "alt+shift+l"
+
+# tmux-style mark + swap: alt+m / prefix+m toggles a mark on the
+# active pane ("(marked) ..." title); alt+s / prefix+s swaps the
+# active pane with the marked one (cross-tab supported via move
+# emulation) and unmarks. Scripts: dotfiles/bin/herdr-mark and
+# dotfiles/bin/herdr-swap-marked, symlinked into ~/.local/bin.
+[[keys.command]]
+key = "alt+m"
+type = "shell"
+command = "herdr-mark"
+description = "toggle mark on pane"
+
+[[keys.command]]
+key = "prefix+m"
+type = "shell"
+command = "herdr-mark"
+description = "toggle mark on pane"
+
+[[keys.command]]
+key = "alt+s"
+type = "shell"
+command = "herdr-swap-marked"
+description = "swap with marked pane"
+
+[[keys.command]]
+key = "prefix+s"
+type = "shell"
+command = "herdr-swap-marked"
+description = "swap with marked pane"

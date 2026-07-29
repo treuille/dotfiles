@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# herdr-swap-marked — swap the active pane with the marked pane,
+# then unmark it (restores the marked pane's original title).
+#
+# Recreates tmux's `swap-pane` (with a marked pane) for herdr.
+# Companion: herdr-mark.
+#
+# Same-tab swaps use native `herdr pane swap`. Cross-tab swaps are
+# emulated: herdr declines them (response: changed=false,
+# reason=cross_tab, exit 0 — a silent no-op), so instead:
+#   1. marked pane moves into the current tab, split beside the
+#      current pane
+#   2. current pane moves to the marked pane's tab — recreated
+#      with its original label when herdr auto-closed it on
+#      emptying (single-pane tabs)
+# Known approximations: a recreated tab appends at the end of the
+# tab strip; in multi-pane tabs the incoming pane lands as a
+# right-split beside the target, not in the exact departed slot.
+#
+# On any declined swap the mark is KEPT for retry and a herdr
+# notification explains why — a failed swap must never silently
+# eat the mark.
+#
+# Requires: herdr >= 0.7.4, jq.
+# Bound in .config/herdr/config.toml: alt+s and prefix+s.
+set -uo pipefail
+
+MARKFILE="${XDG_RUNTIME_DIR:-/tmp}/herdr-mark"
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+    echo "Usage: herdr-swap-marked"
+    echo "  Swap the active pane with the marked pane, then unmark."
+    exit 0
+fi
+
+[ -f "$MARKFILE" ] || exit 0  # nothing marked — no-op
+cur="${HERDR_ACTIVE_PANE_ID:-$(herdr pane current | jq -r .result.pane.pane_id)}"
+marked_id=$(sed -n 1p "$MARKFILE")
+orig=$(sed -n '2,$p' "$MARKFILE")
+
+# Restore the marked pane's title and clear the mark state.
+unmark() {
+    if [ "$orig" = "__NONE__" ]; then
+        herdr pane rename "$marked_id" --clear >/dev/null 2>&1 || true
+    else
+        herdr pane rename "$marked_id" "$orig" >/dev/null 2>&1 || true
+    fi
+    rm -f "$MARKFILE"
+}
+
+# Swapping with yourself = just unmark.
+if [ "$marked_id" = "$cur" ]; then
+    unmark
+    exit 0
+fi
+
+resp=$(herdr pane swap --source-pane "$marked_id" --target-pane "$cur" 2>&1) || {
+    herdr notification show "swap failed" --body "$resp" >/dev/null 2>&1 || true
+    exit 1  # keep the mark for retry
+}
+changed=$(jq -r '.result.swap.changed // false' <<<"$resp")
+reason=$(jq -r '.result.swap.reason // ""' <<<"$resp")
+
+if [ "$changed" != "true" ] && [ "$reason" = "cross_tab" ]; then
+    # Cross-tab exchange via two moves (see header).
+    marked_tab=$(herdr pane get "$marked_id" | jq -r .result.pane.tab_id)
+    marked_ws="${marked_tab%%:*}"
+    marked_tab_label=$(herdr tab get "$marked_tab" | jq -r '.result.tab.label // ""')
+    cur_tab=$(herdr pane get "$cur" | jq -r .result.pane.tab_id)
+
+    herdr pane move "$marked_id" --tab "$cur_tab" --split right \
+        --target-pane "$cur" --no-focus >/dev/null
+
+    if herdr tab get "$marked_tab" >/dev/null 2>&1; then
+        # Marked tab survived (had other panes).
+        herdr pane move "$cur" --tab "$marked_tab" --split right \
+            --no-focus >/dev/null
+    else
+        # Tab auto-closed when emptied — recreate it, keeping its label.
+        if [ -n "$marked_tab_label" ]; then
+            herdr pane move "$cur" --new-tab --workspace "$marked_ws" \
+                --label "$marked_tab_label" --no-focus >/dev/null
+        else
+            herdr pane move "$cur" --new-tab --workspace "$marked_ws" \
+                --no-focus >/dev/null
+        fi
+    fi
+elif [ "$changed" != "true" ]; then
+    herdr notification show "swap failed" \
+        --body "pane swap declined: ${reason:-unknown}" >/dev/null 2>&1 || true
+    exit 1  # keep the mark for retry
+fi
+
+unmark
