@@ -7,9 +7,15 @@
 # Behavior:
 #   - Marking prefixes the pane's displayed title with "(marked) ".
 #     The base title mirrors herdr's own display precedence:
-#     custom label > detected agent name ("claude", "d2") > live
-#     terminal title. Never freezes long OSC task-summary titles
-#     when a shorter display name exists.
+#     reported metadata title (pane.report_metadata, e.g. d2's
+#     set_title) > custom label > detected agent name ("claude",
+#     "d2") > live terminal title. Never freezes long OSC
+#     task-summary titles when a shorter display name exists.
+#   - Panes with a metadata title get the mark on that surface too
+#     (source custom:mark), since it outranks the label in herdr's
+#     display. Unmark clears our source; herdr falls back to the
+#     agent's own title. If the agent re-titles while marked, the
+#     newer report wins — same dynamic-title semantics as OSC.
 #   - Marking the marked pane again unmarks it (toggle).
 #   - Marking a different pane moves the mark (old pane restored).
 #   - While marked, the title is pinned (herdr label semantics);
@@ -19,7 +25,9 @@
 # lines: pane_id, then the original label ("__NONE__" = no custom
 # label existed, restore via `pane rename --clear`).
 #
-# Requires: herdr >= 0.7.4 (keys.command bindings), jq.
+# Requires: herdr >= 0.7.4 (keys.command bindings), jq, python3
+# (the report-metadata CLI rejects --source values as of 0.9.x,
+# so metadata reports go over the socket API directly).
 # Bound in .config/herdr/config.toml: alt+m and prefix+m.
 set -uo pipefail
 
@@ -35,6 +43,35 @@ fi
 # so the script also works from a shell prompt.
 cur="${HERDR_ACTIVE_PANE_ID:-$(herdr pane current | jq -r .result.pane.pane_id)}"
 
+# Report or clear our metadata title over the socket API.
+# Usage: meta PANE_ID clear | meta PANE_ID set TEXT
+# Millisecond seq: herdr rejects stale seqs per source, and mark and
+# unmark can land within the same second.
+meta() {
+    python3 - "$@" 2>/dev/null << 'PYEOF' || true
+import json, os, socket, sys, time
+pane, op = sys.argv[1], sys.argv[2]
+params = {"pane_id": pane, "source": "custom:mark",
+          "seq": int(time.time() * 1000)}
+if op == "clear":
+    params["clear_title"] = True
+else:
+    params["title"] = sys.argv[3]
+path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser(
+    "~/.config/herdr/herdr.sock")
+s = socket.socket(socket.AF_UNIX)
+s.connect(path)
+s.sendall((json.dumps({"id": "mark:meta",
+    "method": "pane.report_metadata", "params": params}) + "\n").encode())
+buf = b""
+while b"\n" not in buf:
+    c = s.recv(65536)
+    if not c:
+        break
+    buf += c
+PYEOF
+}
+
 # Restore a previously marked pane's title.
 unmark() {
     local id="$1" orig="$2"
@@ -43,6 +80,9 @@ unmark() {
     else
         herdr pane rename "$id" "$orig" >/dev/null 2>&1 || true
     fi
+    # Clearing our metadata source is a no-op if we never set it;
+    # herdr falls back to the agent's own reported title.
+    meta "$id" clear
 }
 
 if [ -f "$MARKFILE" ]; then
@@ -57,11 +97,19 @@ if [ -f "$MARKFILE" ]; then
 fi
 
 info=$(herdr pane get "$cur")
+title=$(jq -r '.result.pane.title // "__NONE__"' <<<"$info")
 label=$(jq -r '.result.pane.label // "__NONE__"' <<<"$info")
-if [ "$label" = "__NONE__" ]; then
-    base=$(jq -r '.result.pane.agent // .result.pane.terminal_title_stripped // "pane"' <<<"$info")
-else
+if [ "$title" != "__NONE__" ]; then
+    base="$title"
+elif [ "$label" != "__NONE__" ]; then
     base="$label"
+else
+    base=$(jq -r '.result.pane.agent // .result.pane.terminal_title_stripped // "pane"' <<<"$info")
 fi
 printf '%s\n%s\n' "$cur" "$label" > "$MARKFILE"
 herdr pane rename "$cur" "(marked) $base" >/dev/null
+# Metadata title outranks the label in herdr's display — mark that
+# surface too when the pane has one (e.g. d2.set_title threads).
+if [ "$title" != "__NONE__" ]; then
+    meta "$cur" set "(marked) $base"
+fi
