@@ -54,7 +54,9 @@ export PATH=${HOME}/.local/bin:${PATH}
 # Brancher: manage parallel working directories tied to Git branches
 brancher() {
     local output
-    output="$(${HOME}/dotfiles/bin/brancher "$@")"
+    # `command` skips this function and finds the binary on PATH
+    # (~/.local/bin symlink, installed by setup_dotfiles.py).
+    output="$(command brancher "$@")"
     local rc=$?
     if [[ $rc -eq 0 && "$output" == cd\ * ]]; then
         eval "$output"
