@@ -27,6 +27,8 @@ switch_tab = "prefix+shift+1..9"
 # Cycle workspaces without the prefix
 next_workspace = "alt+n"
 previous_workspace = "alt+p"
+# Vertical split (side by side): keep default prefix+v, add direct alt+w
+split_vertical = ["prefix+v", "alt+w"]
 # Navigate mode: prefixed and direct
 goto = ["prefix+g", "alt+g"]
 # Sidebar toggle: keep the default prefix+b, add direct alt+b
@@ -70,3 +72,18 @@ key = "prefix+s"
 type = "shell"
 command = "herdr-swap-marked"
 description = "swap with marked pane"
+
+# tmux-style even-horizontal: equalize column widths in the focused
+# tab (only left/right splits touched; vertical stacks untouched).
+# Script: dotfiles/bin/herdr-equalize, symlinked into ~/.local/bin.
+[[keys.command]]
+key = "alt+e"
+type = "shell"
+command = "herdr-equalize"
+description = "equalize pane widths"
+
+[[keys.command]]
+key = "prefix+e"
+type = "shell"
+command = "herdr-equalize"
+description = "equalize pane widths"
