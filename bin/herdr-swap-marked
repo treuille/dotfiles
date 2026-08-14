@@ -21,7 +21,8 @@
 # notification explains why — a failed swap must never silently
 # eat the mark.
 #
-# Requires: herdr >= 0.7.4, jq.
+# Requires: herdr >= 0.7.4, jq, python3 (metadata clears go over
+# the socket API — see herdr-mark).
 # Bound in .config/herdr/config.toml: alt+s and prefix+s.
 set -uo pipefail
 
@@ -38,6 +39,30 @@ cur="${HERDR_ACTIVE_PANE_ID:-$(herdr pane current | jq -r .result.pane.pane_id)}
 marked_id=$(sed -n 1p "$MARKFILE")
 orig=$(sed -n '2,$p' "$MARKFILE")
 
+# Clear our custom:mark metadata title (herdr-mark sets it on
+# metadata-titled panes, where it outranks the label). Skipping
+# this leaves "(marked) " stuck in the displayed title — and
+# herdr-mark then stacks another prefix on the next mark.
+meta_clear() {
+    python3 - "$1" 2>/dev/null << 'PYEOF' || true
+import json, os, socket, sys, time
+params = {"pane_id": sys.argv[1], "source": "custom:mark",
+          "seq": int(time.time() * 1000), "clear_title": True}
+path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser(
+    "~/.config/herdr/herdr.sock")
+s = socket.socket(socket.AF_UNIX)
+s.connect(path)
+s.sendall((json.dumps({"id": "swap:meta",
+    "method": "pane.report_metadata", "params": params}) + "\n").encode())
+buf = b""
+while b"\n" not in buf:
+    c = s.recv(65536)
+    if not c:
+        break
+    buf += c
+PYEOF
+}
+
 # Restore the marked pane's title and clear the mark state.
 unmark() {
     if [ "$orig" = "__NONE__" ]; then
@@ -45,6 +70,7 @@ unmark() {
     else
         herdr pane rename "$marked_id" "$orig" >/dev/null 2>&1 || true
     fi
+    meta_clear "$marked_id"
     rm -f "$MARKFILE"
 }
 

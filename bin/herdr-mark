@@ -106,6 +106,11 @@ elif [ "$label" != "__NONE__" ]; then
 else
     base=$(jq -r '.result.pane.agent // .result.pane.terminal_title_stripped // "pane"' <<<"$info")
 fi
+# Self-heal: a stale custom:mark title (e.g. left by a swap that
+# didn't clear metadata) would otherwise stack "(marked) " prefixes.
+while [ "${base#"(marked) "}" != "$base" ]; do
+    base=${base#"(marked) "}
+done
 printf '%s\n%s\n' "$cur" "$label" > "$MARKFILE"
 herdr pane rename "$cur" "(marked) $base" >/dev/null
 # Metadata title outranks the label in herdr's display — mark that
