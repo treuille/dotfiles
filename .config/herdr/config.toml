@@ -24,9 +24,12 @@ delivery = "herdr"
 # Workspace-first numbering: prefix+N jumps to workspace, shift for tabs
 switch_workspace = "prefix+1..9"
 switch_tab = "prefix+shift+1..9"
-# Cycle workspaces without the prefix
-next_workspace = "alt+n"
-previous_workspace = "alt+p"
+# Cycle tabs without the prefix; workspaces behind the prefix
+# (swapped from the defaults: tab cycling is the more frequent move)
+next_tab = "alt+n"
+previous_tab = "alt+p"
+next_workspace = "prefix+n"
+previous_workspace = "prefix+p"
 # Vertical split (side by side): keep default prefix+v, add direct alt+w
 split_vertical = ["prefix+v", "alt+w"]
 # Zoom (fullscreen pane): keep default prefix+z, add direct alt+z
