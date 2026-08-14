@@ -13,9 +13,17 @@
 #   2. current pane moves to the marked pane's tab — recreated
 #      with its original label when herdr auto-closed it on
 #      emptying (single-pane tabs)
-# Known approximations: a recreated tab appends at the end of the
-# tab strip; in multi-pane tabs the incoming pane lands as a
-# right-split beside the target, not in the exact departed slot.
+# In multi-pane tabs the incoming pane is placed back into the
+# departed pane's slot: pane rects (`herdr api snapshot`) are
+# diffed across the eviction to find the pane that absorbed the
+# slot, then the incoming pane splits that absorber on its growth
+# axis, sized to the departed rect (with a swap when the slot was
+# on the left/top, since herdr only splits right/down). Known
+# approximations: a recreated tab appends at the end of the tab
+# strip; when a multi-pane subtree absorbed the slot the rebuild
+# covers only the absorber's strip of it; if no absorber can be
+# resolved the incoming pane falls back to a right-split beside
+# the default target.
 #
 # On any declined swap the mark is KEPT for retry and a herdr
 # notification explains why — a failed swap must never silently
@@ -74,6 +82,55 @@ unmark() {
     rm -f "$MARKFILE"
 }
 
+# Pane rects of a tab, as compact JSON. Usage: rects TAB_ID
+rects() {
+    herdr api snapshot 2>/dev/null | jq -c --arg t "$1" \
+        '[.result.snapshot.layouts[] | select(.tab_id == $t)
+          | .panes[] | {pane_id, rect}]' 2>/dev/null || echo '[]'
+}
+
+# Resolve where the incoming pane goes by diffing rects across the
+# eviction: the pane that absorbed the departed slot (covers its
+# center, grew along one axis) is the split target. Prints
+# "ABSORBER AXIS RATIO swap|keep" or "none". RATIO is the
+# absorber's post-split share (herdr --ratio semantics: the target
+# pane keeps that fraction); "swap" means the slot was left/above
+# the absorber, so after the split the panes exchange positions.
+# Usage: placement PRE_JSON POST_JSON MARKED_ID
+placement() {
+    python3 -c "$(cat << 'PYEOF'
+import json, sys
+pre = {p["pane_id"]: p["rect"] for p in json.loads(sys.argv[1])}
+post = {p["pane_id"]: p["rect"] for p in json.loads(sys.argv[2])}
+m = pre.get(sys.argv[3])
+if not m:
+    print("none"); sys.exit()
+cx, cy = m["x"] + m["width"] / 2.0, m["y"] + m["height"] / 2.0
+for pid, r in post.items():
+    o = pre.get(pid)
+    if o is None:
+        continue
+    if not (r["x"] <= cx < r["x"] + r["width"]
+            and r["y"] <= cy < r["y"] + r["height"]):
+        continue
+    if r["width"] > o["width"]:
+        axis, share, swap = "right", m["width"] / r["width"], m["x"] < o["x"]
+    elif r["height"] > o["height"]:
+        axis, share, swap = "down", m["height"] / r["height"], m["y"] < o["y"]
+    else:
+        continue
+    # Splits land right/down, so a left/top slot gets the target's
+    # share (positions are exchanged afterwards); otherwise the
+    # target keeps the remainder.
+    ratio = share if swap else 1.0 - share
+    print(pid, axis, "%.3f" % min(max(ratio, 0.05), 0.95),
+          "swap" if swap else "keep")
+    sys.exit()
+print("none")
+PYEOF
+)" "$1" "$2" "$3" 2>/dev/null || echo none
+}
+
 # Swapping with yourself = just unmark.
 if [ "$marked_id" = "$cur" ]; then
     unmark
@@ -94,13 +151,35 @@ if [ "$changed" != "true" ] && [ "$reason" = "cross_tab" ]; then
     marked_tab_label=$(herdr tab get "$marked_tab" | jq -r '.result.tab.label // ""')
     cur_tab=$(herdr pane get "$cur" | jq -r .result.pane.tab_id)
 
+    # Capture rects before the eviction collapses the layout.
+    pre=$(rects "$marked_tab")
+
     herdr pane move "$marked_id" --tab "$cur_tab" --split right \
         --target-pane "$cur" --no-focus >/dev/null
 
     if herdr tab get "$marked_tab" >/dev/null 2>&1; then
-        # Marked tab survived (had other panes).
-        herdr pane move "$cur" --tab "$marked_tab" --split right \
-            --no-focus >/dev/null
+        # Marked tab survived (had other panes): rebuild the
+        # departed slot by splitting the pane that absorbed it.
+        place=$(placement "$pre" "$(rects "$marked_tab")" "$marked_id")
+        placed=false
+        if [ "$place" != "none" ]; then
+            read -r absorber axis ratio side <<<"$place"
+            if herdr pane move "$cur" --tab "$marked_tab" \
+                --split "$axis" --target-pane "$absorber" \
+                --ratio "$ratio" --no-focus >/dev/null 2>&1; then
+                placed=true
+                # Splits only land right/down; a left/top slot
+                # needs a (now same-tab) swap into position.
+                if [ "$side" = "swap" ]; then
+                    herdr pane swap --source-pane "$cur" \
+                        --target-pane "$absorber" >/dev/null 2>&1 || true
+                fi
+            fi
+        fi
+        if [ "$placed" != "true" ]; then
+            herdr pane move "$cur" --tab "$marked_tab" --split right \
+                --no-focus >/dev/null
+        fi
     else
         # Tab auto-closed when emptied — recreate it, keeping its label.
         if [ -n "$marked_tab_label" ]; then
