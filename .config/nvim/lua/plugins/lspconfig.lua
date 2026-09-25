@@ -87,7 +87,7 @@ return {
               'InsertEnter',
               'FocusLost',
             },
-            border = 'rounded',
+            border = 'single',
             -- source = 'always',
             -- prefix = ' ',
             -- scope = 'cursor',

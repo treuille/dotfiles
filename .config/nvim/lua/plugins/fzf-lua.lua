@@ -46,7 +46,7 @@ return {
 
     opts = {
       winopts = {
-        border = 'rounded', -- 'none', 'single', 'double', 'thicc'
+        border = 'single', -- 'none', 'rounded', 'double', 'thicc'
         -- title_pos = 'left',
         -- backdrop = 60,
         treesitter = {
