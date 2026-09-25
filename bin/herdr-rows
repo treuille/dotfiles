@@ -1,0 +1,383 @@
+#!/usr/bin/env python3
+"""herdr-rows — toggle a tab's pane grid between one tab and two.
+
+For a laptop screen too small for a 2x2 grid: press once and the
+bottom row moves into a new tab inserted right after the current
+one; press again (from either tab) and the panes move back into
+their original slots, the second tab closing on its own once empty.
+
+    tab 1:  A B      -->   tab 1:  A B      tab 2:  C D
+            C D
+
+Split: the top row (panes touching the top edge, per the rects in
+`session.snapshot`) stays; every other pane moves to the new tab,
+laid out left to right in the order it appeared (by row, then
+column), columns equalized. The new tab is labelled after the
+original ("<label> (bottom)") and slotted in with `tab.move`.
+
+Merge: the original tree (`layout.export`, saved at split time) is
+rebuilt by moving each departed pane back beside its nearest still
+-present sibling — split along the saved axis, with a same-tab
+`pane.swap` when the pane belonged on the left/top, since herdr
+only splits right/down — then the saved ratios are re-applied
+with `layout.set_split_ratio`. Panes closed meanwhile are skipped;
+panes opened in the second tab meanwhile are appended to the right.
+
+State: $XDG_RUNTIME_DIR/herdr-rows/<tab>.json (falls back to
+/tmp), one file per split tab holding both tab ids and the saved
+tree. Stale state (either tab gone, e.g. after a herdr restart) is
+discarded and the press acts as a fresh split.
+
+Note: `layout.apply` is NOT used — it spawns fresh panes from the
+tree rather than adopting existing ones, destroying the tab's
+current panes. Everything here goes through `pane.move`.
+
+Requires: herdr protocol >= 19 (tab.move, layout.set_split_ratio).
+Companions: herdr-mark, herdr-swap-marked, herdr-equalize.
+Bound in .config/herdr/config.toml: alt+4 (prefix+4 is taken by
+workspace switching).
+"""
+
+import json
+import os
+import re
+import socket
+import sys
+
+STATE_DIR = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "herdr-rows")
+
+
+def usage() -> None:
+    print("Usage: herdr-rows")
+    print("  Toggle: move the bottom row of the current tab into a new tab")
+    print("  right after it, or merge it back into the saved grid.")
+
+
+class Api:
+    """One request per connection: herdr closes the socket after each
+    request/response cycle (see herdr-equalize)."""
+
+    def __init__(self) -> None:
+        self.path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser(
+            "~/.config/herdr/herdr.sock"
+        )
+        self.seq = 0
+
+    def __call__(self, method: str, params: dict) -> dict:
+        self.seq += 1
+        rid = f"rows:{self.seq}"
+        sock = socket.socket(socket.AF_UNIX)
+        try:
+            sock.connect(self.path)
+            sock.sendall((json.dumps({"id": rid, "method": method, "params": params}) + "\n").encode())
+            buf = b""
+            while b"\n" not in buf:
+                chunk = sock.recv(65536)
+                if not chunk:
+                    sys.exit(f"herdr-rows: {method}: connection closed without a response")
+                buf += chunk
+        except OSError as e:
+            sys.exit(f"herdr-rows: {self.path}: {e}")
+        finally:
+            sock.close()
+        for line in buf.split(b"\n"):
+            if not line:
+                continue
+            msg = json.loads(line)
+            if msg.get("id") != rid:
+                continue
+            if "error" in msg:
+                raise RuntimeError(f"{method}: {msg['error'].get('message')}")
+            return msg["result"]
+        sys.exit(f"herdr-rows: {method}: no matching response")
+
+
+api = Api()
+
+
+def notify(title: str, body: str = "") -> None:
+    try:
+        api("notification.show", {"title": title, "body": body or None})
+    except Exception:
+        pass
+
+
+def tab_exists(tab_id: str) -> bool:
+    try:
+        api("tab.get", {"tab_id": tab_id})
+        return True
+    except RuntimeError:
+        return False
+
+
+def leaves(node: dict) -> list:
+    """Leaf pane ids under a layout node, in tree order."""
+    if node["type"] == "pane":
+        return [node["pane_id"]]
+    return leaves(node["first"]) + leaves(node["second"])
+
+
+def tab_rects(tab_id: str) -> dict:
+    snap = api("session.snapshot", {})["snapshot"]
+    for layout in snap.get("layouts", []):
+        if layout["tab_id"] == tab_id:
+            return {p["pane_id"]: p["rect"] for p in layout["panes"]}
+    return {}
+
+
+def tab_index(workspace_id: str, tab_id: str) -> int:
+    tabs = api("tab.list", {"workspace_id": workspace_id})["tabs"]
+    ids = [t["tab_id"] for t in tabs if t["workspace_id"] == workspace_id]
+    return ids.index(tab_id) if tab_id in ids else len(ids) - 1
+
+
+def move(pane_id: str, tab_id: str, split: str, target: str,
+         ratio=None, focus: bool = False) -> None:
+    dest = {"type": "tab", "tab_id": tab_id, "split": split, "target_pane_id": target}
+    if ratio is not None:
+        dest["ratio"] = min(max(ratio, 0.05), 0.95)
+    api("pane.move", {"pane_id": pane_id, "destination": dest, "focus": focus})
+
+
+def equalize_columns(tab_id: str) -> None:
+    """Even out left/right splits (same rule as herdr-equalize)."""
+    root = api("layout.export", {"tab_id": tab_id})["layout"]["root"]
+
+    def walk(node: dict, path: list) -> None:
+        if node["type"] != "split":
+            return
+        if node["direction"] in ("left", "right"):
+            ratio = len(leaves(node["first"])) / len(leaves(node))
+            api("layout.set_split_ratio", {"tab_id": tab_id, "path": path, "ratio": ratio})
+        walk(node["first"], path + [False])
+        walk(node["second"], path + [True])
+
+    walk(root, [])
+
+
+# --- state ---------------------------------------------------------------
+
+def state_path(tab_id: str) -> str:
+    return os.path.join(STATE_DIR, re.sub(r"[^A-Za-z0-9_.-]", "_", tab_id) + ".json")
+
+
+def load_states() -> list:
+    out = []
+    if not os.path.isdir(STATE_DIR):
+        return out
+    for name in os.listdir(STATE_DIR):
+        p = os.path.join(STATE_DIR, name)
+        try:
+            with open(p) as f:
+                st = json.load(f)
+            st["_path"] = p
+            out.append(st)
+        except (OSError, ValueError):
+            continue
+    return out
+
+
+def find_state(tab_id: str):
+    """State whose original or bottom tab is TAB_ID; stale ones dropped."""
+    for st in load_states():
+        if tab_id not in (st["tab_id"], st["rows_tab_id"]):
+            continue
+        if tab_exists(st["tab_id"]) and tab_exists(st["rows_tab_id"]):
+            return st
+        os.remove(st["_path"])  # a half of the pair is gone: stale
+    return None
+
+
+# --- split ---------------------------------------------------------------
+
+def split(tab_id: str, active: str) -> None:
+    layout = api("layout.export", {"tab_id": tab_id})["layout"]
+    workspace_id = layout["workspace_id"]
+    rects = tab_rects(tab_id)
+    if len(rects) < 2:
+        notify("herdr-rows", "only one pane in this tab")
+        return
+    top = min(r["y"] for r in rects.values())
+    bottom = sorted((pid for pid, r in rects.items() if r["y"] != top),
+                    key=lambda pid: (rects[pid]["y"], rects[pid]["x"]))
+    if not bottom:
+        notify("herdr-rows", "tab is a single row — nothing to move")
+        return
+
+    label = api("tab.get", {"tab_id": tab_id})["tab"].get("label") or ""
+    rows_label = f"{label} (bottom)".strip()
+
+    # First pane opens the new tab; the rest line up to its right.
+    first = bottom[0]
+    res = api("pane.move", {
+        "pane_id": first,
+        "destination": {"type": "new_tab", "workspace_id": workspace_id, "label": rows_label},
+        "focus": first == active,
+    })
+    rows_tab = res["move_result"]["pane"]["tab_id"]
+    prev = first
+    for pid in bottom[1:]:
+        move(pid, rows_tab, "right", prev, focus=pid == active)
+        prev = pid
+    equalize_columns(rows_tab)
+    api("tab.move", {"tab_id": rows_tab, "insert_index": tab_index(workspace_id, tab_id) + 1})
+
+    os.makedirs(STATE_DIR, exist_ok=True)
+    with open(state_path(tab_id), "w") as f:
+        json.dump({"tab_id": tab_id, "rows_tab_id": rows_tab,
+                   "workspace_id": workspace_id, "root": layout["root"]}, f)
+
+
+# --- merge ---------------------------------------------------------------
+
+def edge_leaf(node: dict, present: set, prefer_second: bool):
+    """A present leaf on the side of NODE that faces the departed pane:
+    the last leaf when the pane sat after this subtree, else the first."""
+    order = leaves(node)
+    if prefer_second:
+        order = order[::-1]
+    for pid in order:
+        if pid in present:
+            return pid
+    return None
+
+
+def placements(node: dict, present: set, ancestors: list, out: list) -> None:
+    """For every absent leaf, record (leaf, target, direction, is_first,
+    ratio) from the nearest ancestor split whose sibling side still
+    has a present pane. ANCESTORS: [(split_node, we_are_first)]."""
+    if node["type"] == "pane":
+        pid = node["pane_id"]
+        if pid in present:
+            return
+        for split_node, we_are_first in reversed(ancestors):
+            sibling = split_node["second" if we_are_first else "first"]
+            target = edge_leaf(sibling, present, prefer_second=we_are_first)
+            if target is None:
+                continue
+            d = split_node["direction"]
+            axis = "right" if d in ("left", "right") else "down"
+            # Which side of the axis does the leaf belong on?
+            is_first = we_are_first != (d in ("left", "up"))
+            out.append((pid, target, axis, is_first, split_node["ratio"]))
+            present.add(pid)  # later leaves may anchor on this one
+            return
+        return
+    placements(node["first"], present, ancestors + [(node, True)], out)
+    placements(node["second"], present, ancestors + [(node, False)], out)
+
+
+def restore_ratios(tab_id: str, saved: dict, current: dict) -> None:
+    """Re-apply saved split ratios wherever the rebuilt tree has the
+    same shape (same leaf sets) as the saved one."""
+    def walk(s: dict, c: dict, path: list) -> None:
+        if s["type"] != "split" or c["type"] != "split":
+            return
+        if set(leaves(s)) != set(leaves(c)):
+            return
+        if set(leaves(s["first"])) == set(leaves(c["first"])):
+            pairs = ((s["first"], c["first"], False), (s["second"], c["second"], True))
+            ratio = s["ratio"]
+        elif set(leaves(s["first"])) == set(leaves(c["second"])):
+            pairs = ((s["first"], c["second"], True), (s["second"], c["first"], False))
+            ratio = 1.0 - s["ratio"]
+        else:
+            return
+        try:
+            api("layout.set_split_ratio", {"tab_id": tab_id, "path": path, "ratio": ratio})
+        except RuntimeError:
+            pass
+        for sn, cn, side in pairs:
+            walk(sn, cn, path + [side])
+
+    walk(saved, current, [])
+
+
+def merge(st: dict, active: str) -> None:
+    tab_id, rows_tab = st["tab_id"], st["rows_tab_id"]
+    saved = st["root"]
+    present = set(leaves(api("layout.export", {"tab_id": tab_id})["layout"]["root"]))
+    in_rows = leaves(api("layout.export", {"tab_id": rows_tab})["layout"]["root"])
+    movable = set(in_rows)
+
+    # Prune saved leaves that no longer exist anywhere.
+    def prune(node: dict):
+        if node["type"] == "pane":
+            return node if node["pane_id"] in present | movable else None
+        a, b = prune(node["first"]), prune(node["second"])
+        if a and b:
+            return {**node, "first": a, "second": b}
+        return a or b
+
+    saved = prune(saved)
+    plan: list = []
+    if saved:
+        placements(saved, set(present), [], plan)
+    planned = {p[0] for p in plan}
+    for pid, target, axis, is_first, ratio in plan:
+        if pid not in movable:
+            continue
+        # herdr splits right/down: the mover lands second. A pane that
+        # belongs first gets the complementary ratio, then swaps in.
+        move(pid, tab_id, axis, target,
+             ratio=(1.0 - ratio) if is_first else ratio, focus=pid == active)
+        if is_first:
+            api("pane.swap", {"source_pane_id": pid, "target_pane_id": target})
+    # Panes opened in the bottom tab since the split: append to the right.
+    anchor = None
+    for pid in in_rows:
+        if pid in planned:
+            anchor = pid
+    for pid in in_rows:
+        if pid in planned:
+            continue
+        move(pid, tab_id, "right", anchor, focus=pid == active)
+        anchor = pid
+
+    if saved:
+        current = api("layout.export", {"tab_id": tab_id})["layout"]["root"]
+        restore_ratios(tab_id, saved, current)
+    if tab_exists(rows_tab):
+        try:
+            api("tab.close", {"tab_id": rows_tab})
+        except RuntimeError:
+            pass
+    try:
+        api("tab.focus", {"tab_id": tab_id})
+    except RuntimeError:
+        pass
+    os.remove(st["_path"])
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    if args and args[0] in ("-h", "--help"):
+        usage()
+        return
+    if args:
+        usage()
+        sys.exit(2)
+
+    # Keybindings provide HERDR_ACTIVE_PANE_ID; fall back to the
+    # caller's pane so the script also works from a shell prompt.
+    active = os.environ.get("HERDR_ACTIVE_PANE_ID")
+    if active:
+        pane = api("pane.get", {"pane_id": active})["pane"]
+    else:
+        pane = api("pane.current", {"caller_pane_id": os.environ.get("HERDR_PANE_ID")})["pane"]
+        active = pane["pane_id"]
+    tab_id = pane["tab_id"]
+
+    try:
+        st = find_state(tab_id)
+        if st:
+            merge(st, active)
+        else:
+            split(tab_id, active)
+    except RuntimeError as e:
+        notify("herdr-rows failed", str(e))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

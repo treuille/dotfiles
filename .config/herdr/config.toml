@@ -92,3 +92,15 @@ key = "prefix+e"
 type = "shell"
 command = "herdr-equalize"
 description = "equalize pane widths"
+
+# tmux-style "spread the grid over two windows": alt+4 toggles the
+# current tab between a 2x2 grid (desktop) and two tabs — top row stays, bottom row moves to a new tab inserted right
+# after it (laptop). Pressing again from either tab merges the rows
+# back into the saved grid. Script: dotfiles/bin/herdr-rows,
+# symlinked into ~/.local/bin. (No prefix+4: prefix+1..9 switches
+# workspaces.)
+[[keys.command]]
+key = "alt+4"
+type = "shell"
+command = "herdr-rows"
+description = "split/merge bottom row into next tab"
