@@ -58,3 +58,6 @@ setup/__pycache__
 
 # PulseAudio runtime state
 .config/pulse
+
+# Google MCP - client.json holds an OAuth client secret
+.config/google-mcp

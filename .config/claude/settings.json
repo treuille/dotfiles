@@ -3,8 +3,9 @@
     "EDITOR": "nvim",
     "VISUAL": "nvim"
   },
-  "model": "claude-fable-5[1m]",
+  "model": "fable[1m]",
   "effortLevel": "high",
+  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "editorMode": "vim"
 }
